@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Roboto, Righteous } from 'next/font/google';
+import { MainLayout } from '@/components/layout';
 import './globals.css';
 
 const roboto = Roboto({
@@ -73,10 +74,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en' className={`${roboto.variable} ${righteous.variable}`}>
-      <body className={`${roboto.className} min-h-screen`}>
-        <div className='min-h-screen bg-background-100'>
-          <main>{children}</main>
-        </div>
+      <body className={`${roboto.className}`}>
+        <MainLayout isAuthenticated={false} cartCount={0} currentLanguage='EN'>
+          {children}
+        </MainLayout>
       </body>
     </html>
   );
