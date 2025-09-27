@@ -1,0 +1,271 @@
+# .cursorrules
+
+# Baltic Board Game Marketplace – Strict Linter Handbook
+
+# Priority system: MUST > SHOULD > MAY
+
+# When rules conflict, prioritize: SECURITY > CORRECTNESS > PERFORMANCE > UX > STYLE
+
+#####################################################################
+
+## 1. Framework & Technology Stack
+
+#####################################################################
+
+- MUST use Next.js 15 with the App Router (never Pages Router)
+- MUST use TypeScript in strict mode
+- MUST use Supabase for database, authentication, and storage
+- MUST use Tailwind CSS for styling (no CSS modules or styled-components)
+- MUST use React Hook Form with Yup validation for forms
+- SHOULD prefer Server Components; use Client Components only when interactivity is required
+- MUST never use client-only solutions if a server-side alternative exists
+- MAY use React.memo for expensive pure components
+
+#####################################################################
+
+## 2. File Structure & Organization
+
+#####################################################################
+/components/\*_/_.{ts,tsx}:
+
+- MUST remain under 200 lines; split into smaller components if necessary
+- MUST type props with TypeScript interfaces
+- MUST include accessibility attributes (aria-labels, roles)
+- SHOULD use compound component patterns for complex UI
+  /lib/\*_/_.{ts,tsx}:
+- MUST contain pure utility functions only
+- MUST include JSDoc documentation for all functions
+- SHOULD prefer arrow functions for utilities
+  /types/\*_/_.{ts}:
+- MUST define only interfaces and types
+- SHOULD use const assertions where possible
+  /app/api/\*_/_.{ts}:
+- MUST follow REST conventions
+- MUST validate inputs and outputs with TypeScript
+- MUST implement error handling and return consistent error objects
+- SHOULD add optimistic responses for better UX when safe
+- MUST place business logic in `/lib/`, not inside UI components
+- MUST use barrel exports (index.ts) for feature folders
+- MAY group related files into feature-based directories (auth, marketplace, profile, etc.)
+
+#####################################################################
+
+## 3. Database Design & Rules
+
+#####################################################################
+
+- MUST use UUIDs for primary keys (except when referencing external BGG IDs)
+- MUST enforce Supabase Row Level Security (RLS) for all tables
+- MUST include created_at and updated_at timestamps on all tables
+- MUST implement soft deletes for user data (GDPR compliance)
+- MUST use database transactions for multi-table operations
+- SHOULD add indexes for frequent queries and search fields
+- MUST never store passwords in plain text
+
+#####################################################################
+
+## 4. API Integration Rules
+
+#####################################################################
+
+- MUST validate all API responses against TypeScript interfaces
+- MUST cache BoardGameGeek (BGG) responses in the database to avoid rate limits
+- MUST handle API errors gracefully, including retries for transient failures
+- MUST never expose sensitive API keys in client-side code
+- SHOULD log API errors with sufficient context for debugging
+- MUST implement optimistic updates when it improves user experience
+- SHOULD implement rate limiting on sensitive endpoints (auth, messaging)
+
+#####################################################################
+
+## 5. Security & Privacy (GDPR & PCI)
+
+#####################################################################
+
+- MUST authenticate users before granting data access
+- MUST sanitize user inputs to prevent XSS and SQL injection
+- MUST implement CSRF protection on sensitive actions
+- MUST encrypt all traffic (HTTPS for external APIs, TLS for DB connections)
+- MUST never store sensitive payment information directly
+- MUST verify payment webhooks (makeCommerce/Stripe)
+- MUST support user data export and deletion requests (GDPR)
+- MUST provide consent mechanisms for analytics and cookies
+- SHOULD rotate and secure API keys via environment variables
+
+#####################################################################
+
+## 6. UI/UX & Design System
+
+#####################################################################
+
+- MUST use Tailwind config for colors (brand palette only)
+- MUST implement responsive design (mobile-first)
+- MUST achieve WCAG 2.1 AA accessibility minimum
+- MUST use semantic HTML (nav, main, section, article)
+- MUST provide keyboard focus states for all interactive elements
+- SHOULD use Next.js Image component for all images
+- SHOULD implement skeleton/loading states and error fallbacks
+- MUST avoid fixed pixel values; use rem/em units instead
+
+#####################################################################
+
+## 7. Internationalization & Baltic Market Rules
+
+#####################################################################
+
+- MUST support Estonian, Latvian, and Lithuanian languages (fallback EN)
+- MUST format currency in EUR
+- MUST localize dates/times for Baltic locales
+- SHOULD prepare codebase for RTL expansion
+- MUST consider VAT handling for EU transactions
+- SHOULD integrate local payment preferences (bank links)
+
+#####################################################################
+
+## 8. Testing & Quality Assurance
+
+#####################################################################
+
+- MUST write unit tests for utility functions
+- MUST write integration tests for API routes
+- MUST write component tests for complex UI logic
+- MUST mock external API calls in tests
+- SHOULD write E2E tests (Playwright or Cypress) for critical flows:
+  - listing creation
+  - checkout/payment
+  - messaging
+- MUST test error states and edge cases
+- MUST ensure all tests pass before committing
+
+#####################################################################
+
+## 9. Error Handling & Logging
+
+#####################################################################
+
+- MUST implement React error boundaries for UI
+- MUST provide user-friendly error messages (never raw stack traces)
+- MUST log errors with context (user ID, request ID, timestamp)
+- MUST hide sensitive details from error messages
+- SHOULD retry transient failures with exponential backoff
+- MUST provide fallback UI states on failure
+
+#####################################################################
+
+## 10. Deployment & Workflow
+
+#####################################################################
+
+- MUST use descriptive commit messages
+- MUST develop on feature branches
+- MUST run linting and tests before commits/PRs
+- MUST never commit directly to main
+- MUST squash commits for a clean Git history
+- MUST use staging environment before production deployment
+- MUST implement database migration + rollback strategies
+- SHOULD back up database before applying migrations
+- SHOULD configure environment-specific logging levels
+
+#####################################################################
+
+## 11. Performance & Monitoring
+
+#####################################################################
+
+- MUST optimize all images
+- MUST lazy-load non-critical components
+- MUST cache frequently accessed API/data responses
+- MUST monitor Core Web Vitals (LCP < 2.5s target)
+- MUST track API response times and error rates
+- SHOULD set performance budgets (bundle size, TTFB, etc.)
+- SHOULD use tree-shaking and minimize unused imports
+
+#####################################################################
+
+## 12. Marketplace Business Logic
+
+#####################################################################
+User Management:
+
+- MUST verify emails before activating accounts
+- MUST allow users to control privacy settings
+- MUST provide deactivation before full deletion
+- SHOULD implement a user reputation system
+
+Marketplace:
+
+- MUST validate image uploads for listings
+- MUST index listings for fast search (e.g. Meilisearch)
+- MUST display realistic Baltic shipping estimates
+- MUST provide price history per listing
+- MUST prevent duplicate listings by same user for same game
+
+Messaging:
+
+- MUST use Supabase Realtime for chat
+- MUST require authentication before sending messages
+- MUST encrypt messages where sensitive
+- MUST allow users to export chat history
+
+#####################################################################
+
+## 13. Analytics & PostHog Events
+
+#####################################################################
+
+- MUST track only GDPR-consented users
+- MUST use consistent event naming:
+  `marketplace.listing.create`, `marketplace.listing.view`, `checkout.complete`, `message.sent`
+- SHOULD measure funnel steps (view → message → purchase)
+- MUST never log personal data directly
+
+#####################################################################
+
+## 14. Code Style & Naming Conventions
+
+#####################################################################
+
+- camelCase for variables/functions
+- PascalCase for components and types
+- UPPER_SNAKE_CASE for constants and env vars
+- kebab-case for file names and routes
+- Custom hooks prefixed with `use`
+- Utility functions prefixed with verbs
+- Imports order:
+  1. React/Next.js
+  2. Third-party libs
+  3. Internal modules
+  4. Types (with `type` keyword)
+  5. Relative imports
+- SHOULD use async/await (no .then chaining)
+- MUST destructure props in function params
+
+#####################################################################
+
+## 15. External API Specific Rules
+
+#####################################################################
+BoardGameGeek API:
+
+- MUST respect max 2 requests/second rate limit
+- MUST cache XML responses in DB for at least 24 hours
+- MUST parse XML with error handling for malformed or missing fields
+
+makeCommerce API:
+
+- MUST verify webhook signatures
+- MUST process payments in EUR only (initial scope)
+- MUST support Estonian, Latvian, and Lithuanian bank links
+- SHOULD log all payment lifecycle events for auditing
+
+#####################################################################
+
+## 16. Environment Management
+
+#####################################################################
+
+- MUST validate required env vars at application startup
+- MUST use separate Supabase projects for dev, staging, and prod
+- MUST never expose SUPABASE_SERVICE_ROLE_KEY to the client
+- MUST use environment-specific configs for logging and analytics
+- SHOULD store env vars in encrypted secrets (Vercel/Cloudflare/Kubernetes)
