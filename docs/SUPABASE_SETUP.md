@@ -5,6 +5,7 @@ This document outlines the complete Supabase integration for the Second Turn Gam
 ## Overview
 
 The Supabase integration provides:
+
 - **Authentication**: User sign-up, sign-in, and session management
 - **Database**: PostgreSQL with Row Level Security (RLS)
 - **Storage**: File uploads for images (listings, profiles, games)
@@ -14,6 +15,7 @@ The Supabase integration provides:
 ## Files Created
 
 ### Core Configuration
+
 - `lib/supabase.ts` - Main Supabase client configurations
 - `lib/supabase/auth.ts` - Authentication utilities
 - `lib/supabase/storage.ts` - File storage utilities
@@ -22,11 +24,13 @@ The Supabase integration provides:
 - `middleware.ts` - Route protection and authentication middleware
 
 ### Database & Types
+
 - `types/database.types.ts` - Generated TypeScript types for database
 - `lib/supabase/rls-policies.sql` - Row Level Security policies
 - `scripts/setup-database.sql` - Complete database schema setup
 
 ### Environment & Validation
+
 - `lib/env.ts` - Environment variable validation (updated)
 - `scripts/validate-env.js` - Environment validation script
 
@@ -60,19 +64,29 @@ RESEND_API_KEY=your_resend_key
 ## Database Setup
 
 ### 1. Create Supabase Project
+
 1. Go to [supabase.com](https://supabase.com)
 2. Create a new project
 3. Note your project URL and API keys
 
 ### 2. Run Database Schema
-Execute the SQL in `scripts/setup-database.sql` in your Supabase SQL editor:
+
+**Option A: Complete Fresh Setup (Recommended)**
+Execute the SQL in `scripts/complete-setup.sql` in your Supabase SQL editor:
 
 ```sql
--- This creates all tables, indexes, triggers, and functions
--- Run this first, then run the RLS policies
+-- This script safely drops all existing objects and creates everything fresh
+-- No conflicts or "already exists" errors
 ```
 
+**Option B: Manual Setup (if you prefer step-by-step)**
+
+1. Run `scripts/reset-database.sql` to clean up existing objects
+2. Run `scripts/setup-database.sql` to create tables and functions
+3. Run `lib/supabase/rls-policies.sql` to set up security policies
+
 ### 3. Apply Row Level Security Policies
+
 Execute the SQL in `lib/supabase/rls-policies.sql` in your Supabase SQL editor:
 
 ```sql
@@ -80,7 +94,9 @@ Execute the SQL in `lib/supabase/rls-policies.sql` in your Supabase SQL editor:
 ```
 
 ### 4. Create Storage Buckets
+
 The RLS policies script will create these buckets:
+
 - `listing-images` - For listing photos
 - `profile-avatars` - For user profile pictures
 - `game-images` - For game cover images
@@ -110,7 +126,7 @@ import { db } from '@/lib/supabase';
 // Get listings
 const { data: listings } = await db.getListings({
   status: 'active',
-  limit: 20
+  limit: 20,
 });
 
 // Create listing
@@ -119,9 +135,9 @@ const { data, error } = await db.createListing({
   game_id: 'game-uuid',
   title: 'Great Game for Sale',
   description: 'Excellent condition',
-  price: 25.00,
+  price: 25.0,
   condition: 'very_good',
-  location: 'Tallinn, Estonia'
+  location: 'Tallinn, Estonia',
 });
 ```
 
@@ -134,11 +150,14 @@ import { imageUpload, storage } from '@/lib/supabase/storage';
 const { data, error } = await imageUpload.uploadListingImage(
   listingId,
   file,
-  1 // order
+  1 // sortOrder
 );
 
 // Get public URL
-const { publicUrl } = storage.getPublicUrl('LISTING_IMAGES', 'path/to/file.jpg');
+const { publicUrl } = storage.getPublicUrl(
+  'LISTING_IMAGES',
+  'path/to/file.jpg'
+);
 ```
 
 ### Error Handling
@@ -162,14 +181,14 @@ if (error) {
 import { realtime } from '@/lib/supabase';
 
 // Subscribe to listing updates
-const subscription = realtime.subscribeToListings((payload) => {
+const subscription = realtime.subscribeToListings(payload => {
   console.log('Listing updated:', payload);
 });
 
 // Subscribe to messages
 const messageSubscription = realtime.subscribeToMessages(
   conversationId,
-  (payload) => {
+  payload => {
     console.log('New message:', payload);
   }
 );
@@ -188,13 +207,13 @@ The `middleware.ts` file automatically protects routes:
 All database operations are fully typed:
 
 ```typescript
-import type { 
-  Profile, 
-  Game, 
-  Listing, 
+import type {
+  Profile,
+  Game,
+  Listing,
   ListingInsert,
   GameCondition,
-  ListingStatus 
+  ListingStatus,
 } from '@/types/database.types';
 
 // Type-safe operations
@@ -203,27 +222,30 @@ const listing: ListingInsert = {
   game_id: gameId,
   title: 'My Game',
   description: 'Great condition',
-  price: 30.00,
+  price: 30.0,
   condition: 'like_new', // TypeScript enforces valid values
   status: 'active',
-  location: 'Tallinn'
+  location: 'Tallinn',
 };
 ```
 
 ## Security Features
 
 ### Row Level Security (RLS)
+
 - Users can only access their own data
 - Public read access for active listings
 - Secure message access based on participation
 - Protected file uploads with user ownership
 
 ### Environment Validation
+
 - All required environment variables validated at startup
 - Type-safe configuration with Zod
 - Clear error messages for missing variables
 
 ### Error Handling
+
 - User-friendly error messages
 - No sensitive data exposed in client
 - Comprehensive error logging for debugging
@@ -231,16 +253,19 @@ const listing: ListingInsert = {
 ## Testing
 
 ### Environment Validation
+
 ```bash
 node scripts/validate-env.js
 ```
 
 ### Linting
+
 ```bash
 npm run lint
 ```
 
 ### Formatting
+
 ```bash
 npm run format
 ```
@@ -262,17 +287,23 @@ npm run format
    - Check all required variables are set in `.env.local`
    - Ensure Supabase project is created and keys are correct
 
-2. **RLS policies blocking access**
+2. **Database setup errors**
+   - **"trigger already exists"**: Use `scripts/reset-database.sql` first, then run setup again
+   - **"policy already exists"**: Use `scripts/reset-database.sql` first, then run setup again
+   - **"syntax error at or near 'order'"**: Fixed - the `order` column was renamed to `sort_order`
+   - **"storage bucket already exists"**: This is handled with `ON CONFLICT DO NOTHING`
+
+3. **RLS policies blocking access**
    - Verify user is authenticated
    - Check policy conditions match your use case
    - Review Supabase logs for policy violations
 
-3. **File upload fails**
+4. **File upload fails**
    - Check storage bucket policies
    - Verify file size and type restrictions
    - Ensure user has proper permissions
 
-4. **Type errors**
+5. **Type errors**
    - Regenerate types: `npx supabase gen types typescript --project-id YOUR_PROJECT_ID > types/database.types.ts`
    - Check database schema matches TypeScript types
 
@@ -283,6 +314,7 @@ Set `NODE_ENV=development` to enable detailed error logging and console output.
 ## Support
 
 For issues with this integration:
+
 1. Check Supabase documentation
 2. Review error logs in development mode
 3. Validate environment variables

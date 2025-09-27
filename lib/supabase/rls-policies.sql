@@ -14,6 +14,7 @@ ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
 -- Profiles table policies
 -- Users can view all profiles
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles
     FOR SELECT USING (true);
 
@@ -228,9 +229,12 @@ CREATE POLICY "Users can delete their own reviews" ON reviews
 
 -- Storage bucket policies
 -- Allow authenticated users to upload to listing-images bucket
-INSERT INTO storage.buckets (id, name, public) VALUES ('listing-images', 'listing-images', true);
-INSERT INTO storage.buckets (id, name, public) VALUES ('profile-avatars', 'profile-avatars', true);
-INSERT INTO storage.buckets (id, name, public) VALUES ('game-images', 'game-images', true);
+INSERT INTO storage.buckets (id, name, public) VALUES ('listing-images', 'listing-images', true)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('profile-avatars', 'profile-avatars', true)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('game-images', 'game-images', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Storage policies for listing-images bucket
 CREATE POLICY "Anyone can view listing images" ON storage.objects

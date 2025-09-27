@@ -179,7 +179,7 @@ export type Database = {
           listing_id: string;
           url: string;
           alt_text: string | null;
-          order: number;
+          sort_order: number;
           created_at: string;
         };
         Insert: {
@@ -187,7 +187,7 @@ export type Database = {
           listing_id: string;
           url: string;
           alt_text?: string | null;
-          order: number;
+          sort_order: number;
           created_at?: string;
         };
         Update: {
@@ -195,7 +195,7 @@ export type Database = {
           listing_id?: string;
           url?: string;
           alt_text?: string | null;
-          order?: number;
+          sort_order?: number;
           created_at?: string;
         };
       };

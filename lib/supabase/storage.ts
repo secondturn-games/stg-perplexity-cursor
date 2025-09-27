@@ -178,10 +178,10 @@ export class ImageUploadService {
   async uploadListingImage(
     listingId: string,
     file: File,
-    order: number
+    sortOrder: number
   ): Promise<UploadResult> {
     const fileExtension = file.name.split('.').pop();
-    const fileName = `${listingId}/${order}-${Date.now()}.${fileExtension}`;
+    const fileName = `${listingId}/${sortOrder}-${Date.now()}.${fileExtension}`;
 
     return this.storage.uploadFile('LISTING_IMAGES', fileName, file, {
       contentType: file.type,
