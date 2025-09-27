@@ -7,28 +7,44 @@ import { z } from 'zod';
 const envSchema = z.object({
   // Supabase Configuration
   NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'Supabase anon key is required'),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Supabase service role key is required'),
-  
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z
+    .string()
+    .min(1, 'Supabase anon key is required'),
+  SUPABASE_SERVICE_ROLE_KEY: z
+    .string()
+    .min(1, 'Supabase service role key is required'),
+
   // Application Configuration
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  NEXT_PUBLIC_APP_URL: z.string().url('Invalid app URL').default('http://localhost:3000'),
-  
+  NODE_ENV: z
+    .enum(['development', 'test', 'production'])
+    .default('development'),
+  NEXT_PUBLIC_APP_URL: z
+    .string()
+    .url('Invalid app URL')
+    .default('http://localhost:3000'),
+
   // API Keys (Optional)
   BGG_API_URL: z.string().url().optional(),
   MAKECOMMERCE_API_KEY: z.string().optional(),
   MAKECOMMERCE_API_URL: z.string().url().optional(),
-  
+
   // Analytics (Optional)
   NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
-  
+
   // Email Configuration (Optional)
   RESEND_API_KEY: z.string().optional(),
-  
+
   // File Upload Configuration (Optional)
-  MAX_FILE_SIZE: z.string().regex(/^\d+$/).optional().transform((val) => val ? parseInt(val, 10) : 5 * 1024 * 1024), // 5MB default
-  ALLOWED_FILE_TYPES: z.string().optional().default('image/jpeg,image/png,image/webp'),
+  MAX_FILE_SIZE: z
+    .string()
+    .regex(/^\d+$/)
+    .optional()
+    .transform(val => (val ? parseInt(val, 10) : 5 * 1024 * 1024)), // 5MB default
+  ALLOWED_FILE_TYPES: z
+    .string()
+    .optional()
+    .default('image/jpeg,image/png,image/webp'),
 });
 
 /**
@@ -63,14 +79,18 @@ export type Env = z.infer<typeof envSchema>;
 export function validateEnvironment(): void {
   try {
     envSchema.parse(process.env);
-    console.log('✅ Environment variables validated successfully');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Environment variables validated successfully');
+    }
   } catch (error) {
     console.error('❌ Environment validation failed:');
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
+      error.errors.forEach(err => {
         console.error(`  - ${err.path.join('.')}: ${err.message}`);
       });
     }
-    throw new Error('Environment validation failed. Please check your .env file.');
+    throw new Error(
+      'Environment validation failed. Please check your .env file.'
+    );
   }
 }

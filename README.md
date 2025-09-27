@@ -41,34 +41,38 @@ second-turn-games/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm 8+
 - Git
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd second-turn-games
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp env.example .env.local
    ```
-   
+
    Edit `.env.local` with your configuration:
    - Supabase URL and keys
    - API keys for external services
    - Other required environment variables
 
 4. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -99,6 +103,7 @@ Required environment variables are validated at startup. See `env.example` for a
 ### TypeScript
 
 Strict TypeScript configuration with:
+
 - Strict null checks
 - No implicit any
 - Exact optional property types
@@ -107,6 +112,7 @@ Strict TypeScript configuration with:
 ### ESLint & Prettier
 
 Configured with strict rules for:
+
 - TypeScript best practices
 - React hooks
 - Accessibility
@@ -115,6 +121,7 @@ Configured with strict rules for:
 ## 🧪 Testing
 
 The project includes:
+
 - Jest configuration for unit tests
 - React Testing Library for component tests
 - Coverage reporting
@@ -123,8 +130,9 @@ The project includes:
 ## 🌍 Internationalization
 
 Ready for Baltic market with support for:
+
 - Estonian (et)
-- Latvian (lv) 
+- Latvian (lv)
 - Lithuanian (lt)
 - English (en) fallback
 
@@ -138,24 +146,29 @@ Ready for Baltic market with support for:
 ## 📦 Dependencies
 
 ### Core
+
 - Next.js 15
 - React 18
 - TypeScript 5
 
 ### UI & Styling
+
 - Tailwind CSS
 - Lucide React (icons)
 - Tailwind Forms & Typography plugins
 
 ### Forms & Validation
+
 - React Hook Form
 - Yup validation
 - Zod for runtime validation
 
 ### Database & Auth
+
 - Supabase client
 
 ### Utilities
+
 - clsx & tailwind-merge for conditional classes
 - date-fns for date manipulation
 

@@ -91,9 +91,20 @@ export interface Listing {
   expires_at?: string;
 }
 
-export type GameCondition = 'new' | 'like_new' | 'very_good' | 'good' | 'fair' | 'poor';
+export type GameCondition =
+  | 'new'
+  | 'like_new'
+  | 'very_good'
+  | 'good'
+  | 'fair'
+  | 'poor';
 
-export type ListingStatus = 'active' | 'pending' | 'sold' | 'expired' | 'cancelled';
+export type ListingStatus =
+  | 'active'
+  | 'pending'
+  | 'sold'
+  | 'expired'
+  | 'cancelled';
 
 export interface ShippingMethod {
   id: string;

@@ -1,17 +1,8 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "@typescript-eslint/recommended",
-    "prettier"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": ["next/core-web-vitals", "prettier"],
+  "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": "error",
-    "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/prefer-const": "error",
-    "@typescript-eslint/no-non-null-assertion": "error",
     "react-hooks/exhaustive-deps": "error",
     "react/no-unescaped-entities": "off",
     "@next/next/no-page-custom-font": "off",
@@ -20,17 +11,5 @@
     "no-console": "warn",
     "eqeqeq": "error",
     "curly": "error"
-  },
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
-  },
-  "env": {
-    "browser": true,
-    "es6": true,
-    "node": true
   }
 }

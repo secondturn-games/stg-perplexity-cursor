@@ -16,8 +16,17 @@ const righteous = Righteous({
 
 export const metadata: Metadata = {
   title: 'Second Turn Games - Baltic Board Game Marketplace',
-  description: 'Buy and sell board games in the Baltic region. Connect with local gamers and find your next favorite game.',
-  keywords: ['board games', 'marketplace', 'baltic', 'estonia', 'latvia', 'lithuania', 'gaming'],
+  description:
+    'Buy and sell board games in the Baltic region. Connect with local gamers and find your next favorite game.',
+  keywords: [
+    'board games',
+    'marketplace',
+    'baltic',
+    'estonia',
+    'latvia',
+    'lithuania',
+    'gaming',
+  ],
   authors: [{ name: 'Second Turn Games' }],
   creator: 'Second Turn Games',
   publisher: 'Second Turn Games',
@@ -26,10 +35,13 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  ),
   openGraph: {
     title: 'Second Turn Games - Baltic Board Game Marketplace',
-    description: 'Buy and sell board games in the Baltic region. Connect with local gamers and find your next favorite game.',
+    description:
+      'Buy and sell board games in the Baltic region. Connect with local gamers and find your next favorite game.',
     url: '/',
     siteName: 'Second Turn Games',
     locale: 'en_US',
@@ -38,7 +50,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Second Turn Games - Baltic Board Game Marketplace',
-    description: 'Buy and sell board games in the Baltic region. Connect with local gamers and find your next favorite game.',
+    description:
+      'Buy and sell board games in the Baltic region. Connect with local gamers and find your next favorite game.',
   },
   robots: {
     index: true,
@@ -59,9 +72,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${roboto.variable} ${righteous.variable}`}>
+    <html lang='en' className={`${roboto.variable} ${righteous.variable}`}>
       <body className={`${roboto.className} min-h-screen`}>
-        <div className="min-h-screen bg-background-100">
+        <div className='min-h-screen bg-background-100'>
           <main>{children}</main>
         </div>
       </body>
