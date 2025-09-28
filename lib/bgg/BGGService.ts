@@ -193,11 +193,13 @@ export class BGGService {
     }
 
     let lastError: any;
-    
+
     for (let attempt = 1; attempt <= this.config.retry.maxAttempts; attempt++) {
       try {
-        console.log(`🔍 Getting game details for ID: ${gameId} (attempt ${attempt}/${this.config.retry.maxAttempts})`);
-        
+        console.log(
+          `🔍 Getting game details for ID: ${gameId} (attempt ${attempt}/${this.config.retry.maxAttempts})`
+        );
+
         const response = await this.apiClient.getGameDetails(gameId);
         console.log(
           '🔍 Raw game details response:',
@@ -226,27 +228,36 @@ export class BGGService {
         this.cacheManager.set(cacheKey, enhancedResult);
         console.log(`✅ Successfully got game details for ID: ${gameId}`);
         return enhancedResult;
-        
       } catch (error) {
         lastError = error;
-        console.error(`❌ Attempt ${attempt} failed for game ${gameId}:`, error);
-        
+        console.error(
+          `❌ Attempt ${attempt} failed for game ${gameId}:`,
+          error
+        );
+
         // If it's a rate limit error and we have retries left, wait and retry
-        if (error instanceof BGGError && error.code === 'RATE_LIMIT' && attempt < this.config.retry.maxAttempts) {
+        if (
+          error instanceof BGGError &&
+          error.code === 'RATE_LIMIT' &&
+          attempt < this.config.retry.maxAttempts
+        ) {
           const retryDelay = Math.min(
-            this.config.retry.baseDelay * Math.pow(this.config.retry.backoffMultiplier, attempt - 1),
+            this.config.retry.baseDelay *
+              Math.pow(this.config.retry.backoffMultiplier, attempt - 1),
             this.config.retry.maxDelay
           );
-          console.log(`⏳ Rate limited, waiting ${retryDelay}ms before retry ${attempt + 1}`);
+          console.log(
+            `⏳ Rate limited, waiting ${retryDelay}ms before retry ${attempt + 1}`
+          );
           await new Promise(resolve => setTimeout(resolve, retryDelay));
           continue;
         }
-        
+
         // If it's not a rate limit error or we're out of retries, break
         break;
       }
     }
-    
+
     const bggError = this.handleError('getGameDetails', lastError);
     throw bggError;
   }
@@ -660,7 +671,11 @@ export class BGGService {
       }
 
       const itemsContent = itemsMatch[1];
-      
+      if (!itemsContent) {
+        console.error('❌ No items content found in game details XML');
+        throw new Error('No items content found in game details XML response');
+      }
+
       // Find the main item (usually the first one, or the one with type="boardgame")
       const itemMatches = itemsContent.match(/<item[^>]*>(.*?)<\/item>/gs);
       if (!itemMatches || itemMatches.length === 0) {
@@ -669,7 +684,9 @@ export class BGGService {
         throw new Error('No item element found in game details XML response');
       }
 
-      console.log(`Found ${itemMatches.length} item(s) in game details response`);
+      console.log(
+        `Found ${itemMatches.length} item(s) in game details response`
+      );
 
       // Find the main game item (type="boardgame") or use the first one
       let mainItemXml = '';
@@ -677,7 +694,7 @@ export class BGGService {
 
       for (let i = 0; i < itemMatches.length; i++) {
         const itemMatch = itemMatches[i];
-        if (itemMatch.includes('type="boardgame"')) {
+        if (itemMatch && itemMatch.includes('type="boardgame"')) {
           mainItemXml = itemMatch;
           mainItemIndex = i;
           console.log(`Found main game item at index ${i}`);
@@ -694,12 +711,19 @@ export class BGGService {
 
       if (!mainItemXml) {
         console.error('❌ No valid item content found in game details XML');
-        throw new Error('No valid item content found in game details XML response');
+        throw new Error(
+          'No valid item content found in game details XML response'
+        );
       }
 
       // Extract the content inside the item tags
       const itemContentMatch = mainItemXml.match(/<item[^>]*>(.*?)<\/item>/s);
       const itemXml = itemContentMatch ? itemContentMatch[1] : mainItemXml;
+
+      if (!itemXml) {
+        console.error('❌ No item XML content found');
+        throw new Error('No item XML content found in game details response');
+      }
 
       // Parse basic item attributes
       const idMatch = itemXml.match(/id="([^"]*)"/);
@@ -766,22 +790,22 @@ export class BGGService {
       let bggRating = 0;
       let bggRank = 0;
       let weightRating = 0;
-      
+
       if (statsMatch && statsMatch[1]) {
         const statsContent = statsMatch[1];
-        
+
         // Parse average rating
         const ratingMatch = statsContent.match(
           /<average[^>]*value="([^"]*)"[^>]*>/
         );
         bggRating = parseFloat(ratingMatch?.[1] || '0');
-        
+
         // Parse rank (first available rank)
         const rankMatch = statsContent.match(
           /<rank[^>]*type="subtype"[^>]*value="([^"]*)"[^>]*>/
         );
         bggRank = parseInt(rankMatch?.[1] || '0');
-        
+
         // Parse weight (average weight)
         const weightMatch = statsContent.match(
           /<averageweight[^>]*value="([^"]*)"[^>]*>/
@@ -820,7 +844,9 @@ export class BGGService {
                 average: [{ $: { value: bggRating.toString() } }],
                 ranks: [
                   {
-                    rank: [{ $: { type: 'subtype', value: bggRank.toString() } }],
+                    rank: [
+                      { $: { type: 'subtype', value: bggRank.toString() } },
+                    ],
                   },
                 ],
                 averageweight: [{ $: { value: weightRating.toString() } }],
