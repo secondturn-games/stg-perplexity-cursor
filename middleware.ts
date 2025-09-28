@@ -12,15 +12,24 @@ import type { NextRequest } from 'next/server';
 
 // Routes that require authentication
 const protectedRoutes = [
-  '/profile',
-  '/sell',
-  '/messages',
   '/dashboard',
+  '/profile',
+  '/settings',
+  '/listings',
+  '/messages',
+  '/wishlist',
+  '/payments',
+  '/sell',
   '/admin',
 ];
 
 // Routes that should redirect authenticated users
-const authRoutes = ['/login', '/register', '/auth'];
+const authRoutes = [
+  '/auth/signin',
+  '/auth/signup',
+  '/auth/reset-password',
+  '/auth/update-password',
+];
 
 // Routes that are always accessible
 const publicRoutes = [
@@ -59,18 +68,46 @@ export async function middleware(request: NextRequest) {
       route => pathname === route || pathname.startsWith(`${route}/`)
     );
 
+    // Handle auth callback - allow through
+    if (pathname.startsWith('/auth/callback')) {
+      return NextResponse.next();
+    }
+
     // Handle protected routes
     if (isProtectedRoute && !session) {
-      const redirectUrl = new URL('/login', request.url);
-      redirectUrl.searchParams.set('redirectTo', pathname);
+      const redirectUrl = new URL('/auth/signin', request.url);
+      redirectUrl.searchParams.set('redirect_to', pathname);
       return NextResponse.redirect(redirectUrl);
     }
 
     // Handle auth routes - redirect authenticated users
     if (isAuthRoute && session) {
-      const redirectTo =
-        request.nextUrl.searchParams.get('redirectTo') || '/profile';
+      // Check if user has completed onboarding
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, full_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile?.username || !profile?.full_name) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
+
+      const redirectTo = request.nextUrl.searchParams.get('redirect_to') || '/dashboard';
       return NextResponse.redirect(new URL(redirectTo, request.url));
+    }
+
+    // Handle onboarding redirect for authenticated users without complete profile
+    if (session && !pathname.startsWith('/onboarding') && !isAuthRoute) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, full_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile?.username || !profile?.full_name) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
     }
 
     // For API routes, we might want different handling

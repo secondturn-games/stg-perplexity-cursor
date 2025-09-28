@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Roboto, Righteous } from 'next/font/google';
 import { MainLayout } from '@/components/layout';
+import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css';
 
 const roboto = Roboto({
@@ -75,9 +76,11 @@ export default function RootLayout({
   return (
     <html lang='en' className={`${roboto.variable} ${righteous.variable}`}>
       <body className={`${roboto.className}`}>
-        <MainLayout isAuthenticated={false} cartCount={0} currentLanguage='EN'>
-          {children}
-        </MainLayout>
+        <AuthProvider>
+          <MainLayout isAuthenticated={false} cartCount={0} currentLanguage='EN'>
+            {children}
+          </MainLayout>
+        </AuthProvider>
       </body>
     </html>
   );
