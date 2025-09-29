@@ -6,6 +6,11 @@
 import https from 'https';
 import { BGGError } from '@/types/bgg.types';
 import { BGGConfig } from '@/types/bgg.types';
+import {
+  BGGCircuitBreaker,
+  BGGCircuitBreakerFactory,
+} from '../resilience/BGGCircuitBreaker';
+import { FallbackStrategies } from '../resilience/FallbackStrategies';
 
 export class BGGAPIClient {
   private config: BGGConfig;
@@ -14,6 +19,7 @@ export class BGGAPIClient {
     lastRequestTime: number;
     requestQueue: Array<() => Promise<any>>;
   };
+  private circuitBreaker: BGGCircuitBreaker;
 
   constructor(config: BGGConfig) {
     this.config = config;
@@ -22,12 +28,28 @@ export class BGGAPIClient {
       lastRequestTime: 0,
       requestQueue: [],
     };
+    // Initialize circuit breaker for general API operations
+    this.circuitBreaker = BGGCircuitBreakerFactory.createForSearch({
+      enableEventEmission: true,
+      enableDetailedLogging: config.debug.enabled,
+    });
   }
 
   /**
-   * Make rate-limited HTTP request to BGG API
+   * Make rate-limited HTTP request to BGG API with circuit breaker protection
    */
   async makeRequest(endpoint: string): Promise<string> {
+    return this.circuitBreaker.execute(
+      () => this.executeRequest(endpoint),
+      () => this.getFallbackResponse(endpoint),
+      'makeRequest'
+    );
+  }
+
+  /**
+   * Execute the actual HTTP request (internal method)
+   */
+  private async executeRequest(endpoint: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const makeRequest = async () => {
         try {
@@ -48,7 +70,7 @@ export class BGGAPIClient {
           const req = https.get(url, options, res => {
             let data = '';
 
-            // Check for redirects (BGG often returns 302 redirects when rate limited)
+            // Check for redirects and follow them
             if (res.statusCode === 302 || res.statusCode === 301) {
               const location = res.headers.location;
               if (this.config.debug.enabled) {
@@ -56,16 +78,64 @@ export class BGGAPIClient {
                   `BGG redirect detected: ${res.statusCode} to ${location}`
                 );
               }
-              reject(
-                new BGGError(
-                  'RATE_LIMIT',
-                  'BGG API redirected - likely rate limited',
-                  { statusCode: res.statusCode, location },
-                  30, // retry after 30 seconds
-                  'BGG is rate limiting requests. Please wait a moment and try again.'
-                )
-              );
-              return;
+
+              // Follow the redirect
+              if (location) {
+                const redirectUrl = location.startsWith('http')
+                  ? location
+                  : `https://boardgamegeek.com${location}`;
+
+                if (this.config.debug.enabled) {
+                  console.log(`Following redirect to: ${redirectUrl}`);
+                }
+
+                // Make a new request to the redirect URL
+                const redirectReq = https.get(
+                  redirectUrl,
+                  options,
+                  redirectRes => {
+                    let redirectData = '';
+
+                    redirectRes.on('data', chunk => {
+                      redirectData += chunk;
+                    });
+
+                    redirectRes.on('end', () => {
+                      if (this.config.debug.enabled) {
+                        console.log(
+                          `Redirect response received: ${redirectData.length} bytes`
+                        );
+                      }
+                      resolve(redirectData);
+                    });
+                  }
+                );
+
+                redirectReq.on('error', err => {
+                  reject(
+                    new BGGError(
+                      'NETWORK_ERROR',
+                      'Failed to follow redirect',
+                      { originalError: err.message, redirectUrl },
+                      0,
+                      'Failed to follow BGG redirect'
+                    )
+                  );
+                });
+
+                return;
+              } else {
+                reject(
+                  new BGGError(
+                    'INVALID_RESPONSE',
+                    'BGG API returned redirect without location header',
+                    { statusCode: res.statusCode },
+                    0,
+                    'Invalid redirect response from BGG'
+                  )
+                );
+                return;
+              }
             }
 
             // Check for empty responses (BGG rate limiting)
@@ -188,8 +258,8 @@ export class BGGAPIClient {
         }
       };
 
-      this.rateLimit.requestQueue.push(makeRequest);
-      this.processQueue();
+      // Execute the request directly instead of queuing it
+      makeRequest();
     });
   }
 
@@ -289,7 +359,7 @@ export class BGGAPIClient {
    * Get game details
    */
   async getGameDetails(gameId: string): Promise<string> {
-    return this.makeRequest(`/thing?id=${gameId}&stats=1`);
+    return this.makeRequest(`/thing?id=${gameId}&stats=1&versions=1`);
   }
 
   /**
@@ -297,5 +367,45 @@ export class BGGAPIClient {
    */
   async getUserCollection(username: string): Promise<string> {
     return this.makeRequest(`/collection?username=${username}&stats=1`);
+  }
+
+  /**
+   * Get fallback response when circuit breaker is open
+   */
+  private async getFallbackResponse(endpoint: string): Promise<string> {
+    if (this.config.debug.enabled) {
+      console.log('Using fallback response for endpoint:', endpoint);
+    }
+
+    // Return a basic XML response indicating service unavailability
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<items total="0">
+  <item>
+    <name>Service Temporarily Unavailable</name>
+    <description>BGG API is currently unavailable. Please try again later.</description>
+    <error>circuit_breaker_open</error>
+  </item>
+</items>`;
+  }
+
+  /**
+   * Get circuit breaker status
+   */
+  getCircuitBreakerStatus() {
+    return this.circuitBreaker.getHealthStatus();
+  }
+
+  /**
+   * Get circuit breaker metrics
+   */
+  getCircuitBreakerMetrics() {
+    return this.circuitBreaker.getMetrics();
+  }
+
+  /**
+   * Reset circuit breaker
+   */
+  resetCircuitBreaker() {
+    this.circuitBreaker.reset();
   }
 }

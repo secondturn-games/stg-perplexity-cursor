@@ -13,10 +13,15 @@ import {
   BGGError,
   SearchFilters,
   BGGDataUtils,
+  BGGAlternateName,
+  BGGEdition,
+  BGGLanguageDependence,
 } from '@/types/bgg.types';
 import { getBGGConfig } from './config';
 import { eventBus } from '../events/EventBus';
 import { BGGEventFactory } from '../events/BGGEvents';
+import { FallbackStrategies } from '../resilience/FallbackStrategies';
+import * as xml2js from 'xml2js';
 
 export class BGGService {
   private apiClient: BGGAPIClient;
@@ -241,6 +246,48 @@ export class BGGService {
     } catch (error) {
       const bggError = this.handleError('searchGames', error);
 
+      // Check if we should use fallback strategies
+      if (FallbackStrategies.shouldUseFallback(bggError)) {
+        console.log(
+          '🔄 Using fallback strategy for search due to error:',
+          bggError.code
+        );
+
+        try {
+          const fallbackResults =
+            await FallbackStrategies.getFallbackSearchResults({
+              query: normalizedQuery,
+              filters,
+              maxResults: 10,
+              includePartialData: true,
+            });
+
+          const queryTime = Date.now() - startTime;
+
+          // Emit fallback search event
+          await eventBus.emit(
+            'game.searched',
+            BGGEventFactory.createGameSearchedEvent(
+              normalizedQuery,
+              filters,
+              fallbackResults,
+              {
+                queryTime,
+                cacheHit: false,
+                apiCalls: 0,
+              }
+            )
+          );
+
+          console.log(
+            `✅ Fallback search completed in ${queryTime}ms, found ${fallbackResults.items.length} results`
+          );
+          return fallbackResults;
+        } catch (fallbackError) {
+          console.error('Fallback strategy also failed:', fallbackError);
+        }
+      }
+
       // Emit search failed event
       await eventBus.emit(
         'game.search.failed',
@@ -386,6 +433,58 @@ export class BGGService {
     }
 
     const bggError = this.handleError('getGameDetails', lastError);
+
+    // Check if we should use fallback strategies
+    if (FallbackStrategies.shouldUseFallback(bggError)) {
+      console.log(
+        '🔄 Using fallback strategy for game details due to error:',
+        bggError.code
+      );
+
+      try {
+        const fallbackDetails = await FallbackStrategies.getFallbackGameDetails(
+          {
+            gameId,
+            includePartialData: true,
+          }
+        );
+
+        if (fallbackDetails) {
+          const queryTime = Date.now() - startTime;
+
+          // Emit fallback game details event
+          await eventBus.emit(
+            'game.details.fetched',
+            BGGEventFactory.createGameDetailsFetchedEvent(
+              gameId,
+              fallbackDetails.name,
+              'boardgame',
+              {
+                queryTime,
+                cacheHit: false,
+                apiCalls: 0,
+              },
+              {
+                yearPublished: fallbackDetails.yearpublished,
+                bggRating: fallbackDetails.bgg_rating,
+                bggRank: fallbackDetails.bgg_rank,
+                weightRating: fallbackDetails.weight_rating,
+              }
+            )
+          );
+
+          console.log(
+            `✅ Fallback game details completed in ${queryTime}ms for game ${gameId}`
+          );
+          return fallbackDetails;
+        }
+      } catch (fallbackError) {
+        console.error(
+          'Fallback strategy also failed for game details:',
+          fallbackError
+        );
+      }
+    }
 
     // Emit game details failed event
     await eventBus.emit('game.details.failed', {
@@ -716,7 +815,10 @@ export class BGGService {
     }
   }
 
-  private parseXML(xml: string, isSearchResponse: boolean = false): any {
+  private async parseXML(
+    xml: string,
+    isSearchResponse: boolean = false
+  ): Promise<any> {
     console.log('Parsing XML response:', xml.substring(0, 200) + '...');
 
     try {
@@ -724,14 +826,14 @@ export class BGGService {
       if (xml.includes('<items')) {
         if (isSearchResponse) {
           console.log('Detected items response - treating as search');
-          return this.parseSearchResponse(xml);
+          return await this.parseSearchResponse(xml);
         } else {
           console.log('Detected items response - treating as game details');
-          return this.parseGameDetailsResponse(xml);
+          return await this.parseGameDetailsResponse(xml);
         }
       } else if (xml.includes('<item')) {
         console.log('Detected single item without items wrapper');
-        return this.parseGameDetailsResponse(xml);
+        return await this.parseGameDetailsResponse(xml);
       } else {
         console.log('Unknown XML structure');
         console.log('XML preview:', xml.substring(0, 200));
@@ -746,57 +848,53 @@ export class BGGService {
   /**
    * Parse search response XML
    */
-  private parseSearchResponse(xml: string): any {
+  private async parseSearchResponse(xml: string): Promise<any> {
     try {
-      const itemsMatch = xml.match(
-        /<items[^>]*total="(\d+)"[^>]*>(.*?)<\/items>/s
-      );
-      if (!itemsMatch) {
-        console.log('No items element found in XML');
-        return { items: { $: { total: '0' }, item: [] } };
-      }
-
-      const total = itemsMatch[1];
-      const itemsContent = itemsMatch[2];
-
-      // Parse individual items
-      const itemMatches =
-        itemsContent?.match(/<item[^>]*>(.*?)<\/item>/gs) || [];
-      const items = itemMatches.map(itemXml => {
-        const idMatch = itemXml.match(/id="([^"]*)"/);
-        const typeMatch = itemXml.match(/type="([^"]*)"/);
-        const nameMatch = itemXml.match(/<name[^>]*value="([^"]*)"[^>]*>/);
-        const yearMatch = itemXml.match(
-          /<yearpublished[^>]*value="([^"]*)"[^>]*>/
-        );
-        const thumbnailMatch = itemXml.match(
-          /<thumbnail[^>]*>([^<]*)<\/thumbnail>/
-        );
-
-        const item = {
-          $: {
-            id: idMatch?.[1] || '',
-            type: typeMatch?.[1] || 'boardgame',
-          },
-          name: nameMatch ? [{ $: { value: nameMatch[1] } }] : [],
-          yearpublished: yearMatch ? [{ $: { value: yearMatch[1] } }] : [],
-          thumbnail: thumbnailMatch ? [thumbnailMatch[1]] : [],
-        };
-
-        // Debug logging for type classification
-        console.log(
-          `Item: ${nameMatch?.[1] || 'Unknown'}, Type: ${typeMatch?.[1] || 'boardgame'}`
-        );
-
-        return item;
+      // Use xml2js to parse the XML properly
+      const parser = new xml2js.Parser({
+        explicitArray: true,
+        mergeAttrs: false,
+        explicitCharkey: false,
+        trim: true,
+        normalize: true,
+        normalizeTags: false,
+        attrkey: '$',
+        charkey: '_',
+        explicitRoot: false,
+        emptyTag: '',
+        ignoreAttrs: false,
+        explicitChildren: false,
+        childkey: '$$',
+        includeWhiteChars: false,
+        async: false,
+        strict: true,
       });
 
-      return {
-        items: {
-          $: { total },
-          item: items,
-        },
-      };
+      const result = await parser.parseStringPromise(xml);
+      console.log('Parsed search XML result:', JSON.stringify(result, null, 2));
+
+      // Extract items from the parsed result
+      if (result.item && Array.isArray(result.item)) {
+        const total = result.$?.total || '0';
+        const items = result.item;
+
+        // Debug logging for each item
+        items.forEach((item: any) => {
+          console.log(
+            `Item: ${item.name?.[0]?.$.value || 'Unknown'}, Type: ${item.$.type || 'boardgame'}, ID: ${item.$.id}`
+          );
+        });
+
+        return {
+          items: {
+            $: { total },
+            item: items,
+          },
+        };
+      }
+
+      console.log('No items found in XML');
+      return { items: { $: { total: '0' }, item: [] } };
     } catch (error) {
       console.error('XML parsing error:', error);
       return { items: { $: { total: '0' }, item: [] } };
@@ -806,211 +904,73 @@ export class BGGService {
   /**
    * Parse game details response XML
    */
-  private parseGameDetailsResponse(xml: string): any {
+  private async parseGameDetailsResponse(xml: string): Promise<any> {
     try {
       console.log('Parsing game details XML response');
 
-      // Extract the items element first, then find the main item element
-      const itemsMatch = xml.match(/<items[^>]*>(.*?)<\/items>/s);
-      if (!itemsMatch) {
-        console.error('❌ No items element found in game details XML');
-        console.error('XML content:', xml.substring(0, 500) + '...');
-        throw new Error('No items element found in game details XML response');
-      }
+      // Use xml2js to parse the XML properly
+      const parser = new xml2js.Parser({
+        explicitArray: true,
+        mergeAttrs: false,
+        explicitCharkey: false,
+        trim: true,
+        normalize: true,
+        normalizeTags: false,
+        attrkey: '$',
+        charkey: '_',
+        explicitRoot: false,
+        emptyTag: '',
+        ignoreAttrs: false,
+        explicitChildren: false,
+        childkey: '$$',
+        includeWhiteChars: false,
+        async: false,
+        strict: true,
+      });
 
-      const itemsContent = itemsMatch[1];
-      if (!itemsContent) {
-        console.error('❌ No items content found in game details XML');
-        throw new Error('No items content found in game details XML response');
-      }
+      const result = await parser.parseStringPromise(xml);
+      console.log('Parsed XML result:', JSON.stringify(result, null, 2));
 
-      // Find the main item (usually the first one, or the one with type="boardgame")
-      const itemMatches = itemsContent.match(/<item[^>]*>(.*?)<\/item>/gs);
-      if (!itemMatches || itemMatches.length === 0) {
-        console.error('❌ No item elements found in game details XML');
-        console.error('Items content:', itemsContent.substring(0, 500) + '...');
-        throw new Error('No item element found in game details XML response');
-      }
+      // Find the main item content
+      let mainItem = null;
 
-      console.log(
-        `Found ${itemMatches.length} item(s) in game details response`
-      );
+      if (result.item && Array.isArray(result.item)) {
+        const items = result.item;
 
-      // Find the main game item (type="boardgame") or use the first one
-      let mainItemXml = '';
-      let mainItemIndex = 0;
+        // Look for boardgame type first
+        for (const item of items) {
+          if (item.$ && item.$.type === 'boardgame') {
+            mainItem = item;
+            console.log('Found boardgame type item');
+            break;
+          }
+        }
 
-      for (let i = 0; i < itemMatches.length; i++) {
-        const itemMatch = itemMatches[i];
-        if (itemMatch && itemMatch.includes('type="boardgame"')) {
-          mainItemXml = itemMatch;
-          mainItemIndex = i;
-          console.log(`Found main game item at index ${i}`);
-          break;
+        // If no boardgame type found, use the first item
+        if (!mainItem && items.length > 0) {
+          mainItem = items[0];
+          console.log('No boardgame type found, using first item');
         }
       }
 
-      // If no boardgame type found, use the first item
-      if (!mainItemXml && itemMatches.length > 0) {
-        mainItemXml = itemMatches[0];
-        mainItemIndex = 0;
-        console.log(`No boardgame type found, using first item at index 0`);
-      }
-
-      if (!mainItemXml) {
+      if (!mainItem) {
         console.error('❌ No valid item content found in game details XML');
         throw new Error(
           'No valid item content found in game details XML response'
         );
       }
 
-      // Extract the content inside the item tags
-      const itemContentMatch = mainItemXml.match(/<item[^>]*>(.*?)<\/item>/s);
-      const itemXml = itemContentMatch ? itemContentMatch[1] : mainItemXml;
-
-      if (!itemXml) {
-        console.error('❌ No item XML content found');
-        throw new Error('No item XML content found in game details response');
-      }
-
-      // Parse basic item attributes
-      const idMatch = itemXml.match(/id="([^"]*)"/);
-      const typeMatch = itemXml.match(/type="([^"]*)"/);
-
-      // Parse name
-      const nameMatch = itemXml.match(/<name[^>]*value="([^"]*)"[^>]*>/);
-
-      // Parse description
-      const descriptionMatch = itemXml.match(
-        /<description[^>]*>(.*?)<\/description>/s
+      console.log(
+        'Parsed game details item:',
+        JSON.stringify(mainItem, null, 2)
       );
-
-      // Parse year published
-      const yearMatch = itemXml.match(
-        /<yearpublished[^>]*value="([^"]*)"[^>]*>/
-      );
-
-      // Parse player counts
-      const minPlayersMatch = itemXml.match(
-        /<minplayers[^>]*value="([^"]*)"[^>]*>/
-      );
-      const maxPlayersMatch = itemXml.match(
-        /<maxplayers[^>]*value="([^"]*)"[^>]*>/
-      );
-
-      // Parse play time
-      const playTimeMatch = itemXml.match(
-        /<playingtime[^>]*value="([^"]*)"[^>]*>/
-      );
-      const minPlayTimeMatch = itemXml.match(
-        /<minplaytime[^>]*value="([^"]*)"[^>]*>/
-      );
-      const maxPlayTimeMatch = itemXml.match(
-        /<maxplaytime[^>]*value="([^"]*)"[^>]*>/
-      );
-
-      // Parse age
-      const minAgeMatch = itemXml.match(/<minage[^>]*value="([^"]*)"[^>]*>/);
-
-      // Parse images
-      const imageMatch = itemXml.match(/<image[^>]*>([^<]*)<\/image>/);
-      const thumbnailMatch = itemXml.match(
-        /<thumbnail[^>]*>([^<]*)<\/thumbnail>/
-      );
-
-      // Parse links (categories, mechanics, etc.)
-      const linkMatches =
-        itemXml.match(/<link[^>]*type="([^"]*)"[^>]*value="([^"]*)"[^>]*>/g) ||
-        [];
-      const links = linkMatches.map(linkXml => {
-        const typeMatch = linkXml.match(/type="([^"]*)"/);
-        const valueMatch = linkXml.match(/value="([^"]*)"/);
-        return {
-          $: {
-            type: typeMatch?.[1] || '',
-            value: valueMatch?.[1] || '',
-          },
-        };
-      });
-
-      // Parse statistics
-      const statsMatch = itemXml.match(/<statistics[^>]*>(.*?)<\/statistics>/s);
-      let bggRating = 0;
-      let bggRank = 0;
-      let weightRating = 0;
-
-      if (statsMatch && statsMatch[1]) {
-        const statsContent = statsMatch[1];
-
-        // Parse average rating
-        const ratingMatch = statsContent.match(
-          /<average[^>]*value="([^"]*)"[^>]*>/
-        );
-        bggRating = parseFloat(ratingMatch?.[1] || '0');
-
-        // Parse rank (first available rank)
-        const rankMatch = statsContent.match(
-          /<rank[^>]*type="subtype"[^>]*value="([^"]*)"[^>]*>/
-        );
-        bggRank = parseInt(rankMatch?.[1] || '0');
-
-        // Parse weight (average weight)
-        const weightMatch = statsContent.match(
-          /<averageweight[^>]*value="([^"]*)"[^>]*>/
-        );
-        weightRating = parseFloat(weightMatch?.[1] || '0');
-      }
-
-      const item = {
-        $: {
-          id: idMatch?.[1] || '',
-          type: typeMatch?.[1] || 'boardgame',
-        },
-        name: nameMatch ? [{ $: { value: nameMatch[1] } }] : [],
-        description: descriptionMatch ? [descriptionMatch[1]] : [],
-        yearpublished: yearMatch ? [{ $: { value: yearMatch[1] } }] : [],
-        minplayers: minPlayersMatch
-          ? [{ $: { value: minPlayersMatch[1] } }]
-          : [],
-        maxplayers: maxPlayersMatch
-          ? [{ $: { value: maxPlayersMatch[1] } }]
-          : [],
-        playingtime: playTimeMatch ? [{ $: { value: playTimeMatch[1] } }] : [],
-        minplaytime: minPlayTimeMatch
-          ? [{ $: { value: minPlayTimeMatch[1] } }]
-          : [],
-        maxplaytime: maxPlayTimeMatch
-          ? [{ $: { value: maxPlayTimeMatch[1] } }]
-          : [],
-        minage: minAgeMatch ? [{ $: { value: minAgeMatch[1] } }] : [],
-        image: imageMatch ? [imageMatch[1]] : [],
-        thumbnail: thumbnailMatch ? [thumbnailMatch[1]] : [],
-        link: links,
-        statistics: statsMatch
-          ? [
-              {
-                average: [{ $: { value: bggRating.toString() } }],
-                ranks: [
-                  {
-                    rank: [
-                      { $: { type: 'subtype', value: bggRank.toString() } },
-                    ],
-                  },
-                ],
-                averageweight: [{ $: { value: weightRating.toString() } }],
-              },
-            ]
-          : [],
-      };
-
-      console.log('Parsed game details item:', JSON.stringify(item, null, 2));
       console.log('Item structure check:');
-      console.log('- item.$.id:', item.$.id);
-      console.log('- item.name:', item.name);
-      console.log('- item.description:', item.description);
+      console.log('- item.$.id:', mainItem.$?.id);
+      console.log('- item.name:', mainItem.name);
+      console.log('- item.description:', mainItem.description);
 
       // Return in the expected format for game details
-      return { item };
+      return { item: mainItem };
     } catch (error) {
       console.error('Game details XML parsing error:', error);
       return { item: null };
@@ -1131,20 +1091,182 @@ export class BGGService {
           ?.filter((l: any) => l.$.type === 'language')
           .map((l: any) => l.$.value) || [],
       bgg_rating: parseFloat(
-        item.statistics?.[0]?.average?.[0]?.$.value || '0'
+        item.statistics?.[0]?.ratings?.[0]?.average?.[0]?.$.value || '0'
       ),
       bgg_rank: parseInt(
-        item.statistics?.[0]?.ranks?.[0]?.rank?.[0]?.$.value || '0'
+        item.statistics?.[0]?.ratings?.[0]?.ranks?.[0]?.rank?.[0]?.$.value || '0'
       ),
       weight_rating: parseFloat(
-        item.statistics?.[0]?.averageweight?.[0]?.$.value || '0'
+        item.statistics?.[0]?.ratings?.[0]?.averageweight?.[0]?.$.value || '0'
       ),
       age_rating: parseInt(item.minage?.[0]?.$.value || '0'),
       last_bgg_sync: new Date().toISOString(),
+      // Enhanced fields
+      alternateNames: this.extractAlternateNames(item),
+      editions: this.extractEditions(item),
+      languageDependence: this.extractLanguageDependence(item),
     };
 
     return BGGDataUtils.computeGameDetailsFields(baseGame);
   }
+
+  private extractAlternateNames(item: any): BGGAlternateName[] {
+    if (!item.name || !Array.isArray(item.name)) {
+      return [];
+    }
+
+    return item.name.map((name: any) => ({
+      type: name.$.type as 'primary' | 'alternate',
+      sortindex: parseInt(name.$.sortindex || '1'),
+      value: this.decodeHtmlEntities(name.$.value || ''),
+    }));
+  }
+
+  private extractEditions(item: any): BGGEdition[] {
+    // First try to get real game versions if available
+    if (item.versions && item.versions[0] && item.versions[0].item) {
+      return this.extractGameVersions(item.versions[0].item);
+    }
+
+    // Fallback to the old method for implementations/compilations
+    if (!item.link || !Array.isArray(item.link)) {
+      return [];
+    }
+
+    const versionTypes = [
+      'boardgameimplementation', 
+      'boardgamecompilation'
+    ];
+
+    return item.link
+      .filter((link: any) => versionTypes.includes(link.$.type))
+      .map((link: any) => ({
+        id: link.$.id,
+        name: this.decodeHtmlEntities(link.$.value || ''),
+        type: this.mapEditionType(link.$.type),
+        bggLink: `https://boardgamegeek.com/boardgame/${link.$.id}`,
+      }));
+  }
+
+  private extractGameVersions(versions: any[]): BGGEdition[] {
+    return versions.map((version: any) => {
+      // Extract publisher from links
+      const publisherLink = version.link?.find((link: any) => link.$.type === 'boardgamepublisher');
+      const publisher = publisherLink?.$.value || 'Unknown';
+
+      // Extract language from links
+      const languageLink = version.link?.find((link: any) => link.$.type === 'language');
+      const language = languageLink?.$.value || 'Unknown';
+
+      return {
+        id: version.$.id,
+        name: this.decodeHtmlEntities(version.name?.[0]?.$.value || ''),
+        type: 'implementation' as const, // All versions are implementations
+        yearpublished: parseInt(version.yearpublished?.[0]?.$.value || '0'),
+        image: version.image?.[0] || '',
+        thumbnail: version.thumbnail?.[0] || '',
+        publishers: publisher ? [publisher] : [],
+        languages: language ? [language] : [],
+        bggLink: `https://boardgamegeek.com/boardgameversion/${version.$.id}`,
+        // Additional version-specific data
+        productCode: version.productcode?.[0]?.$.value || '',
+        dimensions: {
+          width: parseFloat(version.width?.[0]?.$.value || '0'),
+          length: parseFloat(version.length?.[0]?.$.value || '0'),
+          depth: parseFloat(version.depth?.[0]?.$.value || '0'),
+          weight: parseFloat(version.weight?.[0]?.$.value || '0'),
+        },
+      };
+    });
+  }
+
+  private extractLanguageDependence(item: any): BGGLanguageDependence {
+    if (!item.poll || !Array.isArray(item.poll)) {
+      return {
+        level: 0,
+        description: 'Unknown',
+        votes: 0,
+        totalVotes: 0,
+        percentage: 0,
+      };
+    }
+
+    const languagePoll = item.poll.find((poll: any) => poll.$.name === 'language_dependence');
+    if (!languagePoll || !languagePoll.results || !Array.isArray(languagePoll.results)) {
+      return {
+        level: 0,
+        description: 'Unknown',
+        votes: 0,
+        totalVotes: 0,
+        percentage: 0,
+      };
+    }
+
+    const totalVotes = parseInt(languagePoll.$.totalvotes || '0');
+    const results = languagePoll.results[0]?.result || [];
+    
+    // Find the result with the most votes
+    let maxVotes = 0;
+    let selectedResult = null;
+    
+    results.forEach((result: any) => {
+      const votes = parseInt(result.$.numvotes || '0');
+      if (votes > maxVotes) {
+        maxVotes = votes;
+        selectedResult = result;
+      }
+    });
+
+    if (!selectedResult) {
+      return {
+        level: 0,
+        description: 'Unknown',
+        votes: 0,
+        totalVotes,
+        percentage: 0,
+      };
+    }
+
+    return {
+      level: this.convertBGGLevelToUserLevel(selectedResult.$.level || '0'),
+      description: selectedResult.$.value || 'Unknown',
+      votes: maxVotes,
+      totalVotes,
+      percentage: totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0,
+    };
+  }
+
+  private mapEditionType(bggType: string): 'expansion' | 'implementation' | 'compilation' | 'accessory' {
+    switch (bggType) {
+      case 'boardgameimplementation':
+        return 'implementation';
+      case 'boardgamecompilation':
+        return 'compilation';
+      default:
+        return 'implementation';
+    }
+  }
+
+  private convertBGGLevelToUserLevel(bggLevel: number | string): number {
+    // Convert BGG internal level codes (76-80) to user-friendly levels (1-5)
+    const level = typeof bggLevel === 'string' ? parseInt(bggLevel) : bggLevel;
+    
+    switch (level) {
+      case 76:
+        return 1; // "No necessary in-game text"
+      case 77:
+        return 2; // "Some necessary text - easily memorized or small crib sheet"
+      case 78:
+        return 3; // "Moderate in-game text - needs crib sheet or paste ups"
+      case 79:
+        return 4; // "Extensive use of text - massive conversion needed to be playable"
+      case 80:
+        return 5; // "Unplayable in another language"
+      default:
+        return 0; // Unknown
+    }
+  }
+
 
   private transformCollectionResponse(data: any): BGGCollectionResponse {
     const items =

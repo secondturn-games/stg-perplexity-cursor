@@ -65,6 +65,52 @@ export interface SearchFilters {
   exactMatch?: boolean;
 }
 
+export interface BGGAlternateName {
+  type: 'primary' | 'alternate';
+  sortindex: number;
+  value: string;
+}
+
+export interface BGGEdition {
+  id: string;
+  name: string;
+  type: 'expansion' | 'implementation' | 'compilation' | 'accessory';
+  yearpublished?: number;
+  image?: string;
+  thumbnail?: string;
+  description?: string;
+  minplayers?: number;
+  maxplayers?: number;
+  playingtime?: number;
+  minage?: number;
+  bgg_rating?: number;
+  bgg_rank?: number;
+  weight_rating?: number;
+  languages?: string[];
+  publishers?: string[];
+  designers?: string[];
+  artists?: string[];
+  mechanics?: string[];
+  categories?: string[];
+  bggLink: string;
+  // Version-specific fields
+  productCode?: string;
+  dimensions?: {
+    width: number;
+    length: number;
+    depth: number;
+    weight: number;
+  };
+}
+
+export interface BGGLanguageDependence {
+  level: number;
+  description: string;
+  votes: number;
+  totalVotes: number;
+  percentage: number;
+}
+
 export interface BGGGameDetails {
   id: string;
   name: string;
@@ -89,6 +135,10 @@ export interface BGGGameDetails {
   weight_rating: number;
   age_rating: number;
   last_bgg_sync: string;
+  // Enhanced fields
+  alternateNames: BGGAlternateName[];
+  editions: BGGEdition[];
+  languageDependence: BGGLanguageDependence;
   // Computed fields
   readonly bggLink: string;
   readonly playerCount: string;
