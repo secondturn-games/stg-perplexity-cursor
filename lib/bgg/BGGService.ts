@@ -25,11 +25,11 @@ import { FallbackStrategies } from '../resilience/FallbackStrategies';
 import * as xml2js from 'xml2js';
 
 export class BGGService {
-  private apiClient: BGGAPIClient;
-  private cacheManager: CacheManager;
-  private searchEngine: SearchEngine;
-  private gameRepository: SupabaseGameRepository;
-  private config: any;
+  protected apiClient: BGGAPIClient;
+  protected cacheManager: CacheManager;
+  protected searchEngine: SearchEngine;
+  protected gameRepository: SupabaseGameRepository;
+  protected config: any;
 
   constructor() {
     this.config = getBGGConfig();
@@ -1485,7 +1485,7 @@ export class BGGService {
   /**
    * Convert database game to BGGGameDetails format
    */
-  private convertDbGameToBGGDetails(dbGame: any): BGGGameDetails {
+  protected convertDbGameToBGGDetails(dbGame: any): BGGGameDetails {
     const bggId = dbGame.bgg_id?.toString() || dbGame.id;
 
     return {
