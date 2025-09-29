@@ -7,7 +7,7 @@ import * as yup from 'yup';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
@@ -381,3 +381,6 @@ export default function UpdatePasswordPage() {
     </div>
   );
 }
+
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';

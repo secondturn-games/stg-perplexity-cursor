@@ -8,7 +8,7 @@ import {
   ReactNode,
 } from 'react';
 import { User } from '@supabase/supabase-js';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase';
 import { Profile } from '@/types/database.types';
 import { getProfile, createProfile } from '@/lib/supabase/client-auth';
 
@@ -177,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { error } = await supabase
       .from('profiles')
-      .update(data)
+      .update(data as never)
       .eq('id', user.id);
 
     if (error) {

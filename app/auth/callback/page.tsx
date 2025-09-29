@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from '@/lib/supabase';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function AuthCallbackPage() {
           }
 
           // Check if profile is complete
-          if (!profile.username || !profile.full_name) {
+          if (!(profile as any)?.username || !(profile as any)?.full_name) {
             router.push('/onboarding');
             return;
           }
@@ -115,3 +115,32 @@ export default function AuthCallbackPage() {
 
   return null;
 }
+
+function LoadingFallback() {
+  return (
+    <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+      <div className='sm:mx-auto sm:w-full sm:max-w-md'>
+        <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4'></div>
+          <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+            Loading...
+          </h2>
+          <p className='text-gray-600'>
+            Please wait while we process your request.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AuthCallbackContent />
+    </Suspense>
+  );
+}
+
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';

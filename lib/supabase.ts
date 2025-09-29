@@ -297,6 +297,30 @@ export type Database = {
  * This client is used in browser environments and React components
  */
 export function createClientComponentClient() {
+  // Check if we're in a build environment without proper env vars
+  if (
+    !env.NEXT_PUBLIC_SUPABASE_URL ||
+    env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
+  ) {
+    // Return a mock client for build-time rendering
+    return createClient<Database>(
+      'https://placeholder.supabase.co',
+      'placeholder-key',
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+        global: {
+          headers: {
+            'X-Client-Info': 'second-turn-games-build',
+          },
+        },
+      }
+    );
+  }
+
   return createClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -320,6 +344,29 @@ export function createClientComponentClient() {
  * This client bypasses RLS and uses the service role key
  */
 export function createServerComponentClient() {
+  // Check if we're in a build environment without proper env vars
+  if (
+    !env.NEXT_PUBLIC_SUPABASE_URL ||
+    env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
+  ) {
+    // Return a mock client for build-time rendering
+    return createClient<Database>(
+      'https://placeholder.supabase.co',
+      'placeholder-service-key',
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+        global: {
+          headers: {
+            'X-Client-Info': 'second-turn-games-server-build',
+          },
+        },
+      }
+    );
+  }
+
   return createClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY,
@@ -342,6 +389,25 @@ export function createServerComponentClient() {
  * This client is optimized for middleware functions
  */
 export function createMiddlewareClient() {
+  // Check if we're in a build environment without proper env vars
+  if (
+    !env.NEXT_PUBLIC_SUPABASE_URL ||
+    env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
+  ) {
+    // Return a mock client for build-time rendering
+    return createClient<Database>(
+      'https://placeholder.supabase.co',
+      'placeholder-key',
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      }
+    );
+  }
+
   return createClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -641,4 +707,11 @@ export const realtime = {
 };
 
 // Export the main client for convenience
-export const supabase = createClientComponentClient();
+// Note: This will be created lazily to avoid build-time issues
+let _supabase: ReturnType<typeof createClientComponentClient> | null = null;
+export const supabase = () => {
+  if (!_supabase) {
+    _supabase = createClientComponentClient();
+  }
+  return _supabase;
+};
