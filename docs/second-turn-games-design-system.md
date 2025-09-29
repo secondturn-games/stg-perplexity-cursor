@@ -133,7 +133,6 @@ Second Turn Games connects board game enthusiasts across Estonia, Latvia, and Li
 ### Primary Logo
 
 - Clean, modern wordmark with friendly characteristics
-- Should incorporate gaming elements subtly (dice, cards, board game pieces)
 - Color variations: Full color, Dark Green monochrome, White reverse
 
 ### Logo Usage Rules
@@ -351,7 +350,7 @@ Second Turn Games connects board game enthusiasts across Estonia, Latvia, and Li
 - Photography and illustrations
 - Template files (Figma, Sketch, Adobe CC)
 
-### File Organization
+### File Organization (not implemented)
 
 ```
 /brand-assets/

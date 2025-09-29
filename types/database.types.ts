@@ -546,6 +546,95 @@ export interface Database {
           },
         ];
       };
+      jobs: {
+        Row: {
+          created_at: string;
+          error: string | null;
+          id: string;
+          metadata: Json;
+          payload: Json;
+          priority: Database['public']['Enums']['job_priority'];
+          result: Json | null;
+          status: Database['public']['Enums']['job_status'];
+          type: Database['public']['Enums']['job_type'];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          metadata?: Json;
+          payload: Json;
+          priority?: Database['public']['Enums']['job_priority'];
+          result?: Json | null;
+          status?: Database['public']['Enums']['job_status'];
+          type: Database['public']['Enums']['job_type'];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          metadata?: Json;
+          payload?: Json;
+          priority?: Database['public']['Enums']['job_priority'];
+          result?: Json | null;
+          status?: Database['public']['Enums']['job_status'];
+          type?: Database['public']['Enums']['job_type'];
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      job_history: {
+        Row: {
+          created_at: string;
+          error: string | null;
+          id: string;
+          job_id: string;
+          metadata: Json;
+          payload: Json;
+          priority: Database['public']['Enums']['job_priority'];
+          result: Json | null;
+          status: Database['public']['Enums']['job_status'];
+          type: Database['public']['Enums']['job_type'];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          job_id: string;
+          metadata?: Json;
+          payload?: Json;
+          priority?: Database['public']['Enums']['job_priority'];
+          result?: Json | null;
+          status?: Database['public']['Enums']['job_status'];
+          type?: Database['public']['Enums']['job_type'];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          job_id?: string;
+          metadata?: Json;
+          payload?: Json;
+          priority?: Database['public']['Enums']['job_priority'];
+          result?: Json | null;
+          status?: Database['public']['Enums']['job_status'];
+          type?: Database['public']['Enums']['job_type'];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'job_history_job_id_fkey';
+            columns: ['job_id'];
+            isOneToOne: false;
+            referencedRelation: 'jobs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -585,6 +674,19 @@ export interface Database {
         | 'refunded';
       shipping_method: 'courier' | 'international' | 'pickup' | 'post';
       user_location: 'EST' | 'EU' | 'LVA' | 'LTU' | 'OTHER';
+      job_status:
+        | 'pending'
+        | 'processing'
+        | 'completed'
+        | 'failed'
+        | 'cancelled';
+      job_priority: 'low' | 'normal' | 'high' | 'critical';
+      job_type:
+        | 'bgg_sync'
+        | 'bgg_bulk_sync'
+        | 'cache_warmup'
+        | 'user_collection_sync'
+        | 'search_prefetch';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -607,6 +709,8 @@ export type Message = Tables<'messages'>;
 export type UserRating = Tables<'user_ratings'>;
 export type Wishlist = Tables<'wishlists'>;
 export type Payment = Tables<'payments'>;
+export type Job = Tables<'jobs'>;
+export type JobHistory = Tables<'job_history'>;
 
 // Enum types
 export type ListingCondition = Enums<'listing_condition'>;
@@ -615,6 +719,9 @@ export type PaymentProvider = Enums<'payment_provider'>;
 export type PaymentStatus = Enums<'payment_status'>;
 export type ShippingMethod = Enums<'shipping_method'>;
 export type UserLocation = Enums<'user_location'>;
+export type JobStatus = Enums<'job_status'>;
+export type JobPriority = Enums<'job_priority'>;
+export type JobType = Enums<'job_type'>;
 
 // Insert types
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
@@ -628,6 +735,9 @@ export type UserRatingInsert =
 export type WishlistInsert =
   Database['public']['Tables']['wishlists']['Insert'];
 export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
+export type JobInsert = Database['public']['Tables']['jobs']['Insert'];
+export type JobHistoryInsert =
+  Database['public']['Tables']['job_history']['Insert'];
 
 // Update types
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
@@ -641,6 +751,9 @@ export type UserRatingUpdate =
 export type WishlistUpdate =
   Database['public']['Tables']['wishlists']['Update'];
 export type PaymentUpdate = Database['public']['Tables']['payments']['Update'];
+export type JobUpdate = Database['public']['Tables']['jobs']['Update'];
+export type JobHistoryUpdate =
+  Database['public']['Tables']['job_history']['Update'];
 
 // Utility types for common operations
 export type ProfileWithStats = Profile & {

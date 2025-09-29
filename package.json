@@ -14,7 +14,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "check-env": "node scripts/check-env.js"
+    "check-env": "node scripts/check-env.js",
+    "dev:jobs": "node scripts/start-job-worker.js",
+    "test:jobs": "node scripts/test-job-system.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -33,6 +35,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
     "tailwind-merge": "^2.0.0",
+    "uuid": "^9.0.1",
     "xml2js": "^0.6.2",
     "yup": "^1.4.0",
     "zod": "^3.22.4"
@@ -45,6 +48,7 @@
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.16",

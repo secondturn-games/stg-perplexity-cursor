@@ -247,7 +247,7 @@ async function handleBatchUpdate(searchParams: URLSearchParams) {
  * Handle batch update (POST)
  */
 async function handleBatchUpdatePost(body: any) {
-  const { gameIds } = body;
+  const { gameIds, priority = 'normal' } = body;
 
   if (!gameIds || !Array.isArray(gameIds) || gameIds.length === 0) {
     return NextResponse.json(
@@ -257,8 +257,32 @@ async function handleBatchUpdatePost(body: any) {
   }
 
   try {
-    // Batch update would be handled here if needed
-    return NextResponse.json({ message: 'Batch update not implemented yet' });
+    // Import job system
+    const { getJobWorker } = await import('@/lib/jobs');
+    const jobWorker = getJobWorker();
+    const jobQueue = jobWorker.getJobQueue();
+
+    // Enqueue bulk sync job
+    const jobId = await jobQueue.enqueue(
+      'bgg_bulk_sync',
+      {
+        gameIds,
+        batchSize: 3,
+        delayBetweenBatches: 2000,
+      },
+      priority,
+      {
+        requestedBy: 'api',
+        requestedAt: new Date().toISOString(),
+      }
+    );
+
+    return NextResponse.json({
+      message: 'Bulk sync job enqueued successfully',
+      jobId,
+      gameIds: gameIds.length,
+      status: 'pending',
+    });
   } catch (error) {
     return handleBGGError(error);
   }
@@ -350,14 +374,46 @@ async function syncPopularGames(options: any = {}) {
   ];
 
   const gameIds = popularGameIds.slice(offset, offset + limit);
-  // Batch update would be handled here if needed
-  const batchResult = { message: 'Batch update not implemented yet' };
 
-  return NextResponse.json({
-    type: 'popular',
-    batchResult,
-    synced: gameIds.length,
-  });
+  try {
+    // Import job system
+    const { getJobWorker } = await import('@/lib/jobs');
+    const jobWorker = getJobWorker();
+    const jobQueue = jobWorker.getJobQueue();
+
+    // Enqueue bulk sync job
+    const jobId = await jobQueue.enqueue(
+      'bgg_bulk_sync',
+      {
+        gameIds,
+        batchSize: 3,
+        delayBetweenBatches: 2000,
+      },
+      'normal',
+      {
+        requestedBy: 'api',
+        requestedAt: new Date().toISOString(),
+        syncType: 'popular',
+      }
+    );
+
+    return NextResponse.json({
+      type: 'popular',
+      jobId,
+      message: 'Popular games sync job enqueued successfully',
+      gameIds: gameIds.length,
+      status: 'pending',
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        type: 'popular',
+        error: 'Failed to enqueue popular games sync job',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
 }
 
 /**
