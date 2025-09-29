@@ -1,18 +1,21 @@
 /**
  * Repository Pattern Exports
  * Central export point for all repository interfaces and implementations
- * 
+ *
  * This module provides a clean interface for accessing repository implementations
  * throughout the application, following the Repository pattern for data access.
  */
 
 // Repository Interfaces
-export type { IGameRepository, IExtendedGameRepository } from './interfaces/IGameRepository';
-export type { 
-  ICacheRepository, 
-  IMemoryCacheRepository, 
-  CacheStats, 
-  CacheOptions 
+export type {
+  IGameRepository,
+  IExtendedGameRepository,
+} from './interfaces/IGameRepository';
+export type {
+  ICacheRepository,
+  IMemoryCacheRepository,
+  CacheStats,
+  CacheOptions,
 } from './interfaces/ICacheRepository';
 
 // Repository Implementations
@@ -20,9 +23,9 @@ export { SupabaseGameRepository } from './SupabaseGameRepository';
 export { MemoryCacheRepository } from './MemoryCacheRepository';
 
 // BGG Service with Repository Pattern
-export { 
+export {
   BGGServiceWithRepositories,
-  type BGGServiceConfig 
+  type BGGServiceConfig,
 } from '../bgg/BGGServiceWithRepositories';
 
 /**
@@ -32,26 +35,26 @@ export {
 
 /**
  * Create a game repository instance
- * 
+ *
  * @param options - Configuration options for the repository
  * @returns Configured game repository instance
- * 
+ *
  * @example
  * ```typescript
  * const gameRepo = createGameRepository();
  * const game = await gameRepo.findById('123');
  * ```
  */
-export function createGameRepository(): IGameRepository {
+export function createGameRepository(): IExtendedGameRepository {
   return new SupabaseGameRepository();
 }
 
 /**
  * Create a cache repository instance
- * 
+ *
  * @param options - Configuration options for the cache
  * @returns Configured cache repository instance
- * 
+ *
  * @example
  * ```typescript
  * const cacheRepo = createCacheRepository({
@@ -61,26 +64,30 @@ export function createGameRepository(): IGameRepository {
  * await cacheRepo.set('key', value);
  * ```
  */
-export function createCacheRepository(options?: CacheOptions): ICacheRepository {
+export function createCacheRepository(
+  options?: CacheOptions
+): ICacheRepository {
   return new MemoryCacheRepository(options);
 }
 
 /**
  * Create a BGG service with repository dependencies
- * 
+ *
  * @param options - Configuration options for the service
  * @returns Configured BGG service instance
- * 
+ *
  * @example
  * ```typescript
  * const bggService = createBGGServiceWithRepositories();
  * const results = await bggService.searchGames('Catan');
  * ```
  */
-export function createBGGServiceWithRepositories(options?: Partial<BGGServiceConfig>): BGGServiceWithRepositories {
+export function createBGGServiceWithRepositories(
+  options?: Partial<BGGServiceConfig>
+): BGGServiceWithRepositories {
   const gameRepository = options?.gameRepository || createGameRepository();
   const cacheRepository = options?.cacheRepository || createCacheRepository();
-  
+
   return new BGGServiceWithRepositories({
     gameRepository,
     cacheRepository,
@@ -109,11 +116,13 @@ export const DEFAULT_REPOSITORY_CONFIG = {
 export class RepositoryHealthChecker {
   /**
    * Check the health of a game repository
-   * 
+   *
    * @param repository - Game repository instance to check
    * @returns Promise resolving to health status
    */
-  static async checkGameRepository(repository: IGameRepository): Promise<{
+  static async checkGameRepository(
+    repository: IExtendedGameRepository
+  ): Promise<{
     healthy: boolean;
     error?: string;
     stats?: any;
@@ -134,7 +143,7 @@ export class RepositoryHealthChecker {
 
   /**
    * Check the health of a cache repository
-   * 
+   *
    * @param repository - Cache repository instance to check
    * @returns Promise resolving to health status
    */
@@ -159,13 +168,13 @@ export class RepositoryHealthChecker {
 
   /**
    * Check the health of all repositories
-   * 
+   *
    * @param gameRepository - Game repository instance
    * @param cacheRepository - Cache repository instance
    * @returns Promise resolving to combined health status
    */
   static async checkAllRepositories(
-    gameRepository: IGameRepository,
+    gameRepository: IExtendedGameRepository,
     cacheRepository: ICacheRepository
   ): Promise<{
     overall: boolean;
@@ -207,11 +216,13 @@ export class RepositoryError extends Error {
 export class RepositoryValidator {
   /**
    * Validate game repository interface compliance
-   * 
+   *
    * @param repository - Repository instance to validate
    * @returns True if repository implements all required methods
    */
-  static validateGameRepository(repository: any): repository is IGameRepository {
+  static validateGameRepository(
+    repository: any
+  ): repository is IExtendedGameRepository {
     const requiredMethods = [
       'findById',
       'findByBggId',
@@ -221,16 +232,20 @@ export class RepositoryValidator {
       'markStale',
     ];
 
-    return requiredMethods.every(method => typeof repository[method] === 'function');
+    return requiredMethods.every(
+      method => typeof repository[method] === 'function'
+    );
   }
 
   /**
    * Validate cache repository interface compliance
-   * 
+   *
    * @param repository - Repository instance to validate
    * @returns True if repository implements all required methods
    */
-  static validateCacheRepository(repository: any): repository is ICacheRepository {
+  static validateCacheRepository(
+    repository: any
+  ): repository is ICacheRepository {
     const requiredMethods = [
       'get',
       'set',
@@ -241,6 +256,8 @@ export class RepositoryValidator {
       'getStats',
     ];
 
-    return requiredMethods.every(method => typeof repository[method] === 'function');
+    return requiredMethods.every(
+      method => typeof repository[method] === 'function'
+    );
   }
 }

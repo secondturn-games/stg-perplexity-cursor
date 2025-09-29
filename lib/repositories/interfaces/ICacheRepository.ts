@@ -1,7 +1,7 @@
 /**
  * Cache Repository Interface
  * Defines the contract for caching operations with support for TTL and statistics
- * 
+ *
  * This interface abstracts caching implementations, allowing for flexible
  * cache backends (memory, Redis, etc.) while maintaining consistent behavior.
  */
@@ -46,17 +46,17 @@ export interface CacheOptions {
 
 /**
  * Generic cache repository interface
- * 
+ *
  * @template T - The type of data being cached
  */
 export interface ICacheRepository<T = any> {
   /**
    * Retrieve a value from the cache
-   * 
+   *
    * @param key - The cache key
    * @returns Promise resolving to the cached value or null if not found
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const cachedGame = await cache.get<Game>('game:123');
@@ -69,13 +69,13 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Store a value in the cache
-   * 
+   *
    * @param key - The cache key
    * @param value - The value to cache
    * @param ttl - Time-to-live in milliseconds (optional, uses default if not provided)
    * @returns Promise that resolves when the value is stored
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * await cache.set('game:123', gameData, 3600000); // Cache for 1 hour
@@ -86,11 +86,11 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Remove a value from the cache
-   * 
+   *
    * @param key - The cache key to remove
    * @returns Promise that resolves when the key is removed
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * await cache.delete('game:123');
@@ -101,11 +101,11 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Check if a key exists in the cache
-   * 
+   *
    * @param key - The cache key to check
    * @returns Promise resolving to true if key exists, false otherwise
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const exists = await cache.has('game:123');
@@ -118,11 +118,11 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Invalidate cache entries matching a pattern
-   * 
+   *
    * @param pattern - Pattern to match keys (supports wildcards like 'game:*')
    * @returns Promise resolving to the number of keys invalidated
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const invalidated = await cache.invalidate('game:*');
@@ -133,10 +133,10 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Clear all cache entries
-   * 
+   *
    * @returns Promise that resolves when cache is cleared
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * await cache.clear();
@@ -147,10 +147,10 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Get cache statistics
-   * 
+   *
    * @returns Promise resolving to cache statistics
    * @throws {Error} When statistics retrieval fails
-   * 
+   *
    * @example
    * ```typescript
    * const stats = await cache.getStats();
@@ -162,11 +162,11 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Get multiple values from the cache
-   * 
+   *
    * @param keys - Array of cache keys
    * @returns Promise resolving to object with key-value pairs
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const games = await cache.getMany(['game:123', 'game:456']);
@@ -177,12 +177,12 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Set multiple values in the cache
-   * 
+   *
    * @param entries - Object with key-value pairs to cache
    * @param ttl - Time-to-live in milliseconds (applied to all entries)
    * @returns Promise that resolves when all values are stored
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * await cache.setMany({
@@ -196,11 +196,11 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Get cache entry with metadata
-   * 
+   *
    * @param key - The cache key
    * @returns Promise resolving to cache entry with metadata or null
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const entry = await cache.getWithMetadata('game:123');
@@ -210,7 +210,9 @@ export interface ICacheRepository<T = any> {
    * }
    * ```
    */
-  getWithMetadata<K = T>(key: string): Promise<{
+  getWithMetadata<K = T>(
+    key: string
+  ): Promise<{
     value: K;
     expiresAt: Date;
     createdAt: Date;
@@ -219,12 +221,12 @@ export interface ICacheRepository<T = any> {
 
   /**
    * Extend the TTL of an existing cache entry
-   * 
+   *
    * @param key - The cache key
    * @param ttl - New time-to-live in milliseconds
    * @returns Promise resolving to true if key exists and was extended, false otherwise
    * @throws {Error} When cache operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const extended = await cache.extendTtl('game:123', 7200000); // Extend by 2 hours
@@ -243,9 +245,9 @@ export interface ICacheRepository<T = any> {
 export interface IMemoryCacheRepository<T = any> extends ICacheRepository<T> {
   /**
    * Get memory usage information
-   * 
+   *
    * @returns Promise resolving to memory usage details
-   * 
+   *
    * @example
    * ```typescript
    * const memoryInfo = await memoryCache.getMemoryInfo();
@@ -261,9 +263,9 @@ export interface IMemoryCacheRepository<T = any> extends ICacheRepository<T> {
 
   /**
    * Force garbage collection (if supported by the runtime)
-   * 
+   *
    * @returns Promise that resolves when GC is complete
-   * 
+   *
    * @example
    * ```typescript
    * await memoryCache.forceGC();
@@ -274,22 +276,26 @@ export interface IMemoryCacheRepository<T = any> extends ICacheRepository<T> {
 
   /**
    * Get cache entries by pattern with metadata
-   * 
+   *
    * @param pattern - Pattern to match keys
    * @returns Promise resolving to array of cache entries with metadata
-   * 
+   *
    * @example
    * ```typescript
    * const gameEntries = await memoryCache.getEntriesWithMetadata('game:*');
    * console.log(`Found ${gameEntries.length} game cache entries`);
    * ```
    */
-  getEntriesWithMetadata<K = T>(pattern: string): Promise<Array<{
-    key: string;
-    value: K;
-    expiresAt: Date;
-    createdAt: Date;
-    hitCount: number;
-    size: number;
-  }>>;
+  getEntriesWithMetadata<K = T>(
+    pattern: string
+  ): Promise<
+    Array<{
+      key: string;
+      value: K;
+      expiresAt: Date;
+      createdAt: Date;
+      hitCount: number;
+      size: number;
+    }>
+  >;
 }

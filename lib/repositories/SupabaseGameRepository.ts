@@ -1,35 +1,40 @@
 /**
  * Supabase Game Repository Implementation
  * Concrete implementation of IGameRepository using Supabase as the data store
- * 
+ *
  * This repository handles all game-related database operations including
  * CRUD operations, search functionality, and BGG data synchronization.
  */
 
 import { createServerComponentClient } from '@/lib/supabase';
-import type { IGameRepository } from './interfaces/IGameRepository';
+import type { IExtendedGameRepository } from './interfaces/IGameRepository';
 import type { BGGGameDetails } from '@/types/bgg.types';
-import type { Game, GameInsert, GameUpdate, GameSearchFilters } from '@/types/database.types';
+import type {
+  Game,
+  GameInsert,
+  GameUpdate,
+  GameSearchFilters,
+} from '@/types/database.types';
 
 /**
  * Supabase implementation of the game repository
- * 
+ *
  * @example
  * ```typescript
  * const gameRepo = new SupabaseGameRepository();
  * const game = await gameRepo.findById('123e4567-e89b-12d3-a456-426614174000');
  * ```
  */
-export class SupabaseGameRepository implements IGameRepository<Game> {
+export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
   private readonly supabase = createServerComponentClient();
 
   /**
    * Find a game by its unique identifier
-   * 
+   *
    * @param id - The game's unique identifier (UUID)
    * @returns Promise resolving to the game entity or null if not found
    * @throws {Error} When database operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const game = await gameRepo.findById('123e4567-e89b-12d3-a456-426614174000');
@@ -56,17 +61,19 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
 
       return data as Game;
     } catch (error) {
-      throw new Error(`Database error in findById: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in findById: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Find a game by its BoardGameGeek ID
-   * 
+   *
    * @param bggId - The BGG numeric identifier
    * @returns Promise resolving to the game entity or null if not found
    * @throws {Error} When database operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const game = await gameRepo.findByBggId(12345);
@@ -88,22 +95,26 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
           // No rows found
           return null;
         }
-        throw new Error(`Failed to find game by BGG ID ${bggId}: ${error.message}`);
+        throw new Error(
+          `Failed to find game by BGG ID ${bggId}: ${error.message}`
+        );
       }
 
       return data as Game;
     } catch (error) {
-      throw new Error(`Database error in findByBggId: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in findByBggId: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Search for games using various filters
-   * 
+   *
    * @param filters - Search criteria including categories, mechanics, player counts, etc.
    * @returns Promise resolving to an array of matching games
    * @throws {Error} When database operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const results = await gameRepo.search({
@@ -117,9 +128,7 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
    */
   async search(filters: GameSearchFilters): Promise<Game[]> {
     try {
-      let query = this.supabase
-        .from('games')
-        .select('*');
+      let query = this.supabase.from('games').select('*');
 
       // Apply filters
       if (filters.categories && filters.categories.length > 0) {
@@ -168,7 +177,7 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
 
       // Order by BGG rating (highest first) and then by title
       query = query
-        .order('bgg_rating', { ascending: false, nullsLast: true })
+        .order('bgg_rating', { ascending: false })
         .order('title', { ascending: true });
 
       const { data, error } = await query;
@@ -179,17 +188,19 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
 
       return (data || []) as Game[];
     } catch (error) {
-      throw new Error(`Database error in search: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in search: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Insert or update a game from BGG data
-   * 
+   *
    * @param game - BGG game details to upsert
    * @returns Promise resolving to the upserted game entity
    * @throws {Error} When database operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const bggGame = await bggService.getGameDetails('12345');
@@ -229,13 +240,14 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
       let result;
 
       if (existingGame) {
-        // Update existing game
-        const { data, error } = await this.supabase
+        // Update existing game - exclude fields that shouldn't be updated
+        const { created_at, ...updateData } = gameData;
+        const { data, error } = await (this.supabase
           .from('games')
-          .update(gameData as GameUpdate)
+          .update(updateData)
           .eq('id', existingGame.id)
           .select()
-          .single();
+          .single() as any);
 
         if (error) {
           throw new Error(`Failed to update game: ${error.message}`);
@@ -259,17 +271,19 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
 
       return result as Game;
     } catch (error) {
-      throw new Error(`Database error in upsert: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in upsert: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Bulk insert or update multiple games from BGG data
-   * 
+   *
    * @param games - Array of BGG game details to upsert
    * @returns Promise resolving to array of upserted game entities
    * @throws {Error} When database operation fails
-   * 
+   *
    * @example
    * ```typescript
    * const bggGames = await Promise.all([
@@ -289,7 +303,7 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
       for (let i = 0; i < games.length; i += batchSize) {
         const batch = games.slice(i, i + batchSize);
         const batchPromises = batch.map(game => this.upsert(game));
-        
+
         try {
           const batchResults = await Promise.all(batchPromises);
           results.push(...batchResults);
@@ -301,17 +315,19 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
 
       return results;
     } catch (error) {
-      throw new Error(`Database error in bulkUpsert: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in bulkUpsert: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Mark games as stale (requiring BGG sync)
-   * 
+   *
    * @param gameIds - Array of game IDs to mark as stale
    * @returns Promise that resolves when operation completes
    * @throws {Error} When database operation fails
-   * 
+   *
    * @example
    * ```typescript
    * await gameRepo.markStale(['123e4567-e89b-12d3-a456-426614174000']);
@@ -330,16 +346,18 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
         throw new Error(`Failed to mark games as stale: ${error.message}`);
       }
     } catch (error) {
-      throw new Error(`Database error in markStale: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in markStale: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Get games that require BGG synchronization
-   * 
+   *
    * @param limit - Maximum number of games to return
    * @returns Promise resolving to array of games needing sync
-   * 
+   *
    * @example
    * ```typescript
    * const staleGames = await gameRepo.getStaleGames(10);
@@ -353,7 +371,10 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
       const { data, error } = await this.supabase
         .from('games')
         .select('*')
-        .or('last_bgg_sync.is.null,last_bgg_sync.lt.' + new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .or(
+          'last_bgg_sync.is.null,last_bgg_sync.lt.' +
+            new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+        )
         .order('created_at', { ascending: true })
         .limit(limit);
 
@@ -363,16 +384,18 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
 
       return (data || []) as Game[];
     } catch (error) {
-      throw new Error(`Database error in getStaleGames: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in getStaleGames: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Update game's last BGG sync timestamp
-   * 
+   *
    * @param gameId - The game's unique identifier
    * @returns Promise that resolves when operation completes
-   * 
+   *
    * @example
    * ```typescript
    * await gameRepo.updateLastSync('123e4567-e89b-12d3-a456-426614174000');
@@ -386,18 +409,22 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
         .eq('id', gameId);
 
       if (error) {
-        throw new Error(`Failed to update last sync for game ${gameId}: ${error.message}`);
+        throw new Error(
+          `Failed to update last sync for game ${gameId}: ${error.message}`
+        );
       }
     } catch (error) {
-      throw new Error(`Database error in updateLastSync: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in updateLastSync: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Get game statistics
-   * 
+   *
    * @returns Promise resolving to game statistics object
-   * 
+   *
    * @example
    * ```typescript
    * const stats = await gameRepo.getStats();
@@ -418,17 +445,24 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
         .select('*', { count: 'exact', head: true });
 
       if (totalError) {
-        throw new Error(`Failed to get total games count: ${totalError.message}`);
+        throw new Error(
+          `Failed to get total games count: ${totalError.message}`
+        );
       }
 
       // Get games needing sync count
       const { count: gamesNeedingSync, error: staleError } = await this.supabase
         .from('games')
         .select('*', { count: 'exact', head: true })
-        .or('last_bgg_sync.is.null,last_bgg_sync.lt.' + new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+        .or(
+          'last_bgg_sync.is.null,last_bgg_sync.lt.' +
+            new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+        );
 
       if (staleError) {
-        throw new Error(`Failed to get stale games count: ${staleError.message}`);
+        throw new Error(
+          `Failed to get stale games count: ${staleError.message}`
+        );
       }
 
       // Get average rating
@@ -441,9 +475,11 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
         throw new Error(`Failed to get rating data: ${ratingError.message}`);
       }
 
-      const averageRating = ratingData && ratingData.length > 0
-        ? ratingData.reduce((sum, game) => sum + (game.bgg_rating || 0), 0) / ratingData.length
-        : 0;
+      const averageRating =
+        ratingData && ratingData.length > 0
+          ? ratingData.reduce((sum, game) => sum + (game.bgg_rating || 0), 0) /
+            ratingData.length
+          : 0;
 
       // Get most popular categories
       const { data: categoryData, error: categoryError } = await this.supabase
@@ -451,7 +487,9 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
         .select('categories');
 
       if (categoryError) {
-        throw new Error(`Failed to get category data: ${categoryError.message}`);
+        throw new Error(
+          `Failed to get category data: ${categoryError.message}`
+        );
       }
 
       const categoryCounts = new Map<string, number>();
@@ -473,7 +511,9 @@ export class SupabaseGameRepository implements IGameRepository<Game> {
         mostPopularCategories,
       };
     } catch (error) {
-      throw new Error(`Database error in getStats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Database error in getStats: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }

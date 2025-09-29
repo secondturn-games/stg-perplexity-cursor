@@ -1,7 +1,7 @@
 /**
  * BGG Service with Repository Pattern
  * Updated BGG service that uses dependency injection for repositories
- * 
+ *
  * This service orchestrates all BGG operations while using injected repositories
  * for data persistence and caching, following the Repository pattern for better
  * testability and maintainability.
@@ -9,7 +9,7 @@
 
 import { BGGAPIClient } from './BGGAPIClient';
 import { SearchEngine } from './SearchEngine';
-import type { IGameRepository } from '@/lib/repositories/interfaces/IGameRepository';
+import type { IExtendedGameRepository } from '@/lib/repositories/interfaces/IGameRepository';
 import type { ICacheRepository } from '@/lib/repositories/interfaces/ICacheRepository';
 import {
   BGGSearchResponse,
@@ -26,7 +26,7 @@ import { getBGGConfig } from './config';
  * Configuration interface for BGG service dependencies
  */
 export interface BGGServiceConfig {
-  gameRepository: IGameRepository<Game>;
+  gameRepository: IExtendedGameRepository<Game>;
   cacheRepository: ICacheRepository;
   apiClient?: BGGAPIClient;
   searchEngine?: SearchEngine;
@@ -35,10 +35,10 @@ export interface BGGServiceConfig {
 
 /**
  * BGG Service with Repository Pattern Implementation
- * 
+ *
  * This service uses dependency injection to receive repository instances,
  * making it more testable and flexible than the original implementation.
- * 
+ *
  * @example
  * ```typescript
  * const gameRepo = new SupabaseGameRepository();
@@ -47,12 +47,12 @@ export interface BGGServiceConfig {
  *   gameRepository: gameRepo,
  *   cacheRepository: cacheRepo
  * });
- * 
+ *
  * const results = await bggService.searchGames('Catan');
  * ```
  */
 export class BGGServiceWithRepositories {
-  private readonly gameRepository: IGameRepository<Game>;
+  private readonly gameRepository: IExtendedGameRepository<Game>;
   private readonly cacheRepository: ICacheRepository;
   private readonly apiClient: BGGAPIClient;
   private readonly searchEngine: SearchEngine;
@@ -62,7 +62,7 @@ export class BGGServiceWithRepositories {
     this.gameRepository = dependencies.gameRepository;
     this.cacheRepository = dependencies.cacheRepository;
     this.config = dependencies.config || getBGGConfig();
-    
+
     // Initialize API client and search engine
     this.apiClient = dependencies.apiClient || new BGGAPIClient(this.config);
     this.searchEngine = dependencies.searchEngine || new SearchEngine();
@@ -70,11 +70,11 @@ export class BGGServiceWithRepositories {
 
   /**
    * Search for games with caching and database integration
-   * 
+   *
    * @param query - Search query string
    * @param filters - Search filters
    * @returns Promise resolving to search results
-   * 
+   *
    * @example
    * ```typescript
    * const results = await bggService.searchGames('Catan', {
@@ -104,16 +104,18 @@ export class BGGServiceWithRepositories {
     }
 
     const normalizedQuery = query.trim();
-    const filterKey = Object.keys(filters).length > 0
-      ? Object.entries(filters)
-          .map(([k, v]) => `${k}:${v}`)
-          .join(',')
-      : 'default';
+    const filterKey =
+      Object.keys(filters).length > 0
+        ? Object.entries(filters)
+            .map(([k, v]) => `${k}:${v}`)
+            .join(',')
+        : 'default';
     const cacheKey = `search:${normalizedQuery}:${filterKey}`;
 
     // Check cache first
     try {
-      const cached = await this.cacheRepository.get<BGGSearchResponse>(cacheKey);
+      const cached =
+        await this.cacheRepository.get<BGGSearchResponse>(cacheKey);
       if (cached) {
         cacheHit = true;
         return {
@@ -171,13 +173,14 @@ export class BGGServiceWithRepositories {
         };
       } else {
         // Single type search
-        const gameType = filters.gameType === 'base-game'
-          ? 'boardgame'
-          : filters.gameType === 'expansion'
-            ? 'boardgameexpansion'
-            : filters.gameType === 'accessory'
-              ? 'boardgameaccessory'
-              : 'boardgame';
+        const gameType =
+          filters.gameType === 'base-game'
+            ? 'boardgame'
+            : filters.gameType === 'expansion'
+              ? 'boardgameexpansion'
+              : filters.gameType === 'accessory'
+                ? 'boardgameaccessory'
+                : 'boardgame';
 
         const typedSearchResult = await this.performTypedSearch(
           normalizedQuery,
@@ -208,7 +211,11 @@ export class BGGServiceWithRepositories {
 
       // Cache the result
       try {
-        await this.cacheRepository.set(cacheKey, results, this.config.cache?.ttl);
+        await this.cacheRepository.set(
+          cacheKey,
+          results,
+          this.config.cache?.ttl
+        );
       } catch (error) {
         console.warn('Failed to cache search results:', error);
       }
@@ -225,10 +232,10 @@ export class BGGServiceWithRepositories {
 
   /**
    * Get game details with database caching
-   * 
+   *
    * @param gameId - BGG game ID
    * @returns Promise resolving to game details
-   * 
+   *
    * @example
    * ```typescript
    * const gameDetails = await bggService.getGameDetails('12345');
@@ -237,7 +244,7 @@ export class BGGServiceWithRepositories {
    */
   async getGameDetails(gameId: string): Promise<BGGGameDetails> {
     const cacheKey = `game:${gameId}`;
-    
+
     // Check cache first
     try {
       const cached = await this.cacheRepository.get<BGGGameDetails>(cacheKey);
@@ -251,12 +258,18 @@ export class BGGServiceWithRepositories {
 
     // Check database for existing game
     try {
-      const existingGame = await this.gameRepository.findByBggId(parseInt(gameId));
+      const existingGame = await this.gameRepository.findByBggId(
+        parseInt(gameId)
+      );
       if (existingGame && existingGame.last_bgg_sync) {
         // Game exists and was synced recently, use cached version
         const gameDetails = this.mapGameToBGGDetails(existingGame);
         try {
-          await this.cacheRepository.set(cacheKey, gameDetails, this.config.cache?.ttl);
+          await this.cacheRepository.set(
+            cacheKey,
+            gameDetails,
+            this.config.cache?.ttl
+          );
         } catch (error) {
           console.warn('Failed to cache game details:', error);
         }
@@ -295,7 +308,11 @@ export class BGGServiceWithRepositories {
 
         // Cache the result
         try {
-          await this.cacheRepository.set(cacheKey, enhancedResult, this.config.cache?.ttl);
+          await this.cacheRepository.set(
+            cacheKey,
+            enhancedResult,
+            this.config.cache?.ttl
+          );
         } catch (error) {
           console.warn('Failed to cache game details:', error);
         }
@@ -337,10 +354,10 @@ export class BGGServiceWithRepositories {
 
   /**
    * Get user collection with caching
-   * 
+   *
    * @param username - BGG username
    * @returns Promise resolving to collection response
-   * 
+   *
    * @example
    * ```typescript
    * const collection = await bggService.getUserCollection('username');
@@ -349,10 +366,11 @@ export class BGGServiceWithRepositories {
    */
   async getUserCollection(username: string): Promise<BGGCollectionResponse> {
     const cacheKey = `collection:${username}`;
-    
+
     // Check cache first
     try {
-      const cached = await this.cacheRepository.get<BGGCollectionResponse>(cacheKey);
+      const cached =
+        await this.cacheRepository.get<BGGCollectionResponse>(cacheKey);
       if (cached) {
         return cached;
       }
@@ -367,7 +385,11 @@ export class BGGServiceWithRepositories {
 
       // Cache the result
       try {
-        await this.cacheRepository.set(cacheKey, result, this.config.cache?.ttl);
+        await this.cacheRepository.set(
+          cacheKey,
+          result,
+          this.config.cache?.ttl
+        );
       } catch (error) {
         console.warn('Failed to cache collection:', error);
       }
@@ -381,10 +403,10 @@ export class BGGServiceWithRepositories {
 
   /**
    * Sync games from BGG to database
-   * 
+   *
    * @param gameIds - Array of BGG game IDs to sync
    * @returns Promise resolving to array of synced games
-   * 
+   *
    * @example
    * ```typescript
    * const syncedGames = await bggService.syncGamesToDatabase(['12345', '67890']);
@@ -396,7 +418,7 @@ export class BGGServiceWithRepositories {
       console.log(`🔄 Starting sync of ${gameIds.length} games to database`);
 
       const bggGames: BGGGameDetails[] = [];
-      
+
       // Fetch game details from BGG API
       for (const gameId of gameIds) {
         try {
@@ -409,20 +431,24 @@ export class BGGServiceWithRepositories {
 
       // Bulk upsert to database
       const syncedGames = await this.gameRepository.bulkUpsert(bggGames);
-      
-      console.log(`✅ Successfully synced ${syncedGames.length} games to database`);
+
+      console.log(
+        `✅ Successfully synced ${syncedGames.length} games to database`
+      );
       return syncedGames;
     } catch (error) {
-      throw new Error(`Failed to sync games to database: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to sync games to database: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Get stale games that need BGG synchronization
-   * 
+   *
    * @param limit - Maximum number of games to return
    * @returns Promise resolving to array of stale games
-   * 
+   *
    * @example
    * ```typescript
    * const staleGames = await bggService.getStaleGames(10);
@@ -433,15 +459,17 @@ export class BGGServiceWithRepositories {
     try {
       return await this.gameRepository.getStaleGames(limit);
     } catch (error) {
-      throw new Error(`Failed to get stale games: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get stale games: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Get cache statistics
-   * 
+   *
    * @returns Promise resolving to cache statistics
-   * 
+   *
    * @example
    * ```typescript
    * const stats = await bggService.getCacheStats();
@@ -469,7 +497,7 @@ export class BGGServiceWithRepositories {
 
   /**
    * Clear cache
-   * 
+   *
    * @example
    * ```typescript
    * await bggService.clearCache();
@@ -487,7 +515,7 @@ export class BGGServiceWithRepositories {
 
   /**
    * Clear cache for specific pattern
-   * 
+   *
    * @param pattern - Pattern to match keys
    * @example
    * ```typescript
@@ -498,7 +526,9 @@ export class BGGServiceWithRepositories {
   async clearCachePattern(pattern: string): Promise<void> {
     try {
       const invalidated = await this.cacheRepository.invalidate(pattern);
-      console.log(`✅ Invalidated ${invalidated} cache entries matching pattern: ${pattern}`);
+      console.log(
+        `✅ Invalidated ${invalidated} cache entries matching pattern: ${pattern}`
+      );
     } catch (error) {
       console.warn('Failed to clear cache pattern:', error);
     }
