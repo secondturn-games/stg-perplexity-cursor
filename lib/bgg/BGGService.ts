@@ -338,7 +338,7 @@ export class BGGService {
           BGGEventFactory.createGameDetailsFetchedEvent(
             gameId,
             enhancedResult.name,
-            enhancedResult.type || 'boardgame',
+            'boardgame', // Default type since BGGGameDetails doesn't have a type property
             {
               queryTime: Date.now() - startTime,
               cacheHit: false,

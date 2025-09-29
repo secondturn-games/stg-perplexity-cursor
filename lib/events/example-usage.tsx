@@ -27,7 +27,7 @@ export function EventSystemExample() {
   });
 
   // Track all BGG events
-  useBGGEventHandler((event: BGGEvent) => {
+  useBGGEventHandler('game.searched', (event: BGGEvent) => {
     setEvents(prev =>
       [
         ...prev,
@@ -248,7 +248,7 @@ export function SearchAnalyticsComponent() {
   });
 
   // Listen to search events
-  useBGGEventHandler((event: BGGEvent) => {
+  useBGGEventHandler('game.searched', (event: BGGEvent) => {
     if (event.eventType === 'game.searched') {
       setSearchStats(prev => ({
         totalSearches: prev.totalSearches + 1,
@@ -293,7 +293,7 @@ export function ErrorMonitoringComponent() {
   >([]);
 
   // Listen to error events
-  useBGGEventHandler((event: BGGEvent) => {
+  useBGGEventHandler('game.searched', (event: BGGEvent) => {
     if (
       event.eventType.includes('error') ||
       event.eventType.includes('failed')
@@ -303,7 +303,10 @@ export function ErrorMonitoringComponent() {
           ...prev,
           {
             type: event.eventType,
-            message: event.data.error?.message || 'Unknown error',
+            message:
+              'error' in event.data
+                ? event.data.error?.message || 'Unknown error'
+                : 'Event processed',
             timestamp: event.timestamp,
           },
         ].slice(-10)

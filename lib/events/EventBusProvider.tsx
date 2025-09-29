@@ -11,6 +11,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
 } from 'react';
 import { EventBus, EventHandler, eventBus } from './EventBus';
 import { BGGEvent } from './BGGEvents';
@@ -183,7 +184,7 @@ export function useEventHandler<T>(
   useEffect(() => {
     on(eventName, handler);
     return () => off(eventName, handler);
-  }, [eventName, on, off, ...deps]);
+  }, [eventName, on, off, handler]);
 }
 
 // Hook for one-time event handling
@@ -196,7 +197,7 @@ export function useOnceEventHandler<T>(
 
   useEffect(() => {
     once(eventName, handler);
-  }, [eventName, once, ...deps]);
+  }, [eventName, once, handler]);
 }
 
 // Hook for event emission
@@ -211,7 +212,7 @@ export function useBGGEventHandler<T extends BGGEvent>(
   handler: EventHandler<T>,
   deps: React.DependencyList = []
 ) {
-  useEventHandler(eventType, handler, deps);
+  useEventHandler(eventType, handler);
 }
 
 // Hook for BGG-specific one-time events
@@ -220,7 +221,7 @@ export function useBGGOnceEventHandler<T extends BGGEvent>(
   handler: EventHandler<T>,
   deps: React.DependencyList = []
 ) {
-  useOnceEventHandler(eventType, handler, deps);
+  useOnceEventHandler(eventType, handler);
 }
 
 // Hook for analytics events
@@ -228,11 +229,10 @@ export function useAnalyticsEventHandler(
   handler: EventHandler<BGGEvent>,
   deps: React.DependencyList = []
 ) {
-  const analyticsEvents = [
-    'analytics.search',
-    'analytics.game.view',
-    'analytics.performance',
-  ];
+  const analyticsEvents = useMemo(
+    () => ['analytics.search', 'analytics.game.view', 'analytics.performance'],
+    []
+  );
 
   useEffect(() => {
     analyticsEvents.forEach(eventType => {
@@ -244,7 +244,7 @@ export function useAnalyticsEventHandler(
         eventBus.off(eventType, handler);
       });
     };
-  }, [handler, ...deps]);
+  }, [handler, analyticsEvents]);
 }
 
 // Hook for error events
@@ -252,13 +252,16 @@ export function useErrorEventHandler(
   handler: EventHandler<BGGEvent>,
   deps: React.DependencyList = []
 ) {
-  const errorEvents = [
-    'game.search.failed',
-    'game.details.failed',
-    'collection.failed',
-    'bgg.api.error',
-    'bgg.api.rate_limited',
-  ];
+  const errorEvents = useMemo(
+    () => [
+      'game.search.failed',
+      'game.details.failed',
+      'collection.failed',
+      'bgg.api.error',
+      'bgg.api.rate_limited',
+    ],
+    []
+  );
 
   useEffect(() => {
     errorEvents.forEach(eventType => {
@@ -270,7 +273,7 @@ export function useErrorEventHandler(
         eventBus.off(eventType, handler);
       });
     };
-  }, [handler, ...deps]);
+  }, [handler, errorEvents]);
 }
 
 // Hook for cache events
@@ -278,12 +281,10 @@ export function useCacheEventHandler(
   handler: EventHandler<BGGEvent>,
   deps: React.DependencyList = []
 ) {
-  const cacheEvents = [
-    'game.cached',
-    'cache.hit',
-    'cache.miss',
-    'cache.evicted',
-  ];
+  const cacheEvents = useMemo(
+    () => ['game.cached', 'cache.hit', 'cache.miss', 'cache.evicted'],
+    []
+  );
 
   useEffect(() => {
     cacheEvents.forEach(eventType => {
@@ -295,7 +296,7 @@ export function useCacheEventHandler(
         eventBus.off(eventType, handler);
       });
     };
-  }, [handler, ...deps]);
+  }, [handler, cacheEvents]);
 }
 
 // Export types

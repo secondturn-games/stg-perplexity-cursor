@@ -70,7 +70,7 @@ export class GameCacheHandler {
       });
 
       // Update cache statistics
-      this.updateCacheStats(cacheKey, 'cached', size);
+      this.updateCacheStats(cacheKey, 'cached');
     } catch (error) {
       console.error(
         'GameCacheHandler: Error handling game cached event:',
@@ -396,7 +396,9 @@ export class GameCacheHandler {
    * Sanitize query for logging
    */
   private sanitizeQuery(query?: string): string | undefined {
-    if (!query) return undefined;
+    if (!query) {
+      return undefined;
+    }
     return query.replace(/[<>\"']/g, '').substring(0, 100);
   }
 

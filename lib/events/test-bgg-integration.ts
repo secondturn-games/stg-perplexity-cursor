@@ -164,8 +164,8 @@ async function testSearchEvents(): Promise<void> {
       '  🔍 Search event structure:',
       JSON.stringify(searchEvent, null, 2)
     );
-    if (!searchEvent.data.query || !searchEvent.data.results) {
-      console.error('  ❌ Search event data structure:', searchEvent.data);
+    if (!searchEvent || !searchEvent.data.query || !searchEvent.data.results) {
+      console.error('  ❌ Search event data structure:', searchEvent?.data);
       throw new Error('Search event data structure is invalid');
     }
 
@@ -200,7 +200,11 @@ async function testGameDetailsEvents(): Promise<void> {
 
     // Verify event data structure
     const detailsEvent = detailsEvents[0];
-    if (!detailsEvent.data.gameId || !detailsEvent.data.gameName) {
+    if (
+      !detailsEvent ||
+      !detailsEvent.data.gameId ||
+      !detailsEvent.data.gameName
+    ) {
       throw new Error('Game details event data structure is invalid');
     }
 
@@ -277,7 +281,7 @@ async function testErrorEvents(): Promise<void> {
 
     // Verify error event data structure
     const errorEvent = errorEvents[0];
-    if (!errorEvent.data.error || !errorEvent.data.error.code) {
+    if (!errorEvent || !errorEvent.data.error || !errorEvent.data.error.code) {
       throw new Error('Error event data structure is invalid');
     }
 
@@ -296,8 +300,13 @@ async function testEventHandlerIntegration(): Promise<void> {
     console.log('  🔧 Testing event handler integration...');
 
     // Import handlers
-    const { gameAnalyticsHandler, gameCacheHandler, errorReportingHandler } =
-      await import('./handlers');
+    const { gameAnalyticsHandler } = await import(
+      './handlers/GameAnalyticsHandler'
+    );
+    const { gameCacheHandler } = await import('./handlers/GameCacheHandler');
+    const { errorReportingHandler } = await import(
+      './handlers/ErrorReportingHandler'
+    );
 
     // Emit test events
     const searchEvent = {

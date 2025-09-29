@@ -317,7 +317,9 @@ export class GameAnalyticsHandler {
    * Sanitize user agent for logging
    */
   private sanitizeUserAgent(userAgent?: string): string | undefined {
-    if (!userAgent) return undefined;
+    if (!userAgent) {
+      return undefined;
+    }
     return userAgent.substring(0, 200);
   }
 
@@ -343,6 +345,10 @@ export class GameAnalyticsHandler {
         const [gameId, source] = key.split('_');
         return { gameId, source, count };
       })
+      .filter(
+        (item): item is { gameId: string; source: string; count: number } =>
+          item.gameId !== undefined && item.source !== undefined
+      )
       .sort((a, b) => b.count - a.count)
       .slice(0, 50); // Top 50 game views
 

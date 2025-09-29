@@ -63,9 +63,9 @@ export class ErrorReportingHandler {
         operation,
         errorCode: error.code,
         errorMessage: error.message,
-        userMessage: error.userMessage,
+        ...(error.userMessage && { userMessage: error.userMessage }),
         retryable,
-        retryAfter: error.retryAfter,
+        ...(error.retryAfter && { retryAfter: error.retryAfter }),
         context: {
           request,
           response,
@@ -148,7 +148,7 @@ export class ErrorReportingHandler {
         operation: 'searchGames',
         errorCode: error.code,
         errorMessage: error.message,
-        userMessage: error.userMessage,
+        ...(error.userMessage && { userMessage: error.userMessage }),
         retryable,
         context: {
           query: this.sanitizeQuery(query),
@@ -189,7 +189,7 @@ export class ErrorReportingHandler {
           operation: 'getGameDetails',
           errorCode: error.code,
           errorMessage: error.message,
-          userMessage: error.userMessage,
+          ...(error.userMessage && { userMessage: error.userMessage }),
           retryable,
           context: {
             gameId,
@@ -235,7 +235,7 @@ export class ErrorReportingHandler {
         operation: 'getUserCollection',
         errorCode: error.code,
         errorMessage: error.message,
-        userMessage: error.userMessage,
+        ...(error.userMessage && { userMessage: error.userMessage }),
         retryable,
         context: {
           username: this.sanitizeUsername(username),
@@ -345,8 +345,8 @@ export class ErrorReportingHandler {
     console.warn(`Rate limit exceeded for operation: ${errorReport.operation}`);
 
     // Track rate limiting patterns
-    if (errorReport.context.request) {
-      console.warn('Request details:', errorReport.context.request);
+    if (errorReport.context['request']) {
+      console.warn('Request details:', errorReport.context['request']);
     }
   }
 

@@ -316,7 +316,7 @@ export class BGGEventFactory {
         error: {
           code: error.code,
           message: error.message,
-          userMessage: error.userMessage,
+          ...(error.userMessage && { userMessage: error.userMessage }),
         },
         retryable:
           error.code === 'RATE_LIMIT' || error.code === 'API_UNAVAILABLE',
@@ -367,8 +367,8 @@ export class BGGEventFactory {
       data: {
         cacheKey,
         dataType,
-        gameId,
-        query,
+        ...(gameId && { gameId }),
+        ...(query && { query }),
         ttl,
         size,
       },
@@ -391,11 +391,11 @@ export class BGGEventFactory {
         error: {
           code: error.code,
           message: error.message,
-          userMessage: error.userMessage,
-          retryAfter: error.retryAfter,
+          ...(error.userMessage && { userMessage: error.userMessage }),
+          ...(error.retryAfter && { retryAfter: error.retryAfter }),
         },
-        request,
-        response,
+        request: request || {},
+        ...(response && { response }),
         retryable:
           error.code === 'RATE_LIMIT' || error.code === 'API_UNAVAILABLE',
       },
@@ -417,8 +417,8 @@ export class BGGEventFactory {
       data: {
         cacheKey,
         dataType,
-        gameId,
-        query,
+        ...(gameId && { gameId }),
+        ...(query && { query }),
         age,
       },
     };
@@ -438,8 +438,8 @@ export class BGGEventFactory {
       data: {
         cacheKey,
         dataType,
-        gameId,
-        query,
+        ...(gameId && { gameId }),
+        ...(query && { query }),
       },
     };
   }
@@ -486,8 +486,8 @@ export class BGGEventFactory {
         searchStrategy,
         queryTime,
         cacheHit,
-        userAgent,
-        sessionId,
+        ...(userAgent && { userAgent }),
+        ...(sessionId && { sessionId }),
       },
     };
   }
@@ -509,9 +509,9 @@ export class BGGEventFactory {
         gameId,
         gameName,
         source,
-        viewTime,
-        userAgent,
-        sessionId,
+        ...(viewTime && { viewTime }),
+        ...(userAgent && { userAgent }),
+        ...(sessionId && { sessionId }),
       },
     };
   }

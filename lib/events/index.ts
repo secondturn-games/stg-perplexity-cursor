@@ -4,8 +4,8 @@
  */
 
 // Core event bus
-export { EventBus, EventHandler, eventBus } from './EventBus';
-export type { EventBusOptions } from './EventBus';
+export { EventBus, eventBus } from './EventBus';
+export type { EventHandler, EventBusOptions } from './EventBus';
 
 // BGG events
 export {
