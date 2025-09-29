@@ -6,6 +6,7 @@
 import { BGGAPIClient } from './BGGAPIClient';
 import { CacheManager } from './CacheManager';
 import { SearchEngine } from './SearchEngine';
+import { SupabaseGameRepository } from '../repositories/SupabaseGameRepository';
 import {
   BGGSearchResponse,
   BGGGameDetails,
@@ -27,6 +28,7 @@ export class BGGService {
   private apiClient: BGGAPIClient;
   private cacheManager: CacheManager;
   private searchEngine: SearchEngine;
+  private gameRepository: SupabaseGameRepository;
   private config: any;
 
   constructor() {
@@ -34,6 +36,7 @@ export class BGGService {
     this.apiClient = new BGGAPIClient(this.config);
     this.cacheManager = new CacheManager(this.config);
     this.searchEngine = new SearchEngine();
+    this.gameRepository = new SupabaseGameRepository();
   }
 
   /**
@@ -308,9 +311,11 @@ export class BGGService {
   async getGameDetails(gameId: string): Promise<BGGGameDetails> {
     const startTime = Date.now();
     const cacheKey = `game:${gameId}`;
+
+    // Check in-memory cache first
     const cached = this.cacheManager.get(cacheKey);
     if (cached) {
-      console.log(`✅ Cache hit for game ${gameId}`);
+      console.log(`✅ Memory cache hit for game ${gameId}`);
 
       // Emit cache hit event
       await eventBus.emit(
@@ -324,6 +329,40 @@ export class BGGService {
       );
 
       return cached;
+    }
+
+    // Check database cache
+    try {
+      const dbGame = await this.gameRepository.findByBggId(parseInt(gameId));
+      if (dbGame) {
+        console.log(`✅ Database cache hit for game ${gameId}`);
+
+        // Convert database game to BGGGameDetails format
+        const gameDetails = this.convertDbGameToBGGDetails(dbGame);
+
+        // Cache in memory for faster future access
+        this.cacheManager.set(cacheKey, gameDetails);
+
+        // Emit database cache hit event
+        await eventBus.emit(
+          'cache.hit.database',
+          BGGEventFactory.createCacheHitEvent(
+            `db:${gameId}`,
+            'game-details',
+            Date.now() -
+              new Date(dbGame.last_bgg_sync || dbGame.updated_at).getTime(),
+            gameId
+          )
+        );
+
+        return gameDetails;
+      }
+    } catch (error) {
+      console.warn(
+        `⚠️ Failed to check database cache for game ${gameId}:`,
+        error
+      );
+      // Continue to API call if database check fails
     }
 
     // Emit cache miss event
@@ -780,6 +819,48 @@ export class BGGService {
    */
   clearCachePattern(pattern: string): void {
     this.cacheManager.clearPattern(pattern);
+  }
+
+  /**
+   * Get games that need BGG synchronization
+   */
+  async getStaleGames(limit: number = 50): Promise<any[]> {
+    try {
+      return await this.gameRepository.getStaleGames(limit);
+    } catch (error) {
+      console.error('❌ Failed to get stale games:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Sync stale games from BGG
+   */
+  async syncStaleGames(limit: number = 10): Promise<void> {
+    try {
+      const staleGames = await this.getStaleGames(limit);
+      console.log(`🔄 Found ${staleGames.length} stale games to sync`);
+
+      for (const game of staleGames) {
+        try {
+          if (game.bgg_id) {
+            console.log(
+              `🔄 Syncing game: ${game.title} (BGG ID: ${game.bgg_id})`
+            );
+            await this.getGameDetails(game.bgg_id.toString());
+
+            // Add a small delay to respect BGG rate limits
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        } catch (error) {
+          console.warn(`⚠️ Failed to sync game ${game.title}:`, error);
+        }
+      }
+
+      console.log(`✅ Completed syncing ${staleGames.length} stale games`);
+    } catch (error) {
+      console.error('❌ Failed to sync stale games:', error);
+    }
   }
 
   // Private helper methods (simplified versions of the original methods)
@@ -1338,10 +1419,225 @@ export class BGGService {
     query: string,
     results: BGGSearchResponse
   ): Promise<void> {
-    // Database caching implementation would go here
+    try {
+      // Cache individual games from search results
+      const gamesToCache = results.items.slice(0, 10); // Cache top 10 results
+
+      for (const searchItem of gamesToCache) {
+        try {
+          // Check if game already exists in database
+          const existingGame = await this.gameRepository.findByBggId(
+            parseInt(searchItem.id)
+          );
+
+          if (!existingGame) {
+            // Get full game details and cache them
+            const gameDetails = await this.getGameDetails(searchItem.id);
+            await this.gameRepository.upsert(gameDetails);
+
+            console.log(`✅ Cached new game in database: ${gameDetails.name}`);
+          } else {
+            // Update last sync timestamp for existing game
+            await this.gameRepository.updateLastSync(existingGame.id);
+            console.log(
+              `✅ Updated sync timestamp for existing game: ${existingGame.title}`
+            );
+          }
+        } catch (error) {
+          console.warn(`⚠️ Failed to cache game ${searchItem.id}:`, error);
+          // Continue with other games even if one fails
+        }
+      }
+
+      console.log(`✅ Cached ${gamesToCache.length} games from search results`);
+    } catch (error) {
+      console.error('❌ Failed to cache search results in database:', error);
+      // Don't throw - this is a background operation
+    }
   }
 
   private async cacheGameInDatabase(game: BGGGameDetails): Promise<void> {
-    // Database caching implementation would go here
+    try {
+      // Upsert the game details to the database
+      const cachedGame = await this.gameRepository.upsert(game);
+
+      console.log(
+        `✅ Cached game details in database: ${game.name} (ID: ${cachedGame.id})`
+      );
+
+      // Emit database cache event
+      await eventBus.emit(
+        'game.cached.database',
+        BGGEventFactory.createGameCachedEvent(
+          `db:${game.id}`,
+          'game-details',
+          this.config.cache.ttl,
+          JSON.stringify(game).length,
+          game.id
+        )
+      );
+    } catch (error) {
+      console.error(`❌ Failed to cache game ${game.id} in database:`, error);
+      // Don't throw - this is a background operation
+    }
+  }
+
+  /**
+   * Convert database game to BGGGameDetails format
+   */
+  private convertDbGameToBGGDetails(dbGame: any): BGGGameDetails {
+    const bggId = dbGame.bgg_id?.toString() || dbGame.id;
+
+    return {
+      id: bggId,
+      name: dbGame.title,
+      description: dbGame.description || '',
+      yearpublished: dbGame.year_published || 0,
+      minplayers: dbGame.min_players || 0,
+      maxplayers: dbGame.max_players || 0,
+      playingtime: dbGame.playing_time || 0,
+      minplaytime: dbGame.playing_time || 0,
+      maxplaytime: dbGame.playing_time || 0,
+      minage: dbGame.age_rating || 0,
+      image: dbGame.image_url || '',
+      thumbnail: dbGame.thumbnail_url || '',
+      categories: dbGame.categories || [],
+      mechanics: dbGame.mechanics || [],
+      designers: dbGame.designers || [],
+      artists: dbGame.artists || [],
+      publishers: dbGame.publishers || [],
+      languages: dbGame.languages || [],
+      bgg_rating: dbGame.bgg_rating || 0,
+      bgg_rank: dbGame.bgg_rank || 0,
+      weight_rating: dbGame.weight_rating || 0,
+      age_rating: dbGame.age_rating || 0,
+      last_bgg_sync: dbGame.last_bgg_sync || new Date().toISOString(),
+      // Enhanced fields
+      alternateNames: [],
+      editions: [],
+      languageDependence: {
+        level: 0,
+        description: 'Unknown',
+        votes: 0,
+        totalVotes: 0,
+        percentage: 0,
+      },
+      // Computed fields (readonly)
+      bggLink: `https://boardgamegeek.com/boardgame/${bggId}`,
+      playerCount: this.formatPlayerCount(
+        dbGame.min_players,
+        dbGame.max_players
+      ),
+      playTimeDisplay: this.formatPlayTime(dbGame.playing_time),
+      ageDisplay: `${dbGame.age_rating || 0}+`,
+      ratingDisplay: this.formatRating(dbGame.bgg_rating),
+      weightDisplay: this.formatWeight(dbGame.weight_rating),
+      rankDisplay: this.formatRank(dbGame.bgg_rank),
+      yearDisplay: dbGame.year_published?.toString() || 'Unknown',
+      categoryDisplay: (dbGame.categories || []).slice(0, 3).join(', '),
+      mechanicDisplay: (dbGame.mechanics || []).slice(0, 3).join(', '),
+      designerDisplay: (dbGame.designers || []).slice(0, 2).join(', '),
+      publisherDisplay: (dbGame.publishers || []).slice(0, 2).join(', '),
+      languageDisplay: (dbGame.languages || []).slice(0, 3).join(', '),
+      imageDisplay: dbGame.thumbnail_url || dbGame.image_url || '',
+      thumbnailDisplay: dbGame.thumbnail_url || '',
+      // Additional computed properties
+      isHighRated: (dbGame.bgg_rating || 0) >= 7.5,
+      isHeavy: (dbGame.weight_rating || 0) >= 3.5,
+      isLight: (dbGame.weight_rating || 0) <= 2.0,
+      isPopular: (dbGame.bgg_rank || 0) > 0 && (dbGame.bgg_rank || 0) <= 1000,
+      isRecent: (dbGame.year_published || 0) >= new Date().getFullYear() - 5,
+      isClassic: (dbGame.year_published || 0) <= new Date().getFullYear() - 20,
+      complexityLevel: this.getComplexityLevel(dbGame.weight_rating),
+      playerCountRange: {
+        min: dbGame.min_players || 0,
+        max: dbGame.max_players || 0,
+        optimal: Math.ceil(
+          ((dbGame.min_players || 0) + (dbGame.max_players || 0)) / 2
+        ),
+      },
+      playTimeRange: {
+        min: dbGame.playing_time || 0,
+        max: dbGame.playing_time || 0,
+        average: dbGame.playing_time || 0,
+      },
+    } as BGGGameDetails;
+  }
+
+  /**
+   * Format player count for display
+   */
+  private formatPlayerCount(min: number, max: number): string {
+    if (!min && !max) {
+      return 'Unknown';
+    }
+    if (min === max) {
+      return min.toString();
+    }
+    return `${min}-${max}`;
+  }
+
+  /**
+   * Format play time for display
+   */
+  private formatPlayTime(time: number): string {
+    if (!time) {
+      return 'Unknown';
+    }
+    if (time < 60) {
+      return `${time} min`;
+    }
+    const hours = Math.floor(time / 60);
+    const minutes = time % 60;
+    if (minutes === 0) {
+      return `${hours}h`;
+    }
+    return `${hours}h ${minutes}m`;
+  }
+
+  /**
+   * Format rating for display
+   */
+  private formatRating(rating: number): string {
+    if (!rating) {
+      return 'N/A';
+    }
+    return rating.toFixed(1);
+  }
+
+  /**
+   * Format weight for display
+   */
+  private formatWeight(weight: number): string {
+    if (!weight) {
+      return 'N/A';
+    }
+    return weight.toFixed(1);
+  }
+
+  /**
+   * Format rank for display
+   */
+  private formatRank(rank: number): string {
+    if (!rank) {
+      return 'Unranked';
+    }
+    return `#${rank}`;
+  }
+
+  /**
+   * Get complexity level based on weight rating
+   */
+  private getComplexityLevel(weight: number): 'light' | 'medium' | 'heavy' {
+    if (!weight) {
+      return 'medium';
+    }
+    if (weight <= 2.0) {
+      return 'light';
+    }
+    if (weight >= 3.5) {
+      return 'heavy';
+    }
+    return 'medium';
   }
 }
