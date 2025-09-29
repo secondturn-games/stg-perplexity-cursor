@@ -39,15 +39,18 @@ lib/events/
 import { eventBus, BGGEventFactory } from '@/lib/events';
 
 // Emit an event
-await eventBus.emit('game.searched', BGGEventFactory.createGameSearchedEvent(
-  'Catan',
-  { gameType: 'base-game' },
-  searchResults,
-  performance
-));
+await eventBus.emit(
+  'game.searched',
+  BGGEventFactory.createGameSearchedEvent(
+    'Catan',
+    { gameType: 'base-game' },
+    searchResults,
+    performance
+  )
+);
 
 // Listen to events
-eventBus.on('game.searched', (event) => {
+eventBus.on('game.searched', event => {
   console.log('Search completed:', event.data.query);
 });
 ```
@@ -66,7 +69,7 @@ function App() {
 }
 
 function SearchComponent() {
-  useBGGEventHandler('game.searched', (event) => {
+  useBGGEventHandler('game.searched', event => {
     console.log('Search event received:', event.data);
   });
 
@@ -77,25 +80,30 @@ function SearchComponent() {
 ## 📊 Event Types
 
 ### Search Events
+
 - `game.searched` - Successful game search completed
 - `game.search.failed` - Search operation failed
 
 ### Game Details Events
+
 - `game.details.fetched` - Game details successfully retrieved
 - `game.details.failed` - Game details retrieval failed
 
 ### Cache Events
+
 - `game.cached` - Data cached successfully
 - `cache.hit` - Cache hit occurred
 - `cache.miss` - Cache miss occurred
 - `cache.evicted` - Data evicted from cache
 
 ### API Events
+
 - `bgg.api.error` - BGG API error occurred
 - `bgg.api.rate_limited` - Rate limit exceeded
 - `bgg.api.success` - API call successful
 
 ### Analytics Events
+
 - `analytics.search` - Search analytics data
 - `analytics.game.view` - Game view analytics
 - `analytics.performance` - Performance metrics
@@ -103,6 +111,7 @@ function SearchComponent() {
 ## 🔧 Event Handlers
 
 ### GameAnalyticsHandler
+
 Tracks search patterns, user behavior, and performance metrics.
 
 ```typescript
@@ -114,6 +123,7 @@ console.log('Search history:', stats.searchHistory);
 ```
 
 ### GameCacheHandler
+
 Manages cache statistics, optimization suggestions, and eviction tracking.
 
 ```typescript
@@ -125,6 +135,7 @@ console.log('Cache hit rate:', stats.hitRate);
 ```
 
 ### ErrorReportingHandler
+
 Monitors errors, tracks failure patterns, and provides error analytics.
 
 ```typescript
@@ -165,6 +176,7 @@ npx tsx lib/events/test-bgg-integration.ts
 The BGG service has been updated to emit events at key points:
 
 ### Search Operations
+
 - Emits `cache.miss` when cache lookup fails
 - Emits `cache.hit` when cache lookup succeeds
 - Emits `game.cached` when data is stored in cache
@@ -172,6 +184,7 @@ The BGG service has been updated to emit events at key points:
 - Emits `game.search.failed` when search fails
 
 ### Game Details Operations
+
 - Emits `cache.miss` when game details not in cache
 - Emits `cache.hit` when game details found in cache
 - Emits `game.cached` when game details are cached
@@ -181,21 +194,25 @@ The BGG service has been updated to emit events at key points:
 ## 🎯 Benefits
 
 ### 1. Loose Coupling
+
 - Services communicate through events, not direct dependencies
 - Easy to add new functionality without modifying existing code
 - Better testability and maintainability
 
 ### 2. Separation of Concerns
+
 - Analytics logic separated from business logic
 - Cache management isolated from data retrieval
 - Error handling centralized and consistent
 
 ### 3. Scalability
+
 - Easy to add new event handlers
 - Background processing capabilities
 - Event-driven architecture supports microservices
 
 ### 4. Observability
+
 - Comprehensive event tracking
 - Performance monitoring
 - Error analytics and debugging
@@ -206,9 +223,9 @@ The BGG service has been updated to emit events at key points:
 
 ```typescript
 const eventBus = new EventBus({
-  maxHandlers: 1000,              // Maximum number of handlers
-  enableErrorHandling: true,       // Enable error handling
-  enableMemoryLeakPrevention: true // Enable memory cleanup
+  maxHandlers: 1000, // Maximum number of handlers
+  enableErrorHandling: true, // Enable error handling
+  enableMemoryLeakPrevention: true, // Enable memory cleanup
 });
 ```
 
@@ -216,8 +233,8 @@ const eventBus = new EventBus({
 
 ```tsx
 <EventBusProvider
-  enableDebugLogging={true}        // Log all events to console
-  enableMemoryMonitoring={true}    // Monitor memory usage
+  enableDebugLogging={true} // Log all events to console
+  enableMemoryMonitoring={true} // Monitor memory usage
 >
   <YourApp />
 </EventBusProvider>
@@ -226,16 +243,19 @@ const eventBus = new EventBus({
 ## 📈 Performance Considerations
 
 ### Memory Management
+
 - Automatic cleanup of unused handlers
 - Configurable handler limits
 - Memory usage monitoring
 
 ### Error Handling
+
 - Isolated error handling prevents system crashes
 - Error events for debugging and monitoring
 - Graceful degradation on handler failures
 
 ### Event Batching
+
 - Events are processed asynchronously
 - No blocking operations in event handlers
 - Efficient memory usage with cleanup
@@ -252,6 +272,7 @@ The event system includes comprehensive error handling:
 ## 🔮 Future Enhancements
 
 ### Planned Features
+
 - Event persistence for debugging
 - Event replay capabilities
 - Advanced filtering and routing
@@ -259,6 +280,7 @@ The event system includes comprehensive error handling:
 - Distributed event processing
 
 ### Integration Opportunities
+
 - Real-time analytics dashboards
 - Automated performance optimization
 - Predictive caching based on usage patterns
@@ -267,6 +289,7 @@ The event system includes comprehensive error handling:
 ## 📚 Examples
 
 See `example-usage.tsx` for comprehensive React component examples showing:
+
 - Event tracking components
 - Analytics dashboards
 - Error monitoring displays

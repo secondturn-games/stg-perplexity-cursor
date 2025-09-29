@@ -38,9 +38,6 @@ const profileSchema = yup.object({
     ),
   phone: yup
     .string()
-<<<<<<< Updated upstream
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
-=======
     .optional()
     .test(
       'phone-format',
@@ -52,7 +49,6 @@ const profileSchema = yup.object({
         return /^[\+]?[1-9][\d]{0,15}$/.test(value);
       }
     ),
->>>>>>> Stashed changes
   showEmail: yup.boolean(),
   showPhone: yup.boolean(),
   showLocation: yup.boolean(),
@@ -154,15 +150,9 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       const { error } = await updateProfile({
         username: data.username,
         full_name: data.fullName,
-<<<<<<< Updated upstream
-        ...(data.bio !== undefined && { bio: data.bio }),
-        location: data.location as 'EST' | 'LVA' | 'LTU' | 'EU' | 'OTHER',
-        ...(data.phone !== undefined && { phone: data.phone }),
-=======
         bio: data.bio || null,
         location: data.location as 'EST' | 'LVA' | 'LTU' | 'EU' | 'OTHER',
         phone: data.phone || null,
->>>>>>> Stashed changes
         privacy_settings: {
           ...(data.showEmail !== undefined && { show_email: data.showEmail }),
           ...(data.showPhone !== undefined && { show_phone: data.showPhone }),
@@ -198,11 +188,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       setError(null);
       setSuccess(null);
 
-<<<<<<< Updated upstream
-      const { error } = await updatePasswordWithVerification(
-=======
       const { error } = await updatePassword(
->>>>>>> Stashed changes
         data.currentPassword,
         data.newPassword
       );
@@ -378,11 +364,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
                 htmlFor='phone'
                 className='block text-sm font-medium text-gray-700 mb-2'
               >
-<<<<<<< Updated upstream
-                Phone Number
-=======
                 Phone Number <span className='text-gray-500'>(optional)</span>
->>>>>>> Stashed changes
               </label>
               <Input
                 id='phone'

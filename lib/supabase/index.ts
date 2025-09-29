@@ -7,7 +7,15 @@
 export * from '../supabase';
 
 // Authentication utilities
-export * from './client-auth';
+export {
+  signInWithEmail,
+  signUpWithProfile,
+  signInWithGoogle,
+  signOut,
+  updateProfile,
+  updatePassword,
+  createClientClient as createAuthClient,
+} from './auth-client';
 export * from './server-auth';
 
 // Storage utilities are already exported from the main supabase file

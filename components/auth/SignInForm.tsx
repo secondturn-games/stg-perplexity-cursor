@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { signInWithEmail, signInWithGoogle } from '@/lib/supabase/client-auth';
+import { signInWithEmail, signInWithGoogle } from '@/lib/supabase/auth-client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -205,11 +205,7 @@ export function SignInForm({
         <div className='mt-6'>
           <Button
             type='button'
-<<<<<<< Updated upstream
-            variant='outline'
-=======
             variant='secondary'
->>>>>>> Stashed changes
             className='w-full'
             onClick={handleGoogleSignIn}
             disabled={isLoading}
