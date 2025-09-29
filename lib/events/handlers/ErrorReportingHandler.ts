@@ -41,7 +41,7 @@ export class ErrorReportingHandler {
     // API error events
     this.handleBGGApiError = this.handleBGGApiError.bind(this);
     this.handleBGGApiRateLimited = this.handleBGGApiRateLimited.bind(this);
-    
+
     // Service error events
     this.handleGameSearchFailed = this.handleGameSearchFailed.bind(this);
     this.handleGameDetailsFailed = this.handleGameDetailsFailed.bind(this);
@@ -51,10 +51,10 @@ export class ErrorReportingHandler {
   /**
    * Handle BGG API error events
    */
-  handleBGGApiError: EventHandler<BGGApiErrorEvent> = async (event) => {
+  handleBGGApiError: EventHandler<BGGApiErrorEvent> = async event => {
     try {
       const { operation, error, request, response, retryable } = event.data;
-      
+
       // Create error report
       const errorReport: ErrorReport = {
         errorId: event.eventId,
@@ -75,65 +75,71 @@ export class ErrorReportingHandler {
 
       // Track error
       this.trackError(errorReport);
-      
+
       // Log error
       this.logError(errorReport);
-      
+
       // Handle specific error types
       this.handleSpecificErrorType(error.code, errorReport);
-
     } catch (error) {
-      console.error('ErrorReportingHandler: Error handling BGG API error:', error);
+      console.error(
+        'ErrorReportingHandler: Error handling BGG API error:',
+        error
+      );
     }
   };
 
   /**
    * Handle BGG API rate limited events
    */
-  handleBGGApiRateLimited: EventHandler<BGGApiRateLimitedEvent> = async (event) => {
-    try {
-      const { operation, retryAfter, requestCount, windowStart, windowEnd } = event.data;
-      
-      // Create error report
-      const errorReport: ErrorReport = {
-        errorId: event.eventId,
-        timestamp: event.timestamp,
-        errorType: 'bgg_api_rate_limited',
-        operation,
-        errorCode: 'RATE_LIMIT',
-        errorMessage: `Rate limited after ${requestCount} requests`,
-        userMessage: 'Too many requests. Please wait before trying again.',
-        retryable: true,
-        retryAfter,
-        context: {
-          requestCount,
-          windowStart,
-          windowEnd,
-          source: event.source,
-        },
-      };
+  handleBGGApiRateLimited: EventHandler<BGGApiRateLimitedEvent> =
+    async event => {
+      try {
+        const { operation, retryAfter, requestCount, windowStart, windowEnd } =
+          event.data;
 
-      // Track error
-      this.trackError(errorReport);
-      
-      // Log error
-      this.logError(errorReport);
-      
-      // Track rate limiting patterns
-      this.trackRateLimitingPattern(operation, requestCount, retryAfter);
+        // Create error report
+        const errorReport: ErrorReport = {
+          errorId: event.eventId,
+          timestamp: event.timestamp,
+          errorType: 'bgg_api_rate_limited',
+          operation,
+          errorCode: 'RATE_LIMIT',
+          errorMessage: `Rate limited after ${requestCount} requests`,
+          userMessage: 'Too many requests. Please wait before trying again.',
+          retryable: true,
+          retryAfter,
+          context: {
+            requestCount,
+            windowStart,
+            windowEnd,
+            source: event.source,
+          },
+        };
 
-    } catch (error) {
-      console.error('ErrorReportingHandler: Error handling BGG API rate limited:', error);
-    }
-  };
+        // Track error
+        this.trackError(errorReport);
+
+        // Log error
+        this.logError(errorReport);
+
+        // Track rate limiting patterns
+        this.trackRateLimitingPattern(operation, requestCount, retryAfter);
+      } catch (error) {
+        console.error(
+          'ErrorReportingHandler: Error handling BGG API rate limited:',
+          error
+        );
+      }
+    };
 
   /**
    * Handle game search failed events
    */
-  handleGameSearchFailed: EventHandler<GameSearchFailedEvent> = async (event) => {
+  handleGameSearchFailed: EventHandler<GameSearchFailedEvent> = async event => {
     try {
       const { query, filters, error, retryable } = event.data;
-      
+
       // Create error report
       const errorReport: ErrorReport = {
         errorId: event.eventId,
@@ -153,64 +159,74 @@ export class ErrorReportingHandler {
 
       // Track error
       this.trackError(errorReport);
-      
+
       // Log error
       this.logError(errorReport);
-      
+
       // Analyze search failure patterns
       this.analyzeSearchFailurePattern(query, error.code);
-
     } catch (error) {
-      console.error('ErrorReportingHandler: Error handling game search failed:', error);
+      console.error(
+        'ErrorReportingHandler: Error handling game search failed:',
+        error
+      );
     }
   };
 
   /**
    * Handle game details failed events
    */
-  handleGameDetailsFailed: EventHandler<GameDetailsFailedEvent> = async (event) => {
-    try {
-      const { gameId, error, retryable, attempt, maxAttempts } = event.data;
-      
-      // Create error report
-      const errorReport: ErrorReport = {
-        errorId: event.eventId,
-        timestamp: event.timestamp,
-        errorType: 'game_details_failed',
-        operation: 'getGameDetails',
-        errorCode: error.code,
-        errorMessage: error.message,
-        userMessage: error.userMessage,
-        retryable,
-        context: {
+  handleGameDetailsFailed: EventHandler<GameDetailsFailedEvent> =
+    async event => {
+      try {
+        const { gameId, error, retryable, attempt, maxAttempts } = event.data;
+
+        // Create error report
+        const errorReport: ErrorReport = {
+          errorId: event.eventId,
+          timestamp: event.timestamp,
+          errorType: 'game_details_failed',
+          operation: 'getGameDetails',
+          errorCode: error.code,
+          errorMessage: error.message,
+          userMessage: error.userMessage,
+          retryable,
+          context: {
+            gameId,
+            attempt,
+            maxAttempts,
+            source: event.source,
+          },
+        };
+
+        // Track error
+        this.trackError(errorReport);
+
+        // Log error
+        this.logError(errorReport);
+
+        // Analyze game details failure patterns
+        this.analyzeGameDetailsFailurePattern(
           gameId,
+          error.code,
           attempt,
-          maxAttempts,
-          source: event.source,
-        },
-      };
-
-      // Track error
-      this.trackError(errorReport);
-      
-      // Log error
-      this.logError(errorReport);
-      
-      // Analyze game details failure patterns
-      this.analyzeGameDetailsFailurePattern(gameId, error.code, attempt, maxAttempts);
-
-    } catch (error) {
-      console.error('ErrorReportingHandler: Error handling game details failed:', error);
-    }
-  };
+          maxAttempts
+        );
+      } catch (error) {
+        console.error(
+          'ErrorReportingHandler: Error handling game details failed:',
+          error
+        );
+      }
+    };
 
   /**
    * Handle collection failed events
    */
-  handleCollectionFailed: EventHandler<CollectionFailedEvent> = async (event) => {
+  handleCollectionFailed: EventHandler<CollectionFailedEvent> = async event => {
     try {
       const { username, error, retryable } = event.data;
-      
+
       // Create error report
       const errorReport: ErrorReport = {
         errorId: event.eventId,
@@ -229,15 +245,17 @@ export class ErrorReportingHandler {
 
       // Track error
       this.trackError(errorReport);
-      
+
       // Log error
       this.logError(errorReport);
-      
+
       // Analyze collection failure patterns
       this.analyzeCollectionFailurePattern(username, error.code);
-
     } catch (error) {
-      console.error('ErrorReportingHandler: Error handling collection failed:', error);
+      console.error(
+        'ErrorReportingHandler: Error handling collection failed:',
+        error
+      );
     }
   };
 
@@ -247,7 +265,7 @@ export class ErrorReportingHandler {
   private trackError(errorReport: ErrorReport): void {
     // Add to error history
     this.errorHistory.push(errorReport);
-    
+
     // Keep only last 1000 errors
     if (this.errorHistory.length > 1000) {
       this.errorHistory = this.errorHistory.slice(-1000);
@@ -256,10 +274,13 @@ export class ErrorReportingHandler {
     // Track error counts
     const errorKey = `${errorReport.errorType}:${errorReport.errorCode}`;
     this.errorCounts.set(errorKey, (this.errorCounts.get(errorKey) || 0) + 1);
-    
+
     // Track operation errors
-    this.operationErrors.set(errorReport.operation, (this.operationErrors.get(errorReport.operation) || 0) + 1);
-    
+    this.operationErrors.set(
+      errorReport.operation,
+      (this.operationErrors.get(errorReport.operation) || 0) + 1
+    );
+
     // Track retryable errors
     if (errorReport.retryable) {
       this.retryableErrors.add(errorReport.errorId);
@@ -272,7 +293,7 @@ export class ErrorReportingHandler {
   private logError(errorReport: ErrorReport): void {
     const logLevel = this.getLogLevel(errorReport.errorCode);
     const logMessage = this.formatLogMessage(errorReport);
-    
+
     switch (logLevel) {
       case 'error':
         console.error(logMessage);
@@ -294,7 +315,10 @@ export class ErrorReportingHandler {
   /**
    * Handle specific error types
    */
-  private handleSpecificErrorType(errorCode: string, errorReport: ErrorReport): void {
+  private handleSpecificErrorType(
+    errorCode: string,
+    errorReport: ErrorReport
+  ): void {
     switch (errorCode) {
       case 'RATE_LIMIT':
         this.handleRateLimitError(errorReport);
@@ -319,7 +343,7 @@ export class ErrorReportingHandler {
   private handleRateLimitError(errorReport: ErrorReport): void {
     // Log rate limiting information
     console.warn(`Rate limit exceeded for operation: ${errorReport.operation}`);
-    
+
     // Track rate limiting patterns
     if (errorReport.context.request) {
       console.warn('Request details:', errorReport.context.request);
@@ -331,8 +355,10 @@ export class ErrorReportingHandler {
    */
   private handleApiUnavailableError(errorReport: ErrorReport): void {
     // Log API unavailability
-    console.error(`BGG API unavailable for operation: ${errorReport.operation}`);
-    
+    console.error(
+      `BGG API unavailable for operation: ${errorReport.operation}`
+    );
+
     // Track API availability issues
     this.trackApiAvailabilityIssue(errorReport.operation);
   }
@@ -343,7 +369,7 @@ export class ErrorReportingHandler {
   private handleNetworkError(errorReport: ErrorReport): void {
     // Log network issues
     console.error(`Network error for operation: ${errorReport.operation}`);
-    
+
     // Track network issues
     this.trackNetworkIssue(errorReport.operation);
   }
@@ -354,7 +380,7 @@ export class ErrorReportingHandler {
   private handleParseError(errorReport: ErrorReport): void {
     // Log parse issues
     console.error(`Parse error for operation: ${errorReport.operation}`);
-    
+
     // Track parse issues
     this.trackParseIssue(errorReport.operation);
   }
@@ -370,9 +396,15 @@ export class ErrorReportingHandler {
   /**
    * Track rate limiting patterns
    */
-  private trackRateLimitingPattern(operation: string, requestCount: number, retryAfter: number): void {
+  private trackRateLimitingPattern(
+    operation: string,
+    requestCount: number,
+    retryAfter: number
+  ): void {
     // Track rate limiting patterns for optimization
-    console.warn(`Rate limiting pattern detected: ${operation} - ${requestCount} requests, retry after ${retryAfter}s`);
+    console.warn(
+      `Rate limiting pattern detected: ${operation} - ${requestCount} requests, retry after ${retryAfter}s`
+    );
   }
 
   /**
@@ -380,23 +412,37 @@ export class ErrorReportingHandler {
    */
   private analyzeSearchFailurePattern(query: string, errorCode: string): void {
     // Analyze search failure patterns
-    console.warn(`Search failure pattern: query="${query}", error=${errorCode}`);
+    console.warn(
+      `Search failure pattern: query="${query}", error=${errorCode}`
+    );
   }
 
   /**
    * Analyze game details failure patterns
    */
-  private analyzeGameDetailsFailurePattern(gameId: string, errorCode: string, attempt: number, maxAttempts: number): void {
+  private analyzeGameDetailsFailurePattern(
+    gameId: string,
+    errorCode: string,
+    attempt: number,
+    maxAttempts: number
+  ): void {
     // Analyze game details failure patterns
-    console.warn(`Game details failure pattern: gameId=${gameId}, error=${errorCode}, attempt=${attempt}/${maxAttempts}`);
+    console.warn(
+      `Game details failure pattern: gameId=${gameId}, error=${errorCode}, attempt=${attempt}/${maxAttempts}`
+    );
   }
 
   /**
    * Analyze collection failure patterns
    */
-  private analyzeCollectionFailurePattern(username: string, errorCode: string): void {
+  private analyzeCollectionFailurePattern(
+    username: string,
+    errorCode: string
+  ): void {
     // Analyze collection failure patterns
-    console.warn(`Collection failure pattern: username=${username}, error=${errorCode}`);
+    console.warn(
+      `Collection failure pattern: username=${username}, error=${errorCode}`
+    );
   }
 
   /**
@@ -444,10 +490,11 @@ export class ErrorReportingHandler {
    * Format log message
    */
   private formatLogMessage(errorReport: ErrorReport): string {
-    const context = Object.keys(errorReport.context).length > 0 
-      ? ` | Context: ${JSON.stringify(errorReport.context)}`
-      : '';
-    
+    const context =
+      Object.keys(errorReport.context).length > 0
+        ? ` | Context: ${JSON.stringify(errorReport.context)}`
+        : '';
+
     return `[${errorReport.errorType}] ${errorReport.operation}: ${errorReport.errorMessage} (${errorReport.errorCode})${context}`;
   }
 
@@ -483,9 +530,7 @@ export class ErrorReportingHandler {
       .map(([operation, count]) => ({ operation, count }))
       .sort((a, b) => b.count - a.count);
 
-    const recentErrors = this.errorHistory
-      .slice(-50)
-      .reverse();
+    const recentErrors = this.errorHistory.slice(-50).reverse();
 
     return {
       totalErrors: this.errorHistory.length,
@@ -520,13 +565,19 @@ export class ErrorReportingHandler {
     for (const error of this.errorHistory) {
       const errorTime = new Date(error.timestamp);
       const hourKey = errorTime.toISOString().substring(0, 13) + ':00:00Z';
-      
+
       if (errorsByHour.has(hourKey)) {
         errorsByHour.set(hourKey, (errorsByHour.get(hourKey) || 0) + 1);
       }
-      
-      errorsByType.set(error.errorType, (errorsByType.get(error.errorType) || 0) + 1);
-      errorsByOperation.set(error.operation, (errorsByOperation.get(error.operation) || 0) + 1);
+
+      errorsByType.set(
+        error.errorType,
+        (errorsByType.get(error.errorType) || 0) + 1
+      );
+      errorsByOperation.set(
+        error.operation,
+        (errorsByOperation.get(error.operation) || 0) + 1
+      );
     }
 
     return {

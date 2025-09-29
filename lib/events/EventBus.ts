@@ -145,7 +145,9 @@ export class EventBus {
    * Check if event has handlers
    */
   hasHandlers(eventName: string): boolean {
-    return this.handlers.has(eventName) && this.handlers.get(eventName)!.size > 0;
+    return (
+      this.handlers.has(eventName) && this.handlers.get(eventName)!.size > 0
+    );
   }
 
   /**
@@ -157,7 +159,8 @@ export class EventBus {
     averageHandlersPerEvent: number;
   } {
     const eventCount = this.handlers.size;
-    const averageHandlersPerEvent = eventCount > 0 ? this.handlerCount / eventCount : 0;
+    const averageHandlersPerEvent =
+      eventCount > 0 ? this.handlerCount / eventCount : 0;
 
     return {
       totalHandlers: this.handlerCount,
@@ -184,7 +187,7 @@ export class EventBus {
         `EventBus: Error in handler for event "${eventName}":`,
         error
       );
-      
+
       // Emit error event for debugging
       this.emit('eventbus:error', {
         eventName,
@@ -205,9 +208,12 @@ export class EventBus {
     }
 
     // Clean up every 5 minutes
-    setTimeout(() => {
-      this.performCleanup();
-    }, 5 * 60 * 1000);
+    setTimeout(
+      () => {
+        this.performCleanup();
+      },
+      5 * 60 * 1000
+    );
   }
 
   /**

@@ -54,7 +54,8 @@ const testSearchResults = {
 const testGameDetails = {
   id: testGameId,
   name: testGameName,
-  description: 'A classic board game about building settlements and trading resources.',
+  description:
+    'A classic board game about building settlements and trading resources.',
   yearpublished: 1995,
   minplayers: 3,
   maxplayers: 4,
@@ -318,7 +319,9 @@ async function testErrorHandling(): Promise<void> {
 
   // Verify error handling
   if (!errorEventReceived) {
-    console.warn('  ⚠️ Error event not received - error handling may not be working');
+    console.warn(
+      '  ⚠️ Error event not received - error handling may not be working'
+    );
   }
 
   // Cleanup
@@ -333,7 +336,7 @@ if (require.main === module) {
       console.log('\n🎉 Event System Test Suite Completed Successfully!');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('\n❌ Event System Test Suite Failed:', error);
       process.exit(1);
     });

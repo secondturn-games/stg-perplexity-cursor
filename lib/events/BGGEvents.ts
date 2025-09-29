@@ -265,7 +265,10 @@ export type BGGEvent =
 export type BGGEventType = BGGEvent['eventType'];
 
 // Event data mapping for type safety
-export type BGGEventData<T extends BGGEventType> = Extract<BGGEvent, { eventType: T }>['data'];
+export type BGGEventData<T extends BGGEventType> = Extract<
+  BGGEvent,
+  { eventType: T }
+>['data'];
 
 // Event factory functions
 export class BGGEventFactory {
@@ -315,7 +318,8 @@ export class BGGEventFactory {
           message: error.message,
           userMessage: error.userMessage,
         },
-        retryable: error.code === 'RATE_LIMIT' || error.code === 'API_UNAVAILABLE',
+        retryable:
+          error.code === 'RATE_LIMIT' || error.code === 'API_UNAVAILABLE',
       },
     };
   }
@@ -325,7 +329,12 @@ export class BGGEventFactory {
     gameName: string,
     gameType: 'boardgame' | 'boardgameexpansion' | 'boardgameaccessory',
     performance: { queryTime: number; cacheHit: boolean; apiCalls: number },
-    metadata: { yearPublished: number; bggRating: number; bggRank: number; weightRating: number }
+    metadata: {
+      yearPublished: number;
+      bggRating: number;
+      bggRank: number;
+      weightRating: number;
+    }
   ): GameDetailsFetchedEvent {
     return {
       eventType: 'game.details.fetched',
@@ -387,7 +396,8 @@ export class BGGEventFactory {
         },
         request,
         response,
-        retryable: error.code === 'RATE_LIMIT' || error.code === 'API_UNAVAILABLE',
+        retryable:
+          error.code === 'RATE_LIMIT' || error.code === 'API_UNAVAILABLE',
       },
     };
   }

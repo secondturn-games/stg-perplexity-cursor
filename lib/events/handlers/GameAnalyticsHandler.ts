@@ -31,11 +31,11 @@ export class GameAnalyticsHandler {
     // Search analytics
     this.handleSearchAnalytics = this.handleSearchAnalytics.bind(this);
     this.handleGameSearched = this.handleGameSearched.bind(this);
-    
+
     // Game view analytics
     this.handleGameViewAnalytics = this.handleGameViewAnalytics.bind(this);
     this.handleGameDetailsFetched = this.handleGameDetailsFetched.bind(this);
-    
+
     // Performance metrics
     this.handlePerformanceMetrics = this.handlePerformanceMetrics.bind(this);
   }
@@ -43,16 +43,24 @@ export class GameAnalyticsHandler {
   /**
    * Handle search analytics events
    */
-  handleSearchAnalytics: EventHandler<SearchAnalyticsEvent> = async (event) => {
+  handleSearchAnalytics: EventHandler<SearchAnalyticsEvent> = async event => {
     try {
-      const { query, resultCount, searchStrategy, queryTime, cacheHit, userAgent, sessionId } = event.data;
-      
+      const {
+        query,
+        resultCount,
+        searchStrategy,
+        queryTime,
+        cacheHit,
+        userAgent,
+        sessionId,
+      } = event.data;
+
       // Track search patterns
       this.trackSearchPattern(query, resultCount, searchStrategy);
-      
+
       // Track performance metrics
       this.trackSearchPerformance(queryTime, cacheHit);
-      
+
       // Track user session data
       if (sessionId) {
         this.trackSessionData(sessionId, {
@@ -73,19 +81,21 @@ export class GameAnalyticsHandler {
         sessionId,
         timestamp: event.timestamp,
       });
-
     } catch (error) {
-      console.error('GameAnalyticsHandler: Error handling search analytics:', error);
+      console.error(
+        'GameAnalyticsHandler: Error handling search analytics:',
+        error
+      );
     }
   };
 
   /**
    * Handle game searched events
    */
-  handleGameSearched: EventHandler<GameSearchedEvent> = async (event) => {
+  handleGameSearched: EventHandler<GameSearchedEvent> = async event => {
     try {
       const { query, results, performance } = event.data;
-      
+
       // Create search analytics event
       const searchAnalyticsEvent: SearchAnalyticsEvent = {
         eventType: 'analytics.search',
@@ -102,108 +112,131 @@ export class GameAnalyticsHandler {
       };
 
       await this.handleSearchAnalytics(searchAnalyticsEvent);
-
     } catch (error) {
-      console.error('GameAnalyticsHandler: Error handling game searched event:', error);
+      console.error(
+        'GameAnalyticsHandler: Error handling game searched event:',
+        error
+      );
     }
   };
 
   /**
    * Handle game view analytics events
    */
-  handleGameViewAnalytics: EventHandler<GameViewAnalyticsEvent> = async (event) => {
-    try {
-      const { gameId, gameName, source, viewTime, userAgent, sessionId } = event.data;
-      
-      // Track game views
-      this.trackGameView(gameId, gameName, source);
-      
-      // Track session data
-      if (sessionId) {
-        this.trackSessionData(sessionId, {
-          lastGameView: gameId,
-          gameViewCount: (this.sessionData.get(sessionId)?.gameViewCount || 0) + 1,
-          lastActivity: new Date().toISOString(),
+  handleGameViewAnalytics: EventHandler<GameViewAnalyticsEvent> =
+    async event => {
+      try {
+        const { gameId, gameName, source, viewTime, userAgent, sessionId } =
+          event.data;
+
+        // Track game views
+        this.trackGameView(gameId, gameName, source);
+
+        // Track session data
+        if (sessionId) {
+          this.trackSessionData(sessionId, {
+            lastGameView: gameId,
+            gameViewCount:
+              (this.sessionData.get(sessionId)?.gameViewCount || 0) + 1,
+            lastActivity: new Date().toISOString(),
+          });
+        }
+
+        // Log analytics data
+        this.logAnalytics('game_view', {
+          gameId,
+          gameName: this.sanitizeGameName(gameName),
+          source,
+          viewTime,
+          userAgent: this.sanitizeUserAgent(userAgent),
+          sessionId,
+          timestamp: event.timestamp,
         });
+      } catch (error) {
+        console.error(
+          'GameAnalyticsHandler: Error handling game view analytics:',
+          error
+        );
       }
-
-      // Log analytics data
-      this.logAnalytics('game_view', {
-        gameId,
-        gameName: this.sanitizeGameName(gameName),
-        source,
-        viewTime,
-        userAgent: this.sanitizeUserAgent(userAgent),
-        sessionId,
-        timestamp: event.timestamp,
-      });
-
-    } catch (error) {
-      console.error('GameAnalyticsHandler: Error handling game view analytics:', error);
-    }
-  };
+    };
 
   /**
    * Handle game details fetched events
    */
-  handleGameDetailsFetched: EventHandler<GameDetailsFetchedEvent> = async (event) => {
-    try {
-      const { gameId, gameName, gameType, performance } = event.data;
-      
-      // Create game view analytics event
-      const gameViewEvent: GameViewAnalyticsEvent = {
-        eventType: 'analytics.game.view',
-        timestamp: new Date().toISOString(),
-        eventId: `analytics_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        source: 'bgg-analytics',
-        data: {
-          gameId,
-          gameName,
-          source: 'search', // Default source, could be enhanced
-        },
-      };
+  handleGameDetailsFetched: EventHandler<GameDetailsFetchedEvent> =
+    async event => {
+      try {
+        const { gameId, gameName, gameType, performance } = event.data;
 
-      await this.handleGameViewAnalytics(gameViewEvent);
+        // Create game view analytics event
+        const gameViewEvent: GameViewAnalyticsEvent = {
+          eventType: 'analytics.game.view',
+          timestamp: new Date().toISOString(),
+          eventId: `analytics_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          source: 'bgg-analytics',
+          data: {
+            gameId,
+            gameName,
+            source: 'search', // Default source, could be enhanced
+          },
+        };
 
-    } catch (error) {
-      console.error('GameAnalyticsHandler: Error handling game details fetched event:', error);
-    }
-  };
+        await this.handleGameViewAnalytics(gameViewEvent);
+      } catch (error) {
+        console.error(
+          'GameAnalyticsHandler: Error handling game details fetched event:',
+          error
+        );
+      }
+    };
 
   /**
    * Handle performance metrics events
    */
-  handlePerformanceMetrics: EventHandler<PerformanceMetricsEvent> = async (event) => {
-    try {
-      const { operation, metrics, timestamp } = event.data;
-      
-      // Track performance metrics
-      this.trackPerformanceMetrics(operation, metrics);
-      
-      // Log performance data
-      this.logAnalytics('performance', {
-        operation,
-        metrics,
-        timestamp,
-      });
+  handlePerformanceMetrics: EventHandler<PerformanceMetricsEvent> =
+    async event => {
+      try {
+        const { operation, metrics, timestamp } = event.data;
 
-    } catch (error) {
-      console.error('GameAnalyticsHandler: Error handling performance metrics:', error);
-    }
-  };
+        // Track performance metrics
+        this.trackPerformanceMetrics(operation, metrics);
+
+        // Log performance data
+        this.logAnalytics('performance', {
+          operation,
+          metrics,
+          timestamp,
+        });
+      } catch (error) {
+        console.error(
+          'GameAnalyticsHandler: Error handling performance metrics:',
+          error
+        );
+      }
+    };
 
   /**
    * Track search patterns
    */
-  private trackSearchPattern(query: string, resultCount: number, searchStrategy: string): void {
+  private trackSearchPattern(
+    query: string,
+    resultCount: number,
+    searchStrategy: string
+  ): void {
     const normalizedQuery = query.toLowerCase().trim();
-    
+
     // Track query frequency
-    this.searchHistory.set(normalizedQuery, (this.searchHistory.get(normalizedQuery) || 0) + 1);
-    
+    this.searchHistory.set(
+      normalizedQuery,
+      (this.searchHistory.get(normalizedQuery) || 0) + 1
+    );
+
     // Track search strategy effectiveness
     const strategyKey = `${searchStrategy}_${resultCount > 0 ? 'success' : 'empty'}`;
-    this.searchHistory.set(strategyKey, (this.searchHistory.get(strategyKey) || 0) + 1);
+    this.searchHistory.set(
+      strategyKey,
+      (this.searchHistory.get(strategyKey) || 0) + 1
+    );
   }
 
   /**
@@ -225,7 +258,11 @@ export class GameAnalyticsHandler {
   /**
    * Track game views
    */
-  private trackGameView(gameId: string, gameName: string, source: string): void {
+  private trackGameView(
+    gameId: string,
+    gameName: string,
+    source: string
+  ): void {
     const viewKey = `${gameId}_${source}`;
     this.gameViews.set(viewKey, (this.gameViews.get(viewKey) || 0) + 1);
   }
@@ -256,7 +293,7 @@ export class GameAnalyticsHandler {
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Analytics] ${type}:`, data);
     }
-    
+
     // In production, this would send to analytics service (PostHog, Mixpanel, etc.)
     // Example: analytics.track(type, data);
   }
@@ -309,9 +346,13 @@ export class GameAnalyticsHandler {
       .sort((a, b) => b.count - a.count)
       .slice(0, 50); // Top 50 game views
 
-    const averageResponseTime = this.performanceMetrics.length > 0
-      ? this.performanceMetrics.reduce((sum, metric) => sum + metric.responseTime, 0) / this.performanceMetrics.length
-      : 0;
+    const averageResponseTime =
+      this.performanceMetrics.length > 0
+        ? this.performanceMetrics.reduce(
+            (sum, metric) => sum + metric.responseTime,
+            0
+          ) / this.performanceMetrics.length
+        : 0;
 
     return {
       searchHistory,

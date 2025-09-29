@@ -32,9 +32,18 @@ export {
 } from './BGGEvents';
 
 // Event handlers
-export { GameAnalyticsHandler, gameAnalyticsHandler } from './handlers/GameAnalyticsHandler';
-export { GameCacheHandler, gameCacheHandler } from './handlers/GameCacheHandler';
-export { ErrorReportingHandler, errorReportingHandler } from './handlers/ErrorReportingHandler';
+export {
+  GameAnalyticsHandler,
+  gameAnalyticsHandler,
+} from './handlers/GameAnalyticsHandler';
+export {
+  GameCacheHandler,
+  gameCacheHandler,
+} from './handlers/GameCacheHandler';
+export {
+  ErrorReportingHandler,
+  errorReportingHandler,
+} from './handlers/ErrorReportingHandler';
 export type { ErrorReport } from './handlers/ErrorReportingHandler';
 
 // React provider and hooks
@@ -50,4 +59,7 @@ export {
   useErrorEventHandler,
   useCacheEventHandler,
 } from './EventBusProvider';
-export type { EventBusContextType, EventBusProviderProps } from './EventBusProvider';
+export type {
+  EventBusContextType,
+  EventBusProviderProps,
+} from './EventBusProvider';

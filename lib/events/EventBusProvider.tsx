@@ -5,8 +5,14 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useRef, useCallback } from 'react';
-import { EventBus, EventHandler } from './EventBus';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
+import { EventBus, EventHandler, eventBus } from './EventBus';
 import { BGGEvent } from './BGGEvents';
 
 // Event bus context
@@ -55,7 +61,9 @@ export function EventBusProvider({
 
   // Setup debug logging
   useEffect(() => {
-    if (!enableDebugLogging) return;
+    if (!enableDebugLogging) {
+      return;
+    }
 
     const debugHandler = async (event: BGGEvent) => {
       console.log(`[EventBus] ${event.eventType}:`, event.data);
@@ -93,7 +101,9 @@ export function EventBusProvider({
 
   // Setup memory monitoring
   useEffect(() => {
-    if (!enableMemoryMonitoring) return;
+    if (!enableMemoryMonitoring) {
+      return;
+    }
 
     const interval = setInterval(() => {
       const stats = eventBusRef.current.getMemoryStats();
@@ -117,16 +127,16 @@ export function EventBusProvider({
   // Context value
   const contextValue: EventBusContextType = {
     eventBus: eventBusRef.current,
-    emit: useCallback(async <T>(eventName: string, data: T) => {
+    emit: useCallback(async (eventName: string, data: any) => {
       await eventBusRef.current.emit(eventName, data);
     }, []),
-    on: useCallback(<T>(eventName: string, handler: EventHandler<T>) => {
+    on: useCallback((eventName: string, handler: EventHandler) => {
       eventBusRef.current.on(eventName, handler);
     }, []),
     off: useCallback((eventName: string, handler?: EventHandler) => {
       eventBusRef.current.off(eventName, handler);
     }, []),
-    once: useCallback(<T>(eventName: string, handler: EventHandler<T>) => {
+    once: useCallback((eventName: string, handler: EventHandler) => {
       eventBusRef.current.once(eventName, handler);
     }, []),
     getEventNames: useCallback(() => {
@@ -224,9 +234,17 @@ export function useAnalyticsEventHandler(
     'analytics.performance',
   ];
 
-  analyticsEvents.forEach(eventType => {
-    useEventHandler(eventType, handler, deps);
-  });
+  useEffect(() => {
+    analyticsEvents.forEach(eventType => {
+      eventBus.on(eventType, handler);
+    });
+
+    return () => {
+      analyticsEvents.forEach(eventType => {
+        eventBus.off(eventType, handler);
+      });
+    };
+  }, [handler, ...deps]);
 }
 
 // Hook for error events
@@ -242,9 +260,17 @@ export function useErrorEventHandler(
     'bgg.api.rate_limited',
   ];
 
-  errorEvents.forEach(eventType => {
-    useEventHandler(eventType, handler, deps);
-  });
+  useEffect(() => {
+    errorEvents.forEach(eventType => {
+      eventBus.on(eventType, handler);
+    });
+
+    return () => {
+      errorEvents.forEach(eventType => {
+        eventBus.off(eventType, handler);
+      });
+    };
+  }, [handler, ...deps]);
 }
 
 // Hook for cache events
@@ -259,9 +285,17 @@ export function useCacheEventHandler(
     'cache.evicted',
   ];
 
-  cacheEvents.forEach(eventType => {
-    useEventHandler(eventType, handler, deps);
-  });
+  useEffect(() => {
+    cacheEvents.forEach(eventType => {
+      eventBus.on(eventType, handler);
+    });
+
+    return () => {
+      cacheEvents.forEach(eventType => {
+        eventBus.off(eventType, handler);
+      });
+    };
+  }, [handler, ...deps]);
 }
 
 // Export types

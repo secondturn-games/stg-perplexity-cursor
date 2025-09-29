@@ -41,20 +41,20 @@ const TEST_CONFIG = {
 // Event tracking
 const eventTracker = {
   events: [] as Array<{ type: string; timestamp: string; data: any }>,
-  reset: function() {
+  reset: function () {
     this.events = [];
   },
-  add: function(type: string, data: any) {
+  add: function (type: string, data: any) {
     this.events.push({
       type,
       timestamp: new Date().toISOString(),
       data,
     });
   },
-  getEvents: function(type?: string) {
+  getEvents: function (type?: string) {
     return type ? this.events.filter(e => e.type === type) : this.events;
   },
-  getEventCount: function(type?: string) {
+  getEventCount: function (type?: string) {
     return this.getEvents(type).length;
   },
 };
@@ -134,7 +134,9 @@ async function testSearchEvents(): Promise<void> {
   try {
     // Test successful search
     console.log('  🔍 Testing successful search...');
-    const searchResults = await bggService.searchGames('Catan', { gameType: 'base-game' });
+    const searchResults = await bggService.searchGames('Catan', {
+      gameType: 'base-game',
+    });
 
     // Verify search events were emitted
     const searchEvents = eventTracker.getEvents('game.searched');
@@ -158,14 +160,16 @@ async function testSearchEvents(): Promise<void> {
 
     // Verify event data structure
     const searchEvent = searchEvents[0];
-    console.log('  🔍 Search event structure:', JSON.stringify(searchEvent, null, 2));
+    console.log(
+      '  🔍 Search event structure:',
+      JSON.stringify(searchEvent, null, 2)
+    );
     if (!searchEvent.data.query || !searchEvent.data.results) {
       console.error('  ❌ Search event data structure:', searchEvent.data);
       throw new Error('Search event data structure is invalid');
     }
 
     console.log('  ✅ Search events verified');
-
   } catch (error) {
     console.error('  ❌ Search events test failed:', error);
     throw error;
@@ -201,7 +205,6 @@ async function testGameDetailsEvents(): Promise<void> {
     }
 
     console.log('  ✅ Game details events verified');
-
   } catch (error) {
     console.error('  ❌ Game details events test failed:', error);
     throw error;
@@ -237,11 +240,12 @@ async function testCacheEvents(): Promise<void> {
     }
 
     if (secondSearchEvents.length === 0) {
-      console.warn('  ⚠️ No cache hit events on second search - cache may not be working');
+      console.warn(
+        '  ⚠️ No cache hit events on second search - cache may not be working'
+      );
     }
 
     console.log('  ✅ Cache events verified');
-
   } catch (error) {
     console.error('  ❌ Cache events test failed:', error);
     throw error;
@@ -278,7 +282,6 @@ async function testErrorEvents(): Promise<void> {
     }
 
     console.log('  ✅ Error events verified');
-
   } catch (error) {
     console.error('  ❌ Error events test failed:', error);
     throw error;
@@ -293,7 +296,8 @@ async function testEventHandlerIntegration(): Promise<void> {
     console.log('  🔧 Testing event handler integration...');
 
     // Import handlers
-    const { gameAnalyticsHandler, gameCacheHandler, errorReportingHandler } = await import('./handlers');
+    const { gameAnalyticsHandler, gameCacheHandler, errorReportingHandler } =
+      await import('./handlers');
 
     // Emit test events
     const searchEvent = {
@@ -317,12 +321,13 @@ async function testEventHandlerIntegration(): Promise<void> {
     const errorStats = errorReportingHandler.getErrorStatistics();
 
     console.log(`  📊 Handler statistics:`);
-    console.log(`    - Analytics: ${analyticsStats.searchHistory.length} search history entries`);
+    console.log(
+      `    - Analytics: ${analyticsStats.searchHistory.length} search history entries`
+    );
     console.log(`    - Cache: ${cacheStats.totalEntries} cache entries`);
     console.log(`    - Errors: ${errorStats.totalErrors} error entries`);
 
     console.log('  ✅ Event handler integration verified');
-
   } catch (error) {
     console.error('  ❌ Event handler integration test failed:', error);
     throw error;
@@ -336,7 +341,7 @@ if (require.main === module) {
       console.log('\n🎉 BGG Integration Test Suite Completed Successfully!');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('\n❌ BGG Integration Test Suite Failed:', error);
       process.exit(1);
     });

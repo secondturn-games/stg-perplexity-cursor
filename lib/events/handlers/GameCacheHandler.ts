@@ -15,13 +15,16 @@ import {
 } from '../BGGEvents';
 
 export class GameCacheHandler {
-  private cacheStats: Map<string, {
-    hits: number;
-    misses: number;
-    lastAccess: string;
-    size: number;
-  }> = new Map();
-  
+  private cacheStats: Map<
+    string,
+    {
+      hits: number;
+      misses: number;
+      lastAccess: string;
+      size: number;
+    }
+  > = new Map();
+
   private evictionHistory: Array<{
     cacheKey: string;
     reason: string;
@@ -39,7 +42,7 @@ export class GameCacheHandler {
     this.handleCacheHit = this.handleCacheHit.bind(this);
     this.handleCacheMiss = this.handleCacheMiss.bind(this);
     this.handleCacheEvicted = this.handleCacheEvicted.bind(this);
-    
+
     // BGG service events
     this.handleGameSearched = this.handleGameSearched.bind(this);
     this.handleGameDetailsFetched = this.handleGameDetailsFetched.bind(this);
@@ -48,13 +51,13 @@ export class GameCacheHandler {
   /**
    * Handle game cached events
    */
-  handleGameCached: EventHandler<GameCachedEvent> = async (event) => {
+  handleGameCached: EventHandler<GameCachedEvent> = async event => {
     try {
       const { cacheKey, dataType, gameId, query, ttl, size } = event.data;
-      
+
       // Track cache entry
       this.trackCacheEntry(cacheKey, dataType, size);
-      
+
       // Log cache operation
       this.logCacheOperation('cached', {
         cacheKey,
@@ -68,22 +71,24 @@ export class GameCacheHandler {
 
       // Update cache statistics
       this.updateCacheStats(cacheKey, 'cached', size);
-
     } catch (error) {
-      console.error('GameCacheHandler: Error handling game cached event:', error);
+      console.error(
+        'GameCacheHandler: Error handling game cached event:',
+        error
+      );
     }
   };
 
   /**
    * Handle cache hit events
    */
-  handleCacheHit: EventHandler<CacheHitEvent> = async (event) => {
+  handleCacheHit: EventHandler<CacheHitEvent> = async event => {
     try {
       const { cacheKey, dataType, gameId, query, age } = event.data;
-      
+
       // Track cache hit
       this.trackCacheHit(cacheKey, age);
-      
+
       // Log cache operation
       this.logCacheOperation('hit', {
         cacheKey,
@@ -96,7 +101,6 @@ export class GameCacheHandler {
 
       // Update cache statistics
       this.updateCacheStats(cacheKey, 'hit');
-
     } catch (error) {
       console.error('GameCacheHandler: Error handling cache hit event:', error);
     }
@@ -105,13 +109,13 @@ export class GameCacheHandler {
   /**
    * Handle cache miss events
    */
-  handleCacheMiss: EventHandler<CacheMissEvent> = async (event) => {
+  handleCacheMiss: EventHandler<CacheMissEvent> = async event => {
     try {
       const { cacheKey, dataType, gameId, query } = event.data;
-      
+
       // Track cache miss
       this.trackCacheMiss(cacheKey);
-      
+
       // Log cache operation
       this.logCacheOperation('miss', {
         cacheKey,
@@ -123,22 +127,24 @@ export class GameCacheHandler {
 
       // Update cache statistics
       this.updateCacheStats(cacheKey, 'miss');
-
     } catch (error) {
-      console.error('GameCacheHandler: Error handling cache miss event:', error);
+      console.error(
+        'GameCacheHandler: Error handling cache miss event:',
+        error
+      );
     }
   };
 
   /**
    * Handle cache evicted events
    */
-  handleCacheEvicted: EventHandler<CacheEvictedEvent> = async (event) => {
+  handleCacheEvicted: EventHandler<CacheEvictedEvent> = async event => {
     try {
       const { cacheKey, dataType, reason, age, size } = event.data;
-      
+
       // Track cache eviction
       this.trackCacheEviction(cacheKey, reason, age, size);
-      
+
       // Log cache operation
       this.logCacheOperation('evicted', {
         cacheKey,
@@ -151,52 +157,63 @@ export class GameCacheHandler {
 
       // Update cache statistics
       this.updateCacheStats(cacheKey, 'evicted');
-
     } catch (error) {
-      console.error('GameCacheHandler: Error handling cache evicted event:', error);
+      console.error(
+        'GameCacheHandler: Error handling cache evicted event:',
+        error
+      );
     }
   };
 
   /**
    * Handle game searched events (for cache optimization)
    */
-  handleGameSearched: EventHandler<GameSearchedEvent> = async (event) => {
+  handleGameSearched: EventHandler<GameSearchedEvent> = async event => {
     try {
       const { query, results, performance } = event.data;
-      
+
       // Analyze cache performance for this search
       this.analyzeSearchCachePerformance(query, performance);
-      
+
       // Suggest cache optimizations
       this.suggestCacheOptimizations(query, results, performance);
-
     } catch (error) {
-      console.error('GameCacheHandler: Error handling game searched event:', error);
+      console.error(
+        'GameCacheHandler: Error handling game searched event:',
+        error
+      );
     }
   };
 
   /**
    * Handle game details fetched events (for cache optimization)
    */
-  handleGameDetailsFetched: EventHandler<GameDetailsFetchedEvent> = async (event) => {
-    try {
-      const { gameId, gameName, performance } = event.data;
-      
-      // Analyze cache performance for this game details fetch
-      this.analyzeGameDetailsCachePerformance(gameId, performance);
-      
-      // Update cache recommendations
-      this.updateCacheRecommendations(gameId, gameName);
+  handleGameDetailsFetched: EventHandler<GameDetailsFetchedEvent> =
+    async event => {
+      try {
+        const { gameId, gameName, performance } = event.data;
 
-    } catch (error) {
-      console.error('GameCacheHandler: Error handling game details fetched event:', error);
-    }
-  };
+        // Analyze cache performance for this game details fetch
+        this.analyzeGameDetailsCachePerformance(gameId, performance);
+
+        // Update cache recommendations
+        this.updateCacheRecommendations(gameId, gameName);
+      } catch (error) {
+        console.error(
+          'GameCacheHandler: Error handling game details fetched event:',
+          error
+        );
+      }
+    };
 
   /**
    * Track cache entry
    */
-  private trackCacheEntry(cacheKey: string, dataType: string, size: number): void {
+  private trackCacheEntry(
+    cacheKey: string,
+    dataType: string,
+    size: number
+  ): void {
     this.cacheStats.set(cacheKey, {
       hits: 0,
       misses: 0,
@@ -237,7 +254,12 @@ export class GameCacheHandler {
   /**
    * Track cache eviction
    */
-  private trackCacheEviction(cacheKey: string, reason: string, age: number, size: number): void {
+  private trackCacheEviction(
+    cacheKey: string,
+    reason: string,
+    age: number,
+    size: number
+  ): void {
     this.evictionHistory.push({
       cacheKey,
       reason,
@@ -257,7 +279,10 @@ export class GameCacheHandler {
   /**
    * Update cache statistics
    */
-  private updateCacheStats(cacheKey: string, operation: 'cached' | 'hit' | 'miss' | 'evicted'): void {
+  private updateCacheStats(
+    cacheKey: string,
+    operation: 'cached' | 'hit' | 'miss' | 'evicted'
+  ): void {
     const stats = this.cacheStats.get(cacheKey);
     if (stats) {
       stats.lastAccess = new Date().toISOString();
@@ -270,10 +295,10 @@ export class GameCacheHandler {
   private analyzeSearchCachePerformance(query: string, performance: any): void {
     const cacheKey = `search:${query}`;
     const stats = this.cacheStats.get(cacheKey);
-    
+
     if (stats) {
       const hitRate = stats.hits / (stats.hits + stats.misses);
-      
+
       if (hitRate < 0.3) {
         this.logCacheOptimization('low_hit_rate', {
           cacheKey,
@@ -287,13 +312,16 @@ export class GameCacheHandler {
   /**
    * Analyze game details cache performance
    */
-  private analyzeGameDetailsCachePerformance(gameId: string, performance: any): void {
+  private analyzeGameDetailsCachePerformance(
+    gameId: string,
+    performance: any
+  ): void {
     const cacheKey = `game:${gameId}`;
     const stats = this.cacheStats.get(cacheKey);
-    
+
     if (stats) {
       const hitRate = stats.hits / (stats.hits + stats.misses);
-      
+
       if (hitRate > 0.8) {
         this.logCacheOptimization('high_hit_rate', {
           cacheKey,
@@ -307,7 +335,11 @@ export class GameCacheHandler {
   /**
    * Suggest cache optimizations
    */
-  private suggestCacheOptimizations(query: string, results: any, performance: any): void {
+  private suggestCacheOptimizations(
+    query: string,
+    results: any,
+    performance: any
+  ): void {
     // Suggest optimizations based on search patterns
     if (performance.cacheHit && performance.queryTime > 100) {
       this.logCacheOptimization('slow_cache_hit', {
@@ -320,7 +352,8 @@ export class GameCacheHandler {
     if (!performance.cacheHit && results.itemsCount === 0) {
       this.logCacheOptimization('empty_result_caching', {
         query: this.sanitizeQuery(query),
-        suggestion: 'Consider caching empty results to avoid repeated API calls',
+        suggestion:
+          'Consider caching empty results to avoid repeated API calls',
       });
     }
   }
@@ -407,7 +440,7 @@ export class GameCacheHandler {
       totalHits += stats.hits;
       totalMisses += stats.misses;
       totalSize += stats.size;
-      
+
       const hitRate = stats.hits / (stats.hits + stats.misses);
       entries.push({
         cacheKey,
@@ -418,8 +451,10 @@ export class GameCacheHandler {
       });
     }
 
-    const hitRate = totalHits + totalMisses > 0 ? totalHits / (totalHits + totalMisses) : 0;
-    const averageSize = this.cacheStats.size > 0 ? totalSize / this.cacheStats.size : 0;
+    const hitRate =
+      totalHits + totalMisses > 0 ? totalHits / (totalHits + totalMisses) : 0;
+    const averageSize =
+      this.cacheStats.size > 0 ? totalSize / this.cacheStats.size : 0;
 
     // Sort by hit rate and take top 20
     const topEntries = entries
