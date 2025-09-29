@@ -367,6 +367,13 @@ export function createServerComponentClient() {
     );
   }
 
+  // Check if service role key is available
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      'SUPABASE_SERVICE_ROLE_KEY is required for server-side operations'
+    );
+  }
+
   return createClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY,

@@ -12,7 +12,8 @@ const envSchema = z.object({
     .min(1, 'Supabase anon key is required'),
   SUPABASE_SERVICE_ROLE_KEY: z
     .string()
-    .min(1, 'Supabase service role key is required'),
+    .min(1, 'Supabase service role key is required')
+    .optional(),
 
   // Application Configuration
   NODE_ENV: z
@@ -79,7 +80,7 @@ export const env = (() => {
       return {
         NEXT_PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co',
         NEXT_PUBLIC_SUPABASE_ANON_KEY: 'placeholder-key',
-        SUPABASE_SERVICE_ROLE_KEY: 'placeholder-service-key',
+        SUPABASE_SERVICE_ROLE_KEY: undefined,
         NODE_ENV: 'production' as const,
         NEXT_PUBLIC_APP_URL: 'https://placeholder.com',
         BGG_API_URL: 'https://www.boardgamegeek.com/xmlapi2',
