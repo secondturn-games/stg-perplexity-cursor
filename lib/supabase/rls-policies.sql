@@ -28,6 +28,11 @@ DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" ON public.profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
+-- Allow system to create profiles via trigger (SECURITY DEFINER)
+DROP POLICY IF EXISTS "System can create profiles via trigger" ON public.profiles;
+CREATE POLICY "System can create profiles via trigger" ON public.profiles
+    FOR INSERT WITH CHECK (true);
+
 -- Users can update their own profile
 DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles

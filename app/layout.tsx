@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
-import { Roboto, Righteous } from 'next/font/google';
+import { Open_Sans, Righteous } from 'next/font/google';
 import { MainLayout } from '@/components/layout';
 import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css';
 
-const roboto = Roboto({
-  weight: ['100', '300', '400', '500', '700', '900'],
+const openSans = Open_Sans({
+  weight: ['400', '600'],
   subsets: ['latin'],
-  variable: '--font-roboto',
+  variable: '--font-open-sans',
 });
 
 const righteous = Righteous({
@@ -74,14 +74,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en' className={`${roboto.variable} ${righteous.variable}`}>
-      <body className={`${roboto.className}`}>
+    <html lang='en' className={`${openSans.variable} ${righteous.variable}`}>
+      <body className={`${openSans.className}`}>
         <AuthProvider>
-          <MainLayout
-            isAuthenticated={false}
-            cartCount={0}
-            currentLanguage='EN'
-          >
+          <MainLayout cartCount={0} currentLanguage='EN'>
             {children}
           </MainLayout>
         </AuthProvider>

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  error?: string;
+  error?: string | undefined;
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(

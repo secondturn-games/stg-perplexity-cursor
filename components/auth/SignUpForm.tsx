@@ -6,7 +6,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { signUpWithEmail, signInWithGoogle } from '@/lib/supabase/client-auth';
+import {
+  signUpWithProfile,
+  signInWithGoogle,
+} from '@/lib/supabase/auth-client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -26,28 +29,11 @@ const signUpSchema = yup.object({
       'Password must contain at least one uppercase letter, one lowercase letter, and one number'
     )
     .required('Password is required'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Passwords must match')
-    .required('Please confirm your password'),
-  username: yup
-    .string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be less than 20 characters')
-    .matches(
-      /^[a-zA-Z0-9_-]+$/,
-      'Username can only contain letters, numbers, hyphens, and underscores'
-    )
-    .required('Username is required'),
   fullName: yup
     .string()
     .min(2, 'Full name must be at least 2 characters')
     .max(50, 'Full name must be less than 50 characters')
     .required('Full name is required'),
-  gdprConsent: yup
-    .boolean()
-    .oneOf([true], 'You must accept the privacy policy and terms of service'),
-  marketingConsent: yup.boolean(),
 });
 
 type SignUpFormData = yup.InferType<typeof signUpSchema>;
@@ -63,7 +49,6 @@ export function SignUpForm({
 }: SignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const { signUp } = useAuth();
@@ -84,6 +69,7 @@ export function SignUpForm({
       setIsLoading(true);
       setError(null);
 
+<<<<<<< Updated upstream
       const { error } = await signUp(
         {
           email: data.email,
@@ -95,6 +81,14 @@ export function SignUpForm({
         },
         redirectTo
       );
+=======
+      const { error } = await signUpWithProfile({
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        gdprConsent: true, // Always true since agreement is shown below form
+      });
+>>>>>>> Stashed changes
 
       if (error) {
         setError(error.message);
@@ -188,6 +182,7 @@ export function SignUpForm({
           </Alert>
         )}
 
+<<<<<<< Updated upstream
         <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
           <div>
             <label
@@ -228,6 +223,25 @@ export function SignUpForm({
               disabled={isLoading}
             />
           </div>
+=======
+        <div>
+          <label
+            htmlFor='fullName'
+            className='block text-sm font-medium text-gray-700 mb-2'
+          >
+            Full Name
+          </label>
+          <Input
+            id='fullName'
+            type='text'
+            autoComplete='name'
+            placeholder='Enter your full name'
+            {...register('fullName')}
+            error={errors.fullName?.message}
+            disabled={isLoading}
+            autoFocus
+          />
+>>>>>>> Stashed changes
         </div>
 
         <div>
@@ -335,6 +349,7 @@ export function SignUpForm({
           )}
         </div>
 
+<<<<<<< Updated upstream
         <div>
           <label
             htmlFor='confirmPassword'
@@ -414,13 +429,15 @@ export function SignUpForm({
           </div>
         </div>
 
+=======
+>>>>>>> Stashed changes
         <Button
           type='submit'
           className='w-full'
           disabled={isLoading}
           loading={isLoading}
         >
-          {isLoading ? 'Creating account...' : 'Create Account'}
+          {isLoading ? 'Creating account...' : 'Sign Up'}
         </Button>
       </form>
 
@@ -439,7 +456,11 @@ export function SignUpForm({
         <div className='mt-6'>
           <Button
             type='button'
+<<<<<<< Updated upstream
             variant='outline'
+=======
+            variant='secondary'
+>>>>>>> Stashed changes
             className='w-full'
             onClick={handleGoogleSignUp}
             disabled={isLoading}

@@ -205,7 +205,11 @@ export function SignInForm({
         <div className='mt-6'>
           <Button
             type='button'
+<<<<<<< Updated upstream
             variant='outline'
+=======
+            variant='secondary'
+>>>>>>> Stashed changes
             className='w-full'
             onClick={handleGoogleSignIn}
             disabled={isLoading}

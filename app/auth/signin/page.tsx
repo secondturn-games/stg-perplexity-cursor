@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 
 export default function SignInPage() {
   return (
-    <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
-      <div className='sm:mx-auto sm:w-full sm:max-w-md'>
-        <div className='text-center'>
+    <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-6 px-4 sm:py-12 sm:px-6 lg:px-8'>
+      <div className='mx-auto w-full max-w-md'>
+        <div className='text-center mb-6'>
           <Link href='/' className='inline-block'>
-            <h1 className='text-4xl font-bold text-primary-600 mb-2'>
+            <h1 className='text-3xl sm:text-4xl font-bold text-primary-600 mb-2'>
               Second Turn Games
             </h1>
           </Link>
@@ -22,10 +22,8 @@ export default function SignInPage() {
             The Baltic marketplace for board game enthusiasts
           </p>
         </div>
-      </div>
 
-      <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
-        <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
+        <div className='bg-white py-6 px-4 shadow rounded-lg sm:py-8 sm:px-10'>
           <SignInForm />
         </div>
       </div>

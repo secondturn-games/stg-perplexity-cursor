@@ -37,7 +37,17 @@ const onboardingSchema = yup.object({
   bio: yup.string().max(500, 'Bio must be less than 500 characters'),
   phone: yup
     .string()
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
+    .optional()
+    .test(
+      'phone-format',
+      'Please enter a valid phone number',
+      function (value) {
+        if (!value || value.trim() === '') {
+          return true; // Allow empty values
+        }
+        return /^[\+]?[1-9][\d]{0,15}$/.test(value);
+      }
+    ),
   showEmail: yup.boolean(),
   showPhone: yup.boolean(),
   showLocation: yup.boolean(),
@@ -65,7 +75,7 @@ export default function OnboardingPage() {
     resolver: yupResolver(onboardingSchema),
     defaultValues: {
       username: '',
-      fullName: user?.user_metadata?.['full_name'] || '',
+      fullName: '',
       location: 'EST',
       bio: '',
       phone: '',
@@ -95,21 +105,19 @@ export default function OnboardingPage() {
       const { error } = await updateProfile({
         username: data.username,
         full_name: data.fullName,
-        ...(data.bio !== undefined && { bio: data.bio }),
+        bio: data.bio || '',
         location: data.location,
-        ...(data.phone !== undefined && { phone: data.phone }),
+        phone: data.phone || '',
         privacy_settings: {
-          ...(data.showEmail !== undefined && { show_email: data.showEmail }),
-          ...(data.showPhone !== undefined && { show_phone: data.showPhone }),
-          ...(data.showLocation !== undefined && {
-            show_location: data.showLocation,
-          }),
+          show_email: data.showEmail || false,
+          show_phone: data.showPhone || false,
+          show_location: data.showLocation || true,
         },
         notification_settings: {
-          ...(data.messages !== undefined && { messages: data.messages }),
-          ...(data.offers !== undefined && { offers: data.offers }),
-          ...(data.listings !== undefined && { listings: data.listings }),
-          ...(data.marketing !== undefined && { marketing: data.marketing }),
+          messages: data.messages || true,
+          offers: data.offers || true,
+          listings: data.listings || true,
+          marketing: data.marketing || false,
         },
       });
 
@@ -159,7 +167,7 @@ export default function OnboardingPage() {
             Welcome to Second Turn Games!
           </h1>
           <p className='text-gray-600'>
-            Let's set up your profile to get you started
+            Complete your profile setup to get started
           </p>
         </div>
 
@@ -227,9 +235,7 @@ export default function OnboardingPage() {
                     type='text'
                     placeholder='Choose a username'
                     {...register('username')}
-                    {...(errors.username?.message && {
-                      error: errors.username.message,
-                    })}
+                    error={errors.username?.message}
                     disabled={isLoading}
                   />
                   <p className='mt-1 text-sm text-gray-500'>
@@ -249,9 +255,7 @@ export default function OnboardingPage() {
                     type='text'
                     placeholder='Enter your full name'
                     {...register('fullName')}
-                    {...(errors.fullName?.message && {
-                      error: errors.fullName.message,
-                    })}
+                    error={errors.fullName?.message}
                     disabled={isLoading}
                   />
                 </div>
@@ -312,9 +316,7 @@ export default function OnboardingPage() {
                 <Select
                   id='location'
                   {...register('location')}
-                  {...(errors.location?.message && {
-                    error: errors.location.message,
-                  })}
+                  error={errors.location?.message}
                   disabled={isLoading}
                 >
                   {locationOptions.map(option => (
@@ -330,27 +332,25 @@ export default function OnboardingPage() {
                   htmlFor='phone'
                   className='block text-sm font-medium text-gray-700 mb-2'
                 >
-                  Phone Number
+                  Phone Number <span className='text-gray-500'>(optional)</span>
                 </label>
                 <Input
                   id='phone'
                   type='tel'
-                  placeholder='Enter your phone number (optional)'
+                  placeholder='Enter your phone number'
                   {...register('phone')}
-                  {...(errors.phone?.message && {
-                    error: errors.phone.message,
-                  })}
+                  error={errors.phone?.message}
                   disabled={isLoading}
                 />
                 <p className='mt-1 text-sm text-gray-500'>
-                  Optional - helps with local meetups and communication
+                  Helps with local meetups and communication
                 </p>
               </div>
 
               <div className='flex justify-between'>
                 <Button
                   type='button'
-                  variant='outline'
+                  variant='secondary'
                   onClick={prevStep}
                   disabled={isLoading}
                 >
@@ -448,6 +448,7 @@ export default function OnboardingPage() {
                   >
                     <span className='text-sm text-gray-700'>
                       Marketing emails and special offers
+                      <span className='text-gray-500'> (optional)</span>
                     </span>
                   </Checkbox>
                 </div>
@@ -456,7 +457,7 @@ export default function OnboardingPage() {
               <div className='flex justify-between'>
                 <Button
                   type='button'
-                  variant='outline'
+                  variant='secondary'
                   onClick={prevStep}
                   disabled={isLoading}
                 >
@@ -473,6 +474,3 @@ export default function OnboardingPage() {
     </div>
   );
 }
-
-// Disable static generation for this page
-export const dynamic = 'force-dynamic';

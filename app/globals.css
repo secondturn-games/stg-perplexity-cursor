@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;1,400;1,600&family=Righteous:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Open Sans', sans-serif;
   }
 
   h1,
@@ -20,31 +20,101 @@
   body {
     @apply bg-background-100 text-gray-900 antialiased;
   }
+
+  /* Typography Hierarchy */
+  h1 {
+    @apply text-3xl font-normal text-primary-500 leading-tight;
+  }
+
+  h2 {
+    @apply text-2xl font-normal text-primary-500 leading-snug;
+  }
+
+  h3 {
+    @apply text-xl font-normal text-primary-500 leading-snug;
+  }
+
+  h4 {
+    @apply text-lg font-normal text-primary-500 leading-snug;
+  }
+
+  h5 {
+    @apply text-base font-semibold text-gray-800 leading-normal;
+  }
+
+  h6 {
+    @apply text-sm font-semibold text-gray-800 leading-normal;
+  }
+
+  /* Body Text */
+  .text-large {
+    @apply text-base text-gray-800 leading-relaxed;
+  }
+
+  .text-regular {
+    @apply text-sm text-gray-800 leading-normal;
+  }
+
+  .text-small {
+    @apply text-xs text-gray-600 leading-snug;
+  }
+
+  .text-caption {
+    @apply text-xs text-gray-600 leading-tight;
+  }
+
+  /* Interactive Text */
+  .text-button {
+    @apply text-sm font-semibold;
+  }
+
+  .text-link {
+    @apply text-sm text-accent-500 hover:text-accent-600 hover:underline;
+  }
+
+  .text-navigation {
+    @apply text-sm font-medium text-primary-500;
+  }
 }
 
 @layer components {
+  /* Primary Button - Vibrant Orange for CTAs only */
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply bg-accent-500 hover:bg-accent-600 active:scale-95 text-white text-button py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2;
   }
 
+  /* Secondary Button - Dark Green outline */
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply bg-transparent border border-primary-500 text-primary-500 hover:bg-primary-50 text-button py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
   }
 
+  /* Tertiary Button - Orange text only */
+  .btn-tertiary {
+    @apply bg-transparent text-accent-500 hover:bg-accent-50 text-button py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2;
+  }
+
+  /* Legacy button classes for backward compatibility */
   .btn-accent {
-    @apply bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2;
+    @apply btn-primary;
   }
 
+  /* Cards - Design System Specs */
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200;
   }
 
+  /* Form Elements - Design System Specs */
   .input-field {
-    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
+    @apply block w-full rounded-md border border-gray-300 px-4 py-3 text-regular focus:border-accent-500 focus:ring-accent-500 focus:ring-1 transition-colors duration-200;
   }
 
   .search-field {
-    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 placeholder:text-gray-400 sm:text-sm;
+    @apply block w-full rounded-md border border-gray-300 px-4 py-3 text-regular focus:border-accent-500 focus:ring-accent-500 focus:ring-1 placeholder:text-gray-400 transition-colors duration-200;
+  }
+
+  /* Labels - Design System Specs */
+  .form-label {
+    @apply block text-xs font-semibold text-gray-800 mb-2;
   }
 }
 

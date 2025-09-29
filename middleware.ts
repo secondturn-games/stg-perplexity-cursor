@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from '@/lib/supabase';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -48,12 +48,27 @@ export async function middleware(request: NextRequest) {
 
   try {
     // Create Supabase client for middleware
-    const supabase = createMiddlewareClient();
+    const supabase = createServerClient(
+      process.env['NEXT_PUBLIC_SUPABASE_URL']!,
+      process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value);
+            });
+          },
+        },
+      }
+    );
 
-    // Refresh session if needed
+    // Get authenticated user (more secure than getSession)
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // Check if the current route is protected
     const isProtectedRoute = protectedRoutes.some(route =>
@@ -74,19 +89,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // Handle protected routes
-    if (isProtectedRoute && !session) {
+    if (isProtectedRoute && !user) {
       const redirectUrl = new URL('/auth/signin', request.url);
       redirectUrl.searchParams.set('redirect_to', pathname);
       return NextResponse.redirect(redirectUrl);
     }
 
     // Handle auth routes - redirect authenticated users
-    if (isAuthRoute && session) {
+    if (isAuthRoute && user) {
       // Check if user has completed onboarding
       const { data: profile } = await supabase
         .from('profiles')
         .select('username, full_name')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
 
       if (!(profile as any)?.username || !(profile as any)?.full_name) {
@@ -99,11 +114,11 @@ export async function middleware(request: NextRequest) {
     }
 
     // Handle onboarding redirect for authenticated users without complete profile
-    if (session && !pathname.startsWith('/onboarding') && !isAuthRoute) {
+    if (user && !pathname.startsWith('/onboarding') && !isAuthRoute) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('username, full_name')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
 
       if (!(profile as any)?.username || !(profile as any)?.full_name) {
@@ -114,7 +129,7 @@ export async function middleware(request: NextRequest) {
     // For API routes, we might want different handling
     if (pathname.startsWith('/api/')) {
       // Handle API route protection
-      return handleApiRoute(request, session);
+      return handleApiRoute(request, user);
     }
 
     // Continue with the request
@@ -138,7 +153,7 @@ export async function middleware(request: NextRequest) {
 /**
  * Handle API route protection
  */
-async function handleApiRoute(request: NextRequest, session: any) {
+async function handleApiRoute(request: NextRequest, user: any) {
   const { pathname } = request.nextUrl;
 
   // Public API routes that don't require authentication
@@ -165,8 +180,8 @@ async function handleApiRoute(request: NextRequest, session: any) {
     pathname.startsWith(route)
   );
 
-  // If it's a protected API route and no session, return 401
-  if (isProtectedApiRoute && !session) {
+  // If it's a protected API route and no user, return 401
+  if (isProtectedApiRoute && !user) {
     return NextResponse.json(
       { error: 'Authentication required' },
       { status: 401 }

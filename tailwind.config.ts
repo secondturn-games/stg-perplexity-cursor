@@ -63,7 +63,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Roboto', 'sans-serif'],
+        sans: ['Open Sans', 'sans-serif'],
         heading: ['Righteous', 'cursive'],
       },
       spacing: {

@@ -1,4 +1,10 @@
+'use client';
+
+import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
+
 export default function HomePage() {
+  const { user, loading } = useAuth();
   return (
     <div className='bg-background-100 min-h-screen'>
       {/* Hero Section */}
@@ -16,18 +22,24 @@ export default function HomePage() {
               Connect with local gamers and discover your next favorite game.
             </p>
             <div className='flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4'>
-              <a
-                href='/marketplace'
-                className='btn-primary bg-white text-primary-600 hover:bg-gray-100'
-              >
+              <Link href='/marketplace' className='btn-primary'>
                 Browse Games
-              </a>
-              <a
-                href='/sell'
-                className='btn-secondary border-white text-white hover:bg-white hover:text-primary-600'
-              >
-                Sell a Game
-              </a>
+              </Link>
+              {user ? (
+                <Link
+                  href='/sell'
+                  className='btn-secondary border-white text-white hover:bg-white hover:text-primary-600'
+                >
+                  Sell a Game
+                </Link>
+              ) : (
+                <Link
+                  href='/auth/signup'
+                  className='btn-secondary border-white text-white hover:bg-white hover:text-primary-600'
+                >
+                  Join Now
+                </Link>
+              )}
             </div>
           </div>
         </div>

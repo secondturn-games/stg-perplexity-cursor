@@ -1,5 +1,13 @@
-import { createClientComponentClient } from '@/lib/supabase';
-import { STORAGE_BUCKETS } from '@/lib/supabase';
+import { createClientClient } from '@/lib/supabase';
+
+/**
+ * Storage bucket names
+ */
+export const STORAGE_BUCKETS = {
+  LISTING_IMAGES: 'listing-images',
+  PROFILE_AVATARS: 'profile-avatars',
+  GAME_IMAGES: 'game-images',
+} as const;
 
 /**
  * Storage utilities for Supabase Storage
@@ -21,7 +29,7 @@ export interface UploadResult {
  * Storage helper class
  */
 export class StorageService {
-  private supabase = createClientComponentClient();
+  private supabase = createClientClient();
 
   /**
    * Upload file to storage bucket

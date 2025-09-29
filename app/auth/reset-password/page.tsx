@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
-import { createClientComponentClient } from '@/lib/supabase';
+import { resetPassword } from '@/lib/supabase/auth-client';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
@@ -23,7 +23,6 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
 
   const {
     register,
@@ -38,9 +37,7 @@ export default function ResetPasswordPage() {
       setIsLoading(true);
       setError(null);
 
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
-      });
+      const { error } = await resetPassword(data.email);
 
       if (error) {
         setError(error.message);
@@ -99,7 +96,7 @@ export default function ResetPasswordPage() {
             <div className='flex space-x-4'>
               <Button
                 onClick={() => setSuccess(false)}
-                variant='outline'
+                variant='secondary'
                 className='flex-1'
               >
                 Try Again
@@ -164,7 +161,7 @@ export default function ResetPasswordPage() {
                 autoComplete='email'
                 placeholder='Enter your email'
                 {...register('email')}
-                {...(errors.email?.message && { error: errors.email.message })}
+                error={errors.email?.message}
                 disabled={isLoading}
               />
             </div>
@@ -195,6 +192,3 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
-
-// Disable static generation for this page
-export const dynamic = 'force-dynamic';

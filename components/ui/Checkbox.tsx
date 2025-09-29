@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 export interface CheckboxProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-  error?: string;
+  error?: string | undefined;
   children?: React.ReactNode;
 }
 

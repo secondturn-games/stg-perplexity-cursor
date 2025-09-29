@@ -8,9 +8,14 @@ import {
   ReactNode,
 } from 'react';
 import { User } from '@supabase/supabase-js';
-import { createClientComponentClient } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { Profile } from '@/types/database.types';
-import { getProfile, createProfile } from '@/lib/supabase/client-auth';
+import {
+  getProfile,
+  createProfile,
+  createOrUpdateProfile,
+  updateProfile as updateProfileClient,
+} from '@/lib/supabase/auth-client';
 
 interface AuthContextType {
   user: User | null;
@@ -43,9 +48,9 @@ interface SignUpData {
 interface ProfileUpdateData {
   username?: string;
   full_name?: string;
-  bio?: string;
-  location?: string;
-  phone?: string;
+  bio?: string | null;
+  location?: 'EST' | 'LVA' | 'LTU' | 'EU' | 'OTHER' | null;
+  phone?: string | null;
   privacy_settings?: {
     show_email?: boolean;
     show_phone?: boolean;
@@ -65,7 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env['NEXT_PUBLIC_SUPABASE_URL']!,
+    process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!
+  );
 
   useEffect(() => {
     // Get initial session
@@ -98,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
       }
 
+      // Only set loading to false after profile loading is complete
       setLoading(false);
     });
 
@@ -108,12 +117,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await getProfile(userId);
       if (error) {
+        // If profile doesn't exist (PGRST116), that's expected for new users
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found - user needs to complete onboarding');
+          setProfile(null);
+          return;
+        }
         console.error('Error loading profile:', error);
+        setProfile(null);
         return;
       }
+
+      // Check if profile is complete (has username and full_name)
+      if (data && (!data.username || !data.full_name)) {
+        console.log('Profile incomplete - user needs to complete onboarding');
+        setProfile(null);
+        return;
+      }
+
       setProfile(data);
     } catch (error) {
       console.error('Error loading profile:', error);
+      setProfile(null);
     }
   };
 
@@ -175,10 +200,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: { message: 'No user logged in' } };
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(data as never)
-      .eq('id', user.id);
+    // Use createOrUpdateProfile to handle both creation and updates
+    const { error } = await createOrUpdateProfile({
+      username: data.username || '',
+      full_name: data.full_name || '',
+      bio: data.bio || null,
+      location: data.location || null,
+      phone: data.phone || null,
+      privacy_settings: data.privacy_settings || {},
+      notification_settings: data.notification_settings || {},
+    });
 
     if (error) {
       return { error };
