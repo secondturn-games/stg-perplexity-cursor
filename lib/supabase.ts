@@ -428,7 +428,7 @@ export const db = {
     profile: Database['public']['Tables']['profiles']['Insert']
   ) => {
     const supabase = createServerComponentClient();
-    return supabase.from('profiles').insert(profile);
+    return supabase.from('profiles').insert(profile as never);
   },
 
   /**
@@ -439,7 +439,10 @@ export const db = {
     updates: Database['public']['Tables']['profiles']['Update']
   ) => {
     const supabase = createServerComponentClient();
-    return supabase.from('profiles').update(updates).eq('user_id', userId);
+    return supabase
+      .from('profiles')
+      .update(updates as never)
+      .eq('user_id', userId);
   },
 
   /**
@@ -515,7 +518,7 @@ export const db = {
     listing: Database['public']['Tables']['listings']['Insert']
   ) => {
     const supabase = createServerComponentClient();
-    return supabase.from('listings').insert(listing);
+    return supabase.from('listings').insert(listing as never);
   },
 };
 
@@ -550,14 +553,16 @@ export const auth = {
     email: string,
     password: string,
     options?: {
-      data?: Record<string, any>;
+      emailRedirectTo?: string;
+      data?: object;
+      captchaToken?: string;
     }
   ) => {
     const supabase = createClientComponentClient();
     return supabase.auth.signUp({
       email,
       password,
-      options,
+      ...(options && { options }),
     });
   },
 

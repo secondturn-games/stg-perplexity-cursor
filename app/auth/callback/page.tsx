@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
     const handleAuthCallback = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           setError(error.message);
           setLoading(false);
@@ -64,18 +64,18 @@ export default function AuthCallbackPage() {
     };
 
     handleAuthCallback();
-  }, [supabase.auth, router, searchParams]);
+  }, [supabase, router, searchParams]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+      <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+        <div className='sm:mx-auto sm:w-full sm:max-w-md'>
+          <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4'></div>
+            <h2 className='text-xl font-semibold text-gray-900 mb-2'>
               Completing sign in...
             </h2>
-            <p className="text-gray-600">
+            <p className='text-gray-600'>
               Please wait while we set up your account.
             </p>
           </div>
@@ -86,23 +86,23 @@ export default function AuthCallbackPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <Alert variant="error" className="mb-6">
+      <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+        <div className='sm:mx-auto sm:w-full sm:max-w-md'>
+          <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
+            <Alert variant='error' className='mb-6'>
               {error}
             </Alert>
-            <div className="flex space-x-4">
+            <div className='flex space-x-4'>
               <Button
                 onClick={() => router.push('/auth/signin')}
-                className="flex-1"
+                className='flex-1'
               >
                 Try Again
               </Button>
               <Button
-                variant="outline"
+                variant='outline'
                 onClick={() => router.push('/')}
-                className="flex-1"
+                className='flex-1'
               >
                 Go Home
               </Button>
