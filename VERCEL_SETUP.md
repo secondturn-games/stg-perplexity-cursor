@@ -71,7 +71,7 @@ The following console errors have been resolved:
 These warnings are normal and don't affect functionality:
 
 - **Referrer Policy warning**: This is from Vercel's live feedback system
-- **Partitioned cookie warning**: This is from Vercel's live feedback system  
+- **Partitioned cookie warning**: This is from Vercel's live feedback system
 - **Font preload warnings**: These are optimization suggestions for fonts
 
 ## Testing
