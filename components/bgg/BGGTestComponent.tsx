@@ -367,12 +367,14 @@ export function BGGTestComponent() {
         {gameState.data && (
           <div className='mt-4'>
             <h3 className='font-medium mb-2'>Game Details:</h3>
-            
+
             {/* Debug Information (Development Only) */}
             {process.env.NODE_ENV === 'development' && (
               <div className='mb-4 p-3 bg-gray-100 rounded text-xs'>
                 <details>
-                  <summary className='cursor-pointer font-medium'>Debug: Raw Data Structure</summary>
+                  <summary className='cursor-pointer font-medium'>
+                    Debug: Raw Data Structure
+                  </summary>
                   <pre className='mt-2 whitespace-pre-wrap overflow-auto max-h-40'>
                     {JSON.stringify(gameState.data, null, 2)}
                   </pre>
@@ -384,7 +386,9 @@ export function BGGTestComponent() {
               {/* Basic Information */}
               <div className='space-y-3'>
                 <div className='bg-gray-50 p-4 rounded-lg'>
-                  <h4 className='font-semibold text-gray-900 mb-3'>Basic Information</h4>
+                  <h4 className='font-semibold text-gray-900 mb-3'>
+                    Basic Information
+                  </h4>
                   <div className='space-y-2'>
                     <div>
                       <span className='font-medium text-gray-700'>Name:</span>
@@ -394,35 +398,52 @@ export function BGGTestComponent() {
                     </div>
                     <div>
                       <span className='font-medium text-gray-700'>BGG ID:</span>
-                      <span className='ml-2 text-gray-900'>{gameState.data.id || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className='font-medium text-gray-700'>Year Published:</span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.yearpublished || gameState.data.year_published || 'N/A'}
+                        {gameState.data.id || 'N/A'}
                       </span>
                     </div>
                     <div>
-                      <span className='font-medium text-gray-700'>Players:</span>
+                      <span className='font-medium text-gray-700'>
+                        Year Published:
+                      </span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.playerCount || 
-                         (gameState.data.minplayers && gameState.data.maxplayers 
-                           ? `${gameState.data.minplayers}-${gameState.data.maxplayers}`
-                           : 'N/A')}
+                        {gameState.data.yearpublished ||
+                          gameState.data.year_published ||
+                          'N/A'}
                       </span>
                     </div>
                     <div>
-                      <span className='font-medium text-gray-700'>Playing Time:</span>
+                      <span className='font-medium text-gray-700'>
+                        Players:
+                      </span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.playTimeDisplay || 
-                         (gameState.data.playingtime ? `${gameState.data.playingtime} minutes` : 'N/A')}
+                        {gameState.data.playerCount ||
+                          (gameState.data.minplayers &&
+                          gameState.data.maxplayers
+                            ? `${gameState.data.minplayers}-${gameState.data.maxplayers}`
+                            : 'N/A')}
                       </span>
                     </div>
                     <div>
-                      <span className='font-medium text-gray-700'>Min Age:</span>
+                      <span className='font-medium text-gray-700'>
+                        Playing Time:
+                      </span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.ageDisplay || 
-                         (gameState.data.minage ? `${gameState.data.minage}+` : 'N/A')}
+                        {gameState.data.playTimeDisplay ||
+                          (gameState.data.playingtime
+                            ? `${gameState.data.playingtime} minutes`
+                            : 'N/A')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className='font-medium text-gray-700'>
+                        Min Age:
+                      </span>
+                      <span className='ml-2 text-gray-900'>
+                        {gameState.data.ageDisplay ||
+                          (gameState.data.minage
+                            ? `${gameState.data.minage}+`
+                            : 'N/A')}
                       </span>
                     </div>
                   </div>
@@ -430,27 +451,41 @@ export function BGGTestComponent() {
 
                 {/* BGG Ratings */}
                 <div className='bg-blue-50 p-4 rounded-lg'>
-                  <h4 className='font-semibold text-gray-900 mb-3'>BGG Ratings</h4>
+                  <h4 className='font-semibold text-gray-900 mb-3'>
+                    BGG Ratings
+                  </h4>
                   <div className='space-y-2'>
                     <div>
-                      <span className='font-medium text-gray-700'>BGG Rating:</span>
+                      <span className='font-medium text-gray-700'>
+                        BGG Rating:
+                      </span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.ratingDisplay || 
-                         (gameState.data.bgg_rating ? gameState.data.bgg_rating.toFixed(1) : 'N/A')}
+                        {gameState.data.ratingDisplay ||
+                          (gameState.data.bgg_rating
+                            ? gameState.data.bgg_rating.toFixed(1)
+                            : 'N/A')}
                       </span>
                     </div>
                     <div>
-                      <span className='font-medium text-gray-700'>BGG Rank:</span>
+                      <span className='font-medium text-gray-700'>
+                        BGG Rank:
+                      </span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.rankDisplay || 
-                         (gameState.data.bgg_rank ? `#${gameState.data.bgg_rank}` : 'Unranked')}
+                        {gameState.data.rankDisplay ||
+                          (gameState.data.bgg_rank
+                            ? `#${gameState.data.bgg_rank}`
+                            : 'Unranked')}
                       </span>
                     </div>
                     <div>
-                      <span className='font-medium text-gray-700'>Weight Rating:</span>
+                      <span className='font-medium text-gray-700'>
+                        Weight Rating:
+                      </span>
                       <span className='ml-2 text-gray-900'>
-                        {gameState.data.weightDisplay || 
-                         (gameState.data.weight_rating ? gameState.data.weight_rating.toFixed(1) : 'N/A')}
+                        {gameState.data.weightDisplay ||
+                          (gameState.data.weight_rating
+                            ? gameState.data.weight_rating.toFixed(1)
+                            : 'N/A')}
                       </span>
                     </div>
                   </div>
@@ -460,53 +495,72 @@ export function BGGTestComponent() {
               {/* Categories and Mechanics */}
               <div className='space-y-3'>
                 <div className='bg-green-50 p-4 rounded-lg'>
-                  <h4 className='font-semibold text-gray-900 mb-3'>Categories</h4>
+                  <h4 className='font-semibold text-gray-900 mb-3'>
+                    Categories
+                  </h4>
                   <div className='text-sm text-gray-700'>
-                    {gameState.data.categories && gameState.data.categories.length > 0 ? (
+                    {gameState.data.categories &&
+                    gameState.data.categories.length > 0 ? (
                       <div className='flex flex-wrap gap-1'>
-                        {gameState.data.categories.map((category: string, index: number) => (
-                          <span 
-                            key={index}
-                            className='inline-block bg-green-200 text-green-800 px-2 py-1 rounded text-xs'
-                          >
-                            {category}
-                          </span>
-                        ))}
+                        {gameState.data.categories.map(
+                          (category: string, index: number) => (
+                            <span
+                              key={index}
+                              className='inline-block bg-green-200 text-green-800 px-2 py-1 rounded text-xs'
+                            >
+                              {category}
+                            </span>
+                          )
+                        )}
                       </div>
                     ) : (
-                      <span className='text-gray-500'>No categories available</span>
+                      <span className='text-gray-500'>
+                        No categories available
+                      </span>
                     )}
                   </div>
                 </div>
 
                 <div className='bg-purple-50 p-4 rounded-lg'>
-                  <h4 className='font-semibold text-gray-900 mb-3'>Mechanics</h4>
+                  <h4 className='font-semibold text-gray-900 mb-3'>
+                    Mechanics
+                  </h4>
                   <div className='text-sm text-gray-700'>
-                    {gameState.data.mechanics && gameState.data.mechanics.length > 0 ? (
+                    {gameState.data.mechanics &&
+                    gameState.data.mechanics.length > 0 ? (
                       <div className='flex flex-wrap gap-1'>
-                        {gameState.data.mechanics.map((mechanic: string, index: number) => (
-                          <span 
-                            key={index}
-                            className='inline-block bg-purple-200 text-purple-800 px-2 py-1 rounded text-xs'
-                          >
-                            {mechanic}
-                          </span>
-                        ))}
+                        {gameState.data.mechanics.map(
+                          (mechanic: string, index: number) => (
+                            <span
+                              key={index}
+                              className='inline-block bg-purple-200 text-purple-800 px-2 py-1 rounded text-xs'
+                            >
+                              {mechanic}
+                            </span>
+                          )
+                        )}
                       </div>
                     ) : (
-                      <span className='text-gray-500'>No mechanics available</span>
+                      <span className='text-gray-500'>
+                        No mechanics available
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {/* Designers and Artists */}
-                {(gameState.data.designers?.length > 0 || gameState.data.artists?.length > 0) && (
+                {(gameState.data.designers?.length > 0 ||
+                  gameState.data.artists?.length > 0) && (
                   <div className='bg-yellow-50 p-4 rounded-lg'>
-                    <h4 className='font-semibold text-gray-900 mb-3'>Credits</h4>
+                    <h4 className='font-semibold text-gray-900 mb-3'>
+                      Credits
+                    </h4>
                     <div className='space-y-2 text-sm'>
                       {gameState.data.designers?.length > 0 && (
                         <div>
-                          <span className='font-medium text-gray-700'>Designers:</span>
+                          <span className='font-medium text-gray-700'>
+                            Designers:
+                          </span>
                           <span className='ml-2 text-gray-900'>
                             {gameState.data.designers.join(', ')}
                           </span>
@@ -514,7 +568,9 @@ export function BGGTestComponent() {
                       )}
                       {gameState.data.artists?.length > 0 && (
                         <div>
-                          <span className='font-medium text-gray-700'>Artists:</span>
+                          <span className='font-medium text-gray-700'>
+                            Artists:
+                          </span>
                           <span className='ml-2 text-gray-900'>
                             {gameState.data.artists.join(', ')}
                           </span>
@@ -531,13 +587,15 @@ export function BGGTestComponent() {
                     <div className='space-y-2'>
                       {gameState.data.thumbnail && (
                         <div>
-                          <span className='font-medium text-gray-700'>Thumbnail:</span>
+                          <span className='font-medium text-gray-700'>
+                            Thumbnail:
+                          </span>
                           <div className='mt-1'>
-                            <img 
-                              src={gameState.data.thumbnail} 
+                            <img
+                              src={gameState.data.thumbnail}
                               alt={gameState.data.name || 'Game thumbnail'}
                               className='w-16 h-16 object-cover rounded border'
-                              onError={(e) => {
+                              onError={e => {
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
@@ -546,11 +604,13 @@ export function BGGTestComponent() {
                       )}
                       {gameState.data.image && (
                         <div>
-                          <span className='font-medium text-gray-700'>Full Image:</span>
+                          <span className='font-medium text-gray-700'>
+                            Full Image:
+                          </span>
                           <div className='mt-1'>
-                            <a 
-                              href={gameState.data.image} 
-                              target='_blank' 
+                            <a
+                              href={gameState.data.image}
+                              target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 text-sm'
                             >
@@ -568,12 +628,15 @@ export function BGGTestComponent() {
             {/* Description */}
             {gameState.data.description && (
               <div className='mt-6 bg-gray-50 p-4 rounded-lg'>
-                <h4 className='font-semibold text-gray-900 mb-3'>Description</h4>
-                <div 
+                <h4 className='font-semibold text-gray-900 mb-3'>
+                  Description
+                </h4>
+                <div
                   className='text-sm text-gray-700 prose prose-sm max-w-none'
-                  dangerouslySetInnerHTML={{ 
-                    __html: gameState.data.description.substring(0, 500) + 
-                           (gameState.data.description.length > 500 ? '...' : '')
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      gameState.data.description.substring(0, 500) +
+                      (gameState.data.description.length > 500 ? '...' : ''),
                   }}
                 />
               </div>
@@ -581,15 +644,25 @@ export function BGGTestComponent() {
 
             {/* BGG Link */}
             <div className='mt-4 text-center'>
-              <a 
+              <a
                 href={`https://boardgamegeek.com/boardgame/${gameState.data.id}`}
                 target='_blank'
                 rel='noopener noreferrer'
                 className='inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
               >
                 <span>View on BoardGameGeek</span>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' />
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
+                  />
                 </svg>
               </a>
             </div>

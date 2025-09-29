@@ -89,11 +89,12 @@ export async function middleware(request: NextRequest) {
         .eq('id', session.user.id)
         .single();
 
-      if (!profile?.username || !profile?.full_name) {
+      if (!(profile as any)?.username || !(profile as any)?.full_name) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
 
-      const redirectTo = request.nextUrl.searchParams.get('redirect_to') || '/dashboard';
+      const redirectTo =
+        request.nextUrl.searchParams.get('redirect_to') || '/dashboard';
       return NextResponse.redirect(new URL(redirectTo, request.url));
     }
 
@@ -105,7 +106,7 @@ export async function middleware(request: NextRequest) {
         .eq('id', session.user.id)
         .single();
 
-      if (!profile?.username || !profile?.full_name) {
+      if (!(profile as any)?.username || !(profile as any)?.full_name) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
     }

@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'
   ),
   openGraph: {
     title: 'Second Turn Games - Baltic Board Game Marketplace',
@@ -77,7 +77,11 @@ export default function RootLayout({
     <html lang='en' className={`${roboto.variable} ${righteous.variable}`}>
       <body className={`${roboto.className}`}>
         <AuthProvider>
-          <MainLayout isAuthenticated={false} cartCount={0} currentLanguage='EN'>
+          <MainLayout
+            isAuthenticated={false}
+            cartCount={0}
+            currentLanguage='EN'
+          >
             {children}
           </MainLayout>
         </AuthProvider>

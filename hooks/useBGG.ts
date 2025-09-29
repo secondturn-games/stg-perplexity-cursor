@@ -102,7 +102,7 @@ export function useBGG(): UseBGGReturn {
         if (!response.ok) {
           const errorData = await response.json();
           console.error('API Error Response:', errorData);
-          
+
           // Handle BGG-specific error format
           if (errorData.error && typeof errorData.error === 'object') {
             const bggError = new BGGError(
@@ -114,7 +114,7 @@ export function useBGG(): UseBGGReturn {
             );
             throw bggError;
           }
-          
+
           // Handle simple error format
           throw new Error(errorData.error || `HTTP ${response.status}`);
         }
@@ -151,18 +151,21 @@ export function useBGG(): UseBGGReturn {
           let errorMessage = 'Unknown error';
           if (typeof error === 'string') {
             errorMessage = error;
-        } else if (error && typeof error === 'object') {
-          // Try to extract meaningful error information
-          if ('message' in error && typeof error.message === 'string') {
-            errorMessage = error.message;
-          } else if ('error' in error && typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if ('details' in error && typeof error.details === 'string') {
-            errorMessage = error.details;
-          } else {
-            errorMessage = JSON.stringify(error, null, 2);
+          } else if (error && typeof error === 'object') {
+            // Try to extract meaningful error information
+            if ('message' in error && typeof error.message === 'string') {
+              errorMessage = error.message;
+            } else if ('error' in error && typeof error.error === 'string') {
+              errorMessage = error.error;
+            } else if (
+              'details' in error &&
+              typeof error.details === 'string'
+            ) {
+              errorMessage = error.details;
+            } else {
+              errorMessage = JSON.stringify(error, null, 2);
+            }
           }
-        }
 
           const errorObj = new Error(errorMessage);
           bggError = new BGGError('BGG_ERROR', errorMessage, errorObj);

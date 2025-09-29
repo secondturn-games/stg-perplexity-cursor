@@ -13,13 +13,16 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "check-env": "node scripts/check-env.js"
   },
   "dependencies": {
     "next": "^15.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@supabase/supabase-js": "^2.38.0",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@heroicons/react": "^2.0.18",
     "@hookform/resolvers": "^3.3.2",
     "react-hook-form": "^7.48.2",
     "yup": "^1.4.0",

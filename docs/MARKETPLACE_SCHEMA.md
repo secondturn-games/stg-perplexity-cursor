@@ -42,6 +42,7 @@ CREATE TABLE profiles (
 ```
 
 **Key Features:**
+
 - Baltic location support (EST/LVA/LTU)
 - Reputation system for user trust
 - Privacy and notification preferences
@@ -81,6 +82,7 @@ CREATE TABLE games (
 ```
 
 **Key Features:**
+
 - Full BGG integration with caching
 - Array fields for categories, mechanics, designers
 - Search-optimized with trigram indexes
@@ -121,6 +123,7 @@ CREATE TABLE listings (
 ```
 
 **Key Features:**
+
 - EUR currency for Baltic market
 - Comprehensive shipping options
 - Soft delete for GDPR compliance
@@ -150,6 +153,7 @@ CREATE TABLE conversations (
 ```
 
 **Key Features:**
+
 - One conversation per listing per buyer
 - Separate unread counts for buyer/seller
 - Individual archiving by participants
@@ -175,6 +179,7 @@ CREATE TABLE messages (
 ```
 
 **Key Features:**
+
 - Multiple message types (text, offer, image, system)
 - Metadata for structured data (offers, attachments)
 - Read status tracking
@@ -200,6 +205,7 @@ CREATE TABLE user_ratings (
 ```
 
 **Key Features:**
+
 - One rating per transaction
 - Verified purchase tracking
 - Comment system for detailed feedback
@@ -224,6 +230,7 @@ CREATE TABLE wishlists (
 ```
 
 **Key Features:**
+
 - Price alerts with maximum price
 - Condition preferences (new, like_new, etc.)
 - Location-based filtering
@@ -253,6 +260,7 @@ CREATE TABLE payments (
 ```
 
 **Key Features:**
+
 - Support for MakeCommerce and Stripe
 - EUR currency for Baltic market
 - Comprehensive status tracking
@@ -261,31 +269,37 @@ CREATE TABLE payments (
 ## Enums
 
 ### Listing Condition
+
 ```sql
 CREATE TYPE listing_condition AS ENUM ('new', 'like_new', 'very_good', 'good', 'fair', 'poor');
 ```
 
 ### Message Type
+
 ```sql
 CREATE TYPE message_type AS ENUM ('text', 'offer', 'image', 'system');
 ```
 
 ### Payment Status
+
 ```sql
 CREATE TYPE payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'cancelled', 'refunded');
 ```
 
 ### Payment Provider
+
 ```sql
 CREATE TYPE payment_provider AS ENUM ('makecommerce', 'stripe');
 ```
 
 ### User Location
+
 ```sql
 CREATE TYPE user_location AS ENUM ('EST', 'LVA', 'LTU', 'EU', 'OTHER');
 ```
 
 ### Shipping Method
+
 ```sql
 CREATE TYPE shipping_method AS ENUM ('pickup', 'courier', 'post', 'international');
 ```
@@ -350,68 +364,86 @@ CREATE INDEX idx_profiles_reputation ON profiles(reputation_score DESC);
 All tables have comprehensive RLS policies for GDPR compliance and data security:
 
 #### Profiles
+
 - Public read access for marketplace visibility
 - Users can only modify their own profiles
 
 #### Games
+
 - Public read access for all games
 - Admin-only write access
 
 #### Listings
+
 - Public read access for active listings
 - Users can only manage their own listings
 
 #### Conversations & Messages
+
 - Users can only access conversations they participate in
 - Message sending restricted to conversation participants
 
 #### User Ratings
+
 - Public read access for transparency
 - Users can only rate others after completed transactions
 - Users can modify/delete their own ratings
 
 #### Wishlists
+
 - Users can only access their own wishlists
 
 #### Payments
+
 - Users can only access their own payment records
 
 ## GDPR Compliance
 
 ### Data Export
+
 The `export_user_data()` function provides complete data export for GDPR Article 20 (Right to data portability).
 
 ### Data Anonymization
+
 The `anonymize_user_data()` function provides data anonymization for GDPR Article 17 (Right to erasure) while preserving marketplace integrity.
 
 ### Soft Deletes
+
 Listings use soft deletes (`deleted_at`) to maintain data integrity while respecting user deletion requests.
 
 ## Setup Instructions
 
 ### 1. Initial Setup
+
 Run the basic database setup first:
+
 ```bash
 # Run in Supabase SQL Editor
 \i scripts/setup-database.sql
 ```
 
 ### 2. Marketplace Schema
+
 Apply the complete marketplace schema:
+
 ```bash
 # Run in Supabase SQL Editor
 \i scripts/marketplace-schema.sql
 ```
 
 ### 3. Migration (if upgrading)
+
 If you have existing data, use the migration script:
+
 ```bash
 # Run in Supabase SQL Editor
 \i scripts/migrations/001_initial_marketplace_schema.sql
 ```
 
 ### 4. RLS Policies
+
 Apply the security policies:
+
 ```bash
 # Run in Supabase SQL Editor
 \i lib/supabase/rls-policies.sql
@@ -420,27 +452,27 @@ Apply the security policies:
 ## Usage Examples
 
 ### Creating a Listing
+
 ```typescript
-const { data, error } = await supabase
-  .from('listings')
-  .insert({
-    game_id: 'game-uuid',
-    seller_id: user.id,
-    title: 'Catan - Like New',
-    description: 'Played only twice, excellent condition',
-    condition: 'like_new',
-    price: 35.00,
-    currency: 'EUR',
-    location: 'Tallinn, Estonia',
-    images: ['https://example.com/image1.jpg'],
-    shipping_options: {
-      pickup: { available: true, cost: 0 },
-      courier: { available: true, cost: 5.00, regions: ['EST', 'LVA'] }
-    }
-  });
+const { data, error } = await supabase.from('listings').insert({
+  game_id: 'game-uuid',
+  seller_id: user.id,
+  title: 'Catan - Like New',
+  description: 'Played only twice, excellent condition',
+  condition: 'like_new',
+  price: 35.0,
+  currency: 'EUR',
+  location: 'Tallinn, Estonia',
+  images: ['https://example.com/image1.jpg'],
+  shipping_options: {
+    pickup: { available: true, cost: 0 },
+    courier: { available: true, cost: 5.0, regions: ['EST', 'LVA'] },
+  },
+});
 ```
 
 ### Searching Games
+
 ```typescript
 const { data, error } = await supabase
   .from('games')
@@ -452,43 +484,44 @@ const { data, error } = await supabase
 ```
 
 ### Creating a Conversation
+
 ```typescript
-const { data, error } = await supabase
-  .from('conversations')
-  .insert({
-    listing_id: 'listing-uuid',
-    buyer_id: user.id,
-    seller_id: 'seller-uuid'
-  });
+const { data, error } = await supabase.from('conversations').insert({
+  listing_id: 'listing-uuid',
+  buyer_id: user.id,
+  seller_id: 'seller-uuid',
+});
 ```
 
 ### Adding a Rating
+
 ```typescript
-const { data, error } = await supabase
-  .from('user_ratings')
-  .insert({
-    rated_user_id: 'seller-uuid',
-    rater_user_id: user.id,
-    listing_id: 'listing-uuid',
-    rating: 5,
-    comment: 'Great seller, fast shipping!',
-    is_verified_purchase: true
-  });
+const { data, error } = await supabase.from('user_ratings').insert({
+  rated_user_id: 'seller-uuid',
+  rater_user_id: user.id,
+  listing_id: 'listing-uuid',
+  rating: 5,
+  comment: 'Great seller, fast shipping!',
+  is_verified_purchase: true,
+});
 ```
 
 ## Performance Considerations
 
 ### Query Optimization
+
 - Use indexes for filtering and sorting
 - Limit result sets with pagination
 - Use select() to fetch only needed columns
 
 ### Caching Strategy
+
 - Games table caches BGG data to avoid API calls
 - Consider Redis for frequently accessed data
 - Use Supabase's built-in caching for real-time subscriptions
 
 ### Monitoring
+
 - Monitor query performance with Supabase dashboard
 - Set up alerts for slow queries
 - Track RLS policy performance
@@ -496,16 +529,19 @@ const { data, error } = await supabase
 ## Security Best Practices
 
 ### Authentication
+
 - Always validate user authentication before database operations
 - Use Supabase's built-in auth helpers
 - Implement proper session management
 
 ### Data Validation
+
 - Validate all inputs on both client and server
 - Use TypeScript for type safety
 - Implement proper error handling
 
 ### Privacy
+
 - Respect user privacy settings
 - Implement proper consent mechanisms
 - Regular data retention audits
@@ -513,17 +549,20 @@ const { data, error } = await supabase
 ## Maintenance
 
 ### Regular Tasks
+
 - Monitor database performance
 - Update BGG data regularly
 - Clean up expired listings
 - Archive old conversations
 
 ### Backup Strategy
+
 - Regular database backups
 - Test restore procedures
 - Monitor backup integrity
 
 ### Updates
+
 - Keep Supabase client libraries updated
 - Monitor for schema changes
 - Test migrations in staging first

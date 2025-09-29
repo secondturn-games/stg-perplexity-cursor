@@ -20,558 +20,576 @@ export interface Database {
     Tables: {
       profiles: {
         Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string
-          email_verified: boolean
-          full_name: string | null
-          id: string
-          is_verified: boolean
-          last_active_at: string
-          location: Database['public']['Enums']['user_location'] | null
-          notification_settings: Json
-          phone: string | null
-          phone_verified: boolean
-          privacy_settings: Json
-          reputation_score: number
-          updated_at: string
-          username: string
-        }
+          avatar_url: string | null;
+          bio: string | null;
+          created_at: string;
+          email_verified: boolean;
+          full_name: string | null;
+          id: string;
+          is_verified: boolean;
+          last_active_at: string;
+          location: Database['public']['Enums']['user_location'] | null;
+          notification_settings: Json;
+          phone: string | null;
+          phone_verified: boolean;
+          privacy_settings: Json;
+          reputation_score: number;
+          updated_at: string;
+          username: string;
+        };
         Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          email_verified?: boolean
-          full_name?: string | null
-          id: string
-          is_verified?: boolean
-          last_active_at?: string
-          location?: Database['public']['Enums']['user_location'] | null
-          notification_settings?: Json
-          phone?: string | null
-          phone_verified?: boolean
-          privacy_settings?: Json
-          reputation_score?: number
-          updated_at?: string
-          username: string
-        }
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          email_verified?: boolean;
+          full_name?: string | null;
+          id: string;
+          is_verified?: boolean;
+          last_active_at?: string;
+          location?: Database['public']['Enums']['user_location'] | null;
+          notification_settings?: Json;
+          phone?: string | null;
+          phone_verified?: boolean;
+          privacy_settings?: Json;
+          reputation_score?: number;
+          updated_at?: string;
+          username: string;
+        };
         Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          email_verified?: boolean
-          full_name?: string | null
-          id?: string
-          is_verified?: boolean
-          last_active_at?: string
-          location?: Database['public']['Enums']['user_location'] | null
-          notification_settings?: Json
-          phone?: string | null
-          phone_verified?: boolean
-          privacy_settings?: Json
-          reputation_score?: number
-          updated_at?: string
-          username?: string
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          email_verified?: boolean;
+          full_name?: string | null;
+          id?: string;
+          is_verified?: boolean;
+          last_active_at?: string;
+          location?: Database['public']['Enums']['user_location'] | null;
+          notification_settings?: Json;
+          phone?: string | null;
+          phone_verified?: boolean;
+          privacy_settings?: Json;
+          reputation_score?: number;
+          updated_at?: string;
+          username?: string;
+        };
+        Relationships: [];
+      };
       games: {
         Row: {
-          age_rating: number | null
-          artists: string[]
-          bgg_id: number | null
-          bgg_rank: number | null
-          bgg_rating: number | null
-          categories: string[]
-          complexity_rating: number | null
-          created_at: string
-          description: string | null
-          designers: string[]
-          id: string
-          image_url: string | null
-          languages: string[]
-          last_bgg_sync: string | null
-          max_players: number | null
-          mechanics: string[]
-          min_players: number | null
-          playing_time: number | null
-          publishers: string[]
-          thumbnail_url: string | null
-          title: string
-          updated_at: string
-          weight_rating: number | null
-          year_published: number | null
-        }
+          age_rating: number | null;
+          artists: string[];
+          bgg_id: number | null;
+          bgg_rank: number | null;
+          bgg_rating: number | null;
+          categories: string[];
+          complexity_rating: number | null;
+          created_at: string;
+          description: string | null;
+          designers: string[];
+          id: string;
+          image_url: string | null;
+          languages: string[];
+          last_bgg_sync: string | null;
+          max_players: number | null;
+          mechanics: string[];
+          min_players: number | null;
+          playing_time: number | null;
+          publishers: string[];
+          thumbnail_url: string | null;
+          title: string;
+          updated_at: string;
+          weight_rating: number | null;
+          year_published: number | null;
+        };
         Insert: {
-          age_rating?: number | null
-          artists?: string[]
-          bgg_id?: number | null
-          bgg_rank?: number | null
-          bgg_rating?: number | null
-          categories?: string[]
-          complexity_rating?: number | null
-          created_at?: string
-          description?: string | null
-          designers?: string[]
-          id?: string
-          image_url?: string | null
-          languages?: string[]
-          last_bgg_sync?: string | null
-          max_players?: number | null
-          mechanics?: string[]
-          min_players?: number | null
-          playing_time?: number | null
-          publishers?: string[]
-          thumbnail_url?: string | null
-          title: string
-          updated_at?: string
-          weight_rating?: number | null
-          year_published?: number | null
-        }
+          age_rating?: number | null;
+          artists?: string[];
+          bgg_id?: number | null;
+          bgg_rank?: number | null;
+          bgg_rating?: number | null;
+          categories?: string[];
+          complexity_rating?: number | null;
+          created_at?: string;
+          description?: string | null;
+          designers?: string[];
+          id?: string;
+          image_url?: string | null;
+          languages?: string[];
+          last_bgg_sync?: string | null;
+          max_players?: number | null;
+          mechanics?: string[];
+          min_players?: number | null;
+          playing_time?: number | null;
+          publishers?: string[];
+          thumbnail_url?: string | null;
+          title: string;
+          updated_at?: string;
+          weight_rating?: number | null;
+          year_published?: number | null;
+        };
         Update: {
-          age_rating?: number | null
-          artists?: string[]
-          bgg_id?: number | null
-          bgg_rank?: number | null
-          bgg_rating?: number | null
-          categories?: string[]
-          complexity_rating?: number | null
-          created_at?: string
-          description?: string | null
-          designers?: string[]
-          id?: string
-          image_url?: string | null
-          languages?: string[]
-          last_bgg_sync?: string | null
-          max_players?: number | null
-          mechanics?: string[]
-          min_players?: number | null
-          playing_time?: number | null
-          publishers?: string[]
-          thumbnail_url?: string | null
-          title?: string
-          updated_at?: string
-          weight_rating?: number | null
-          year_published?: number | null
-        }
-        Relationships: []
-      }
+          age_rating?: number | null;
+          artists?: string[];
+          bgg_id?: number | null;
+          bgg_rank?: number | null;
+          bgg_rating?: number | null;
+          categories?: string[];
+          complexity_rating?: number | null;
+          created_at?: string;
+          description?: string | null;
+          designers?: string[];
+          id?: string;
+          image_url?: string | null;
+          languages?: string[];
+          last_bgg_sync?: string | null;
+          max_players?: number | null;
+          mechanics?: string[];
+          min_players?: number | null;
+          playing_time?: number | null;
+          publishers?: string[];
+          thumbnail_url?: string | null;
+          title?: string;
+          updated_at?: string;
+          weight_rating?: number | null;
+          year_published?: number | null;
+        };
+        Relationships: [];
+      };
       listings: {
         Row: {
-          condition: Database['public']['Enums']['listing_condition']
-          created_at: string
-          currency: string
-          deleted_at: string | null
-          description: string | null
-          expires_at: string | null
-          game_id: string
-          id: string
-          images: string[]
-          is_active: boolean
-          is_featured: boolean
-          location: string
-          message_count: number
-          price: number
-          seller_id: string
-          shipping_options: Json
-          sold_at: string | null
-          title: string
-          updated_at: string
-          view_count: number
-        }
+          condition: Database['public']['Enums']['listing_condition'];
+          created_at: string;
+          currency: string;
+          deleted_at: string | null;
+          description: string | null;
+          expires_at: string | null;
+          game_id: string;
+          id: string;
+          images: string[];
+          is_active: boolean;
+          is_featured: boolean;
+          location: string;
+          message_count: number;
+          price: number;
+          seller_id: string;
+          shipping_options: Json;
+          sold_at: string | null;
+          title: string;
+          updated_at: string;
+          view_count: number;
+        };
         Insert: {
-          condition: Database['public']['Enums']['listing_condition']
-          created_at?: string
-          currency?: string
-          deleted_at?: string | null
-          description?: string | null
-          expires_at?: string | null
-          game_id: string
-          id?: string
-          images?: string[]
-          is_active?: boolean
-          is_featured?: boolean
-          location: string
-          message_count?: number
-          price: number
-          seller_id: string
-          shipping_options?: Json
-          sold_at?: string | null
-          title: string
-          updated_at?: string
-          view_count?: number
-        }
+          condition: Database['public']['Enums']['listing_condition'];
+          created_at?: string;
+          currency?: string;
+          deleted_at?: string | null;
+          description?: string | null;
+          expires_at?: string | null;
+          game_id: string;
+          id?: string;
+          images?: string[];
+          is_active?: boolean;
+          is_featured?: boolean;
+          location: string;
+          message_count?: number;
+          price: number;
+          seller_id: string;
+          shipping_options?: Json;
+          sold_at?: string | null;
+          title: string;
+          updated_at?: string;
+          view_count?: number;
+        };
         Update: {
-          condition?: Database['public']['Enums']['listing_condition']
-          created_at?: string
-          currency?: string
-          deleted_at?: string | null
-          description?: string | null
-          expires_at?: string | null
-          game_id?: string
-          id?: string
-          images?: string[]
-          is_active?: boolean
-          is_featured?: boolean
-          location?: string
-          message_count?: number
-          price?: number
-          seller_id?: string
-          shipping_options?: Json
-          sold_at?: string | null
-          title?: string
-          updated_at?: string
-          view_count?: number
-        }
+          condition?: Database['public']['Enums']['listing_condition'];
+          created_at?: string;
+          currency?: string;
+          deleted_at?: string | null;
+          description?: string | null;
+          expires_at?: string | null;
+          game_id?: string;
+          id?: string;
+          images?: string[];
+          is_active?: boolean;
+          is_featured?: boolean;
+          location?: string;
+          message_count?: number;
+          price?: number;
+          seller_id?: string;
+          shipping_options?: Json;
+          sold_at?: string | null;
+          title?: string;
+          updated_at?: string;
+          view_count?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: 'listings_game_id_fkey'
-            columns: ['game_id']
-            isOneToOne: false
-            referencedRelation: 'games'
-            referencedColumns: ['id']
+            foreignKeyName: 'listings_game_id_fkey';
+            columns: ['game_id'];
+            isOneToOne: false;
+            referencedRelation: 'games';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'listings_seller_id_fkey'
-            columns: ['seller_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'listings_seller_id_fkey';
+            columns: ['seller_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       conversations: {
         Row: {
-          buyer_id: string
-          buyer_unread_count: number
-          created_at: string
-          id: string
-          is_archived_by_buyer: boolean
-          is_archived_by_seller: boolean
-          last_message_at: string
-          last_message_preview: string | null
-          listing_id: string
-          seller_id: string
-          seller_unread_count: number
-          updated_at: string
-        }
+          buyer_id: string;
+          buyer_unread_count: number;
+          created_at: string;
+          id: string;
+          is_archived_by_buyer: boolean;
+          is_archived_by_seller: boolean;
+          last_message_at: string;
+          last_message_preview: string | null;
+          listing_id: string;
+          seller_id: string;
+          seller_unread_count: number;
+          updated_at: string;
+        };
         Insert: {
-          buyer_id: string
-          buyer_unread_count?: number
-          created_at?: string
-          id?: string
-          is_archived_by_buyer?: boolean
-          is_archived_by_seller?: boolean
-          last_message_at?: string
-          last_message_preview?: string | null
-          listing_id: string
-          seller_id: string
-          seller_unread_count?: number
-          updated_at?: string
-        }
+          buyer_id: string;
+          buyer_unread_count?: number;
+          created_at?: string;
+          id?: string;
+          is_archived_by_buyer?: boolean;
+          is_archived_by_seller?: boolean;
+          last_message_at?: string;
+          last_message_preview?: string | null;
+          listing_id: string;
+          seller_id: string;
+          seller_unread_count?: number;
+          updated_at?: string;
+        };
         Update: {
-          buyer_id?: string
-          buyer_unread_count?: number
-          created_at?: string
-          id?: string
-          is_archived_by_buyer?: boolean
-          is_archived_by_seller?: boolean
-          last_message_at?: string
-          last_message_preview?: string | null
-          listing_id?: string
-          seller_id?: string
-          seller_unread_count?: number
-          updated_at?: string
-        }
+          buyer_id?: string;
+          buyer_unread_count?: number;
+          created_at?: string;
+          id?: string;
+          is_archived_by_buyer?: boolean;
+          is_archived_by_seller?: boolean;
+          last_message_at?: string;
+          last_message_preview?: string | null;
+          listing_id?: string;
+          seller_id?: string;
+          seller_unread_count?: number;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'conversations_buyer_id_fkey'
-            columns: ['buyer_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'conversations_buyer_id_fkey';
+            columns: ['buyer_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'conversations_listing_id_fkey'
-            columns: ['listing_id']
-            isOneToOne: false
-            referencedRelation: 'listings'
-            referencedColumns: ['id']
+            foreignKeyName: 'conversations_listing_id_fkey';
+            columns: ['listing_id'];
+            isOneToOne: false;
+            referencedRelation: 'listings';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'conversations_seller_id_fkey'
-            columns: ['seller_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'conversations_seller_id_fkey';
+            columns: ['seller_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       messages: {
         Row: {
-          content: string
-          conversation_id: string
-          created_at: string
-          edited_at: string | null
-          id: string
-          is_read: boolean
-          message_type: Database['public']['Enums']['message_type']
-          metadata: Json
-          read_at: string | null
-          sender_id: string
-        }
+          content: string;
+          conversation_id: string;
+          created_at: string;
+          edited_at: string | null;
+          id: string;
+          is_read: boolean;
+          message_type: Database['public']['Enums']['message_type'];
+          metadata: Json;
+          read_at: string | null;
+          sender_id: string;
+        };
         Insert: {
-          content: string
-          conversation_id: string
-          created_at?: string
-          edited_at?: string | null
-          id?: string
-          is_read?: boolean
-          message_type?: Database['public']['Enums']['message_type']
-          metadata?: Json
-          read_at?: string | null
-          sender_id: string
-        }
+          content: string;
+          conversation_id: string;
+          created_at?: string;
+          edited_at?: string | null;
+          id?: string;
+          is_read?: boolean;
+          message_type?: Database['public']['Enums']['message_type'];
+          metadata?: Json;
+          read_at?: string | null;
+          sender_id: string;
+        };
         Update: {
-          content?: string
-          conversation_id?: string
-          created_at?: string
-          edited_at?: string | null
-          id?: string
-          is_read?: boolean
-          message_type?: Database['public']['Enums']['message_type']
-          metadata?: Json
-          read_at?: string | null
-          sender_id?: string
-        }
+          content?: string;
+          conversation_id?: string;
+          created_at?: string;
+          edited_at?: string | null;
+          id?: string;
+          is_read?: boolean;
+          message_type?: Database['public']['Enums']['message_type'];
+          metadata?: Json;
+          read_at?: string | null;
+          sender_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'messages_conversation_id_fkey'
-            columns: ['conversation_id']
-            isOneToOne: false
-            referencedRelation: 'conversations'
-            referencedColumns: ['id']
+            foreignKeyName: 'messages_conversation_id_fkey';
+            columns: ['conversation_id'];
+            isOneToOne: false;
+            referencedRelation: 'conversations';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'messages_sender_id_fkey'
-            columns: ['sender_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'messages_sender_id_fkey';
+            columns: ['sender_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       user_ratings: {
         Row: {
-          comment: string | null
-          created_at: string
-          id: string
-          is_verified_purchase: boolean
-          listing_id: string | null
-          rated_user_id: string
-          rater_user_id: string
-          rating: number
-          updated_at: string
-        }
+          comment: string | null;
+          created_at: string;
+          id: string;
+          is_verified_purchase: boolean;
+          listing_id: string | null;
+          rated_user_id: string;
+          rater_user_id: string;
+          rating: number;
+          updated_at: string;
+        };
         Insert: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          is_verified_purchase?: boolean
-          listing_id?: string | null
-          rated_user_id: string
-          rater_user_id: string
-          rating: number
-          updated_at?: string
-        }
+          comment?: string | null;
+          created_at?: string;
+          id?: string;
+          is_verified_purchase?: boolean;
+          listing_id?: string | null;
+          rated_user_id: string;
+          rater_user_id: string;
+          rating: number;
+          updated_at?: string;
+        };
         Update: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          is_verified_purchase?: boolean
-          listing_id?: string | null
-          rated_user_id?: string
-          rater_user_id?: string
-          rating?: number
-          updated_at?: string
-        }
+          comment?: string | null;
+          created_at?: string;
+          id?: string;
+          is_verified_purchase?: boolean;
+          listing_id?: string | null;
+          rated_user_id?: string;
+          rater_user_id?: string;
+          rating?: number;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'user_ratings_listing_id_fkey'
-            columns: ['listing_id']
-            isOneToOne: false
-            referencedRelation: 'listings'
-            referencedColumns: ['id']
+            foreignKeyName: 'user_ratings_listing_id_fkey';
+            columns: ['listing_id'];
+            isOneToOne: false;
+            referencedRelation: 'listings';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'user_ratings_rated_user_id_fkey'
-            columns: ['rated_user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'user_ratings_rated_user_id_fkey';
+            columns: ['rated_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'user_ratings_rater_user_id_fkey'
-            columns: ['rater_user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'user_ratings_rater_user_id_fkey';
+            columns: ['rater_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       wishlists: {
         Row: {
-          condition_preference: Database['public']['Enums']['listing_condition'][] | null
-          created_at: string
-          game_id: string
-          id: string
-          location_preference: string | null
-          max_price: number | null
-          notification_enabled: boolean
-          user_id: string
-        }
+          condition_preference:
+            | Database['public']['Enums']['listing_condition'][]
+            | null;
+          created_at: string;
+          game_id: string;
+          id: string;
+          location_preference: string | null;
+          max_price: number | null;
+          notification_enabled: boolean;
+          user_id: string;
+        };
         Insert: {
-          condition_preference?: Database['public']['Enums']['listing_condition'][] | null
-          created_at?: string
-          game_id: string
-          id?: string
-          location_preference?: string | null
-          max_price?: number | null
-          notification_enabled?: boolean
-          user_id: string
-        }
+          condition_preference?:
+            | Database['public']['Enums']['listing_condition'][]
+            | null;
+          created_at?: string;
+          game_id: string;
+          id?: string;
+          location_preference?: string | null;
+          max_price?: number | null;
+          notification_enabled?: boolean;
+          user_id: string;
+        };
         Update: {
-          condition_preference?: Database['public']['Enums']['listing_condition'][] | null
-          created_at?: string
-          game_id?: string
-          id?: string
-          location_preference?: string | null
-          max_price?: number | null
-          notification_enabled?: boolean
-          user_id?: string
-        }
+          condition_preference?:
+            | Database['public']['Enums']['listing_condition'][]
+            | null;
+          created_at?: string;
+          game_id?: string;
+          id?: string;
+          location_preference?: string | null;
+          max_price?: number | null;
+          notification_enabled?: boolean;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'wishlists_game_id_fkey'
-            columns: ['game_id']
-            isOneToOne: false
-            referencedRelation: 'games'
-            referencedColumns: ['id']
+            foreignKeyName: 'wishlists_game_id_fkey';
+            columns: ['game_id'];
+            isOneToOne: false;
+            referencedRelation: 'games';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'wishlists_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'wishlists_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       payments: {
         Row: {
-          amount: number
-          conversation_id: string | null
-          created_at: string
-          currency: string
-          id: string
-          listing_id: string | null
-          metadata: Json
-          payment_intent_id: string | null
-          processed_at: string | null
-          provider: Database['public']['Enums']['payment_provider']
-          status: Database['public']['Enums']['payment_status']
-          transaction_id: string | null
-          updated_at: string
-          user_id: string
-        }
+          amount: number;
+          conversation_id: string | null;
+          created_at: string;
+          currency: string;
+          id: string;
+          listing_id: string | null;
+          metadata: Json;
+          payment_intent_id: string | null;
+          processed_at: string | null;
+          provider: Database['public']['Enums']['payment_provider'];
+          status: Database['public']['Enums']['payment_status'];
+          transaction_id: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          amount: number
-          conversation_id?: string | null
-          created_at?: string
-          currency?: string
-          id?: string
-          listing_id?: string | null
-          metadata?: Json
-          payment_intent_id?: string | null
-          processed_at?: string | null
-          provider: Database['public']['Enums']['payment_provider']
-          status?: Database['public']['Enums']['payment_status']
-          transaction_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          amount: number;
+          conversation_id?: string | null;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          listing_id?: string | null;
+          metadata?: Json;
+          payment_intent_id?: string | null;
+          processed_at?: string | null;
+          provider: Database['public']['Enums']['payment_provider'];
+          status?: Database['public']['Enums']['payment_status'];
+          transaction_id?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          amount?: number
-          conversation_id?: string | null
-          created_at?: string
-          currency?: string
-          id?: string
-          listing_id?: string | null
-          metadata?: Json
-          payment_intent_id?: string | null
-          processed_at?: string | null
-          provider?: Database['public']['Enums']['payment_provider']
-          status?: Database['public']['Enums']['payment_status']
-          transaction_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
+          amount?: number;
+          conversation_id?: string | null;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          listing_id?: string | null;
+          metadata?: Json;
+          payment_intent_id?: string | null;
+          processed_at?: string | null;
+          provider?: Database['public']['Enums']['payment_provider'];
+          status?: Database['public']['Enums']['payment_status'];
+          transaction_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'payments_conversation_id_fkey'
-            columns: ['conversation_id']
-            isOneToOne: false
-            referencedRelation: 'conversations'
-            referencedColumns: ['id']
+            foreignKeyName: 'payments_conversation_id_fkey';
+            columns: ['conversation_id'];
+            isOneToOne: false;
+            referencedRelation: 'conversations';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'payments_listing_id_fkey'
-            columns: ['listing_id']
-            isOneToOne: false
-            referencedRelation: 'listings'
-            referencedColumns: ['id']
+            foreignKeyName: 'payments_listing_id_fkey';
+            columns: ['listing_id'];
+            isOneToOne: false;
+            referencedRelation: 'listings';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'payments_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            foreignKeyName: 'payments_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       can_user_rate: {
         Args: {
-          p_listing_id: string
-          p_rated_user_id: string
-          p_rater_user_id: string
-        }
-        Returns: boolean
-      }
+          p_listing_id: string;
+          p_rated_user_id: string;
+          p_rater_user_id: string;
+        };
+        Returns: boolean;
+      };
       export_user_data: {
         Args: {
-          p_user_id: string
-        }
-        Returns: Json
-      }
-    }
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+    };
     Enums: {
-      listing_condition: 'fair' | 'good' | 'like_new' | 'new' | 'poor' | 'very_good'
-      message_type: 'image' | 'offer' | 'system' | 'text'
-      payment_provider: 'makecommerce' | 'stripe'
-      payment_status: 'cancelled' | 'completed' | 'failed' | 'pending' | 'processing' | 'refunded'
-      shipping_method: 'courier' | 'international' | 'pickup' | 'post'
-      user_location: 'EST' | 'EU' | 'LVA' | 'LTU' | 'OTHER'
-    }
+      listing_condition:
+        | 'fair'
+        | 'good'
+        | 'like_new'
+        | 'new'
+        | 'poor'
+        | 'very_good';
+      message_type: 'image' | 'offer' | 'system' | 'text';
+      payment_provider: 'makecommerce' | 'stripe';
+      payment_status:
+        | 'cancelled'
+        | 'completed'
+        | 'failed'
+        | 'pending'
+        | 'processing'
+        | 'refunded';
+      shipping_method: 'courier' | 'international' | 'pickup' | 'post';
+      user_location: 'EST' | 'EU' | 'LVA' | 'LTU' | 'OTHER';
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
 }
 
 // Helper types for common operations
@@ -602,20 +620,26 @@ export type UserLocation = Enums<'user_location'>;
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 export type GameInsert = Database['public']['Tables']['games']['Insert'];
 export type ListingInsert = Database['public']['Tables']['listings']['Insert'];
-export type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
+export type ConversationInsert =
+  Database['public']['Tables']['conversations']['Insert'];
 export type MessageInsert = Database['public']['Tables']['messages']['Insert'];
-export type UserRatingInsert = Database['public']['Tables']['user_ratings']['Insert'];
-export type WishlistInsert = Database['public']['Tables']['wishlists']['Insert'];
+export type UserRatingInsert =
+  Database['public']['Tables']['user_ratings']['Insert'];
+export type WishlistInsert =
+  Database['public']['Tables']['wishlists']['Insert'];
 export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
 
 // Update types
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 export type GameUpdate = Database['public']['Tables']['games']['Update'];
 export type ListingUpdate = Database['public']['Tables']['listings']['Update'];
-export type ConversationUpdate = Database['public']['Tables']['conversations']['Update'];
+export type ConversationUpdate =
+  Database['public']['Tables']['conversations']['Update'];
 export type MessageUpdate = Database['public']['Tables']['messages']['Update'];
-export type UserRatingUpdate = Database['public']['Tables']['user_ratings']['Update'];
-export type WishlistUpdate = Database['public']['Tables']['wishlists']['Update'];
+export type UserRatingUpdate =
+  Database['public']['Tables']['user_ratings']['Update'];
+export type WishlistUpdate =
+  Database['public']['Tables']['wishlists']['Update'];
 export type PaymentUpdate = Database['public']['Tables']['payments']['Update'];
 
 // Utility types for common operations

@@ -7,13 +7,12 @@
 export * from '../supabase';
 
 // Authentication utilities
-export * from './auth';
+export * from './client-auth';
+export * from './server-auth';
 
-// Storage utilities
-export * from './storage';
+// Storage utilities are already exported from the main supabase file
 
 // Error handling
 export * from './errors';
 
-// Database types
-export type * from '../../types/database.types';
+// Database types are already exported from the main supabase file

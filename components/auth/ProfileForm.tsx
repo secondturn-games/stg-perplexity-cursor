@@ -5,7 +5,10 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { updateProfile, updatePassword } from '@/lib/supabase/auth';
+import {
+  updateProfile,
+  updatePasswordWithVerification,
+} from '@/lib/supabase/client-auth';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -29,18 +32,16 @@ const profileSchema = yup.object({
     .min(2, 'Full name must be at least 2 characters')
     .max(50, 'Full name must be less than 50 characters')
     .required('Full name is required'),
-  bio: yup
-    .string()
-    .max(500, 'Bio must be less than 500 characters'),
+  bio: yup.string().max(500, 'Bio must be less than 500 characters'),
   location: yup
     .string()
-    .oneOf(['EST', 'LVA', 'LTU', 'EU', 'OTHER'], 'Please select a valid location'),
+    .oneOf(
+      ['EST', 'LVA', 'LTU', 'EU', 'OTHER'],
+      'Please select a valid location'
+    ),
   phone: yup
     .string()
-    .matches(
-      /^[\+]?[1-9][\d]{0,15}$/,
-      'Please enter a valid phone number'
-    ),
+    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
   showEmail: yup.boolean(),
   showPhone: yup.boolean(),
   showLocation: yup.boolean(),
@@ -51,9 +52,7 @@ const profileSchema = yup.object({
 });
 
 const passwordSchema = yup.object({
-  currentPassword: yup
-    .string()
-    .required('Current password is required'),
+  currentPassword: yup.string().required('Current password is required'),
   newPassword: yup
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -99,13 +98,13 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       bio: profile.bio || '',
       location: profile.location || 'EST',
       phone: profile.phone || '',
-      showEmail: profile.privacy_settings?.show_email || false,
-      showPhone: profile.privacy_settings?.show_phone || false,
-      showLocation: profile.privacy_settings?.show_location || true,
-      messages: profile.notification_settings?.messages || true,
-      offers: profile.notification_settings?.offers || true,
-      listings: profile.notification_settings?.listings || true,
-      marketing: profile.notification_settings?.marketing || false,
+      showEmail: (profile.privacy_settings as any)?.show_email || false,
+      showPhone: (profile.privacy_settings as any)?.show_phone || false,
+      showLocation: (profile.privacy_settings as any)?.show_location || true,
+      messages: (profile.notification_settings as any)?.messages || true,
+      offers: (profile.notification_settings as any)?.offers || true,
+      listings: (profile.notification_settings as any)?.listings || true,
+      marketing: (profile.notification_settings as any)?.marketing || false,
     },
   });
 
@@ -125,13 +124,13 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       bio: profile.bio || '',
       location: profile.location || 'EST',
       phone: profile.phone || '',
-      showEmail: profile.privacy_settings?.show_email || false,
-      showPhone: profile.privacy_settings?.show_phone || false,
-      showLocation: profile.privacy_settings?.show_location || true,
-      messages: profile.notification_settings?.messages || true,
-      offers: profile.notification_settings?.offers || true,
-      listings: profile.notification_settings?.listings || true,
-      marketing: profile.notification_settings?.marketing || false,
+      showEmail: (profile.privacy_settings as any)?.show_email || false,
+      showPhone: (profile.privacy_settings as any)?.show_phone || false,
+      showLocation: (profile.privacy_settings as any)?.show_location || true,
+      messages: (profile.notification_settings as any)?.messages || true,
+      offers: (profile.notification_settings as any)?.offers || true,
+      listings: (profile.notification_settings as any)?.listings || true,
+      marketing: (profile.notification_settings as any)?.marketing || false,
     });
   }, [profile, resetProfile]);
 
@@ -144,22 +143,24 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       const { error } = await updateProfile({
         username: data.username,
         full_name: data.fullName,
-        bio: data.bio,
-        location: data.location,
-        phone: data.phone,
+        ...(data.bio !== undefined && { bio: data.bio }),
+        location: data.location as 'EST' | 'LVA' | 'LTU' | 'EU' | 'OTHER',
+        ...(data.phone !== undefined && { phone: data.phone }),
         privacy_settings: {
-          show_email: data.showEmail,
-          show_phone: data.showPhone,
-          show_location: data.showLocation,
+          ...(data.showEmail !== undefined && { show_email: data.showEmail }),
+          ...(data.showPhone !== undefined && { show_phone: data.showPhone }),
+          ...(data.showLocation !== undefined && {
+            show_location: data.showLocation,
+          }),
         },
         notification_settings: {
-          messages: data.messages,
-          offers: data.offers,
-          listings: data.listings,
-          marketing: data.marketing,
+          ...(data.messages !== undefined && { messages: data.messages }),
+          ...(data.offers !== undefined && { offers: data.offers }),
+          ...(data.listings !== undefined && { listings: data.listings }),
+          ...(data.marketing !== undefined && { marketing: data.marketing }),
         },
       });
-      
+
       if (error) {
         setError(error.message);
         return;
@@ -180,8 +181,11 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       setError(null);
       setSuccess(null);
 
-      const { error } = await updatePassword(data.currentPassword, data.newPassword);
-      
+      const { error } = await updatePasswordWithVerification(
+        data.currentPassword,
+        data.newPassword
+      );
+
       if (error) {
         setError(error.message);
         return;
@@ -205,15 +209,19 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-        <p className="text-gray-600">Manage your account information and preferences</p>
+    <div className='max-w-2xl mx-auto'>
+      <div className='mb-8'>
+        <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+          Profile Settings
+        </h1>
+        <p className='text-gray-600'>
+          Manage your account information and preferences
+        </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-8">
+      <div className='border-b border-gray-200 mb-8'>
+        <nav className='-mb-px flex space-x-8'>
           <button
             onClick={() => setActiveTab('profile')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
@@ -238,82 +246,105 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       </div>
 
       {error && (
-        <Alert variant="error" className="mb-6">
+        <Alert variant='error' className='mb-6'>
           {error}
         </Alert>
       )}
 
       {success && (
-        <Alert variant="success" className="mb-6">
+        <Alert variant='success' className='mb-6'>
           {success}
         </Alert>
       )}
 
       {/* Profile Information Tab */}
       {activeTab === 'profile' && (
-        <form onSubmit={handleProfileSubmit(onProfileSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <form
+          onSubmit={handleProfileSubmit(onProfileSubmit)}
+          className='space-y-6'
+        >
+          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor='username'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
                 Username
               </label>
               <Input
-                id="username"
-                type="text"
-                placeholder="Enter your username"
+                id='username'
+                type='text'
+                placeholder='Enter your username'
                 {...registerProfile('username')}
-                error={profileErrors.username?.message}
+                {...(profileErrors.username?.message && {
+                  error: profileErrors.username.message,
+                })}
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor='fullName'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
                 Full Name
               </label>
               <Input
-                id="fullName"
-                type="text"
-                placeholder="Enter your full name"
+                id='fullName'
+                type='text'
+                placeholder='Enter your full name'
                 {...registerProfile('fullName')}
-                error={profileErrors.fullName?.message}
+                {...(profileErrors.fullName?.message && {
+                  error: profileErrors.fullName.message,
+                })}
                 disabled={isLoading}
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor='bio'
+              className='block text-sm font-medium text-gray-700 mb-2'
+            >
               Bio
             </label>
             <textarea
-              id="bio"
+              id='bio'
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500"
-              placeholder="Tell us about yourself..."
+              className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500'
+              placeholder='Tell us about yourself...'
               {...registerProfile('bio')}
               disabled={isLoading}
             />
             {profileErrors.bio && (
-              <p className="mt-1 text-sm text-red-600">{profileErrors.bio.message}</p>
+              <p className='mt-1 text-sm text-red-600'>
+                {profileErrors.bio.message}
+              </p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
+            <p className='mt-1 text-sm text-gray-500'>
               {profile.bio?.length || 0}/500 characters
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
             <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor='location'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
                 Location
               </label>
               <Select
-                id="location"
+                id='location'
                 {...registerProfile('location')}
-                error={profileErrors.location?.message}
+                {...(profileErrors.location?.message && {
+                  error: profileErrors.location.message,
+                })}
                 disabled={isLoading}
               >
-                {locationOptions.map((option) => (
+                {locationOptions.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -322,91 +353,104 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor='phone'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
                 Phone Number
               </label>
               <Input
-                id="phone"
-                type="tel"
-                placeholder="Enter your phone number"
+                id='phone'
+                type='tel'
+                placeholder='Enter your phone number'
                 {...registerProfile('phone')}
-                error={profileErrors.phone?.message}
+                {...(profileErrors.phone?.message && {
+                  error: profileErrors.phone.message,
+                })}
                 disabled={isLoading}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className='block text-sm font-medium text-gray-700 mb-3'>
               Privacy Settings
             </label>
-            <div className="space-y-3">
+            <div className='space-y-3'>
               <Checkbox
-                id="showEmail"
+                id='showEmail'
                 {...registerProfile('showEmail')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">Show email address on profile</span>
+                <span className='text-sm text-gray-700'>
+                  Show email address on profile
+                </span>
               </Checkbox>
               <Checkbox
-                id="showPhone"
+                id='showPhone'
                 {...registerProfile('showPhone')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">Show phone number on profile</span>
+                <span className='text-sm text-gray-700'>
+                  Show phone number on profile
+                </span>
               </Checkbox>
               <Checkbox
-                id="showLocation"
+                id='showLocation'
                 {...registerProfile('showLocation')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">Show location on profile</span>
+                <span className='text-sm text-gray-700'>
+                  Show location on profile
+                </span>
               </Checkbox>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className='block text-sm font-medium text-gray-700 mb-3'>
               Notification Preferences
             </label>
-            <div className="space-y-3">
+            <div className='space-y-3'>
               <Checkbox
-                id="messages"
+                id='messages'
                 {...registerProfile('messages')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">New messages</span>
+                <span className='text-sm text-gray-700'>New messages</span>
               </Checkbox>
               <Checkbox
-                id="offers"
+                id='offers'
                 {...registerProfile('offers')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">New offers on my listings</span>
+                <span className='text-sm text-gray-700'>
+                  New offers on my listings
+                </span>
               </Checkbox>
               <Checkbox
-                id="listings"
+                id='listings'
                 {...registerProfile('listings')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">Updates about my listings</span>
+                <span className='text-sm text-gray-700'>
+                  Updates about my listings
+                </span>
               </Checkbox>
               <Checkbox
-                id="marketing"
+                id='marketing'
                 {...registerProfile('marketing')}
                 disabled={isLoading}
               >
-                <span className="text-sm text-gray-700">Marketing emails and special offers</span>
+                <span className='text-sm text-gray-700'>
+                  Marketing emails and special offers
+                </span>
               </Checkbox>
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              loading={isLoading}
-            >
+          <div className='flex justify-end'>
+            <Button type='submit' disabled={isLoading} loading={isLoading}>
               {isLoading ? 'Updating...' : 'Update Profile'}
             </Button>
           </div>
@@ -415,100 +459,114 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
 
       {/* Change Password Tab */}
       {activeTab === 'password' && (
-        <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-6">
+        <form
+          onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+          className='space-y-6'
+        >
           <div>
-            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor='currentPassword'
+              className='block text-sm font-medium text-gray-700 mb-2'
+            >
               Current Password
             </label>
-            <div className="relative">
+            <div className='relative'>
               <Input
-                id="currentPassword"
+                id='currentPassword'
                 type={showCurrentPassword ? 'text' : 'password'}
-                placeholder="Enter your current password"
+                placeholder='Enter your current password'
                 {...registerPassword('currentPassword')}
-                error={passwordErrors.currentPassword?.message}
+                {...(passwordErrors.currentPassword?.message && {
+                  error: passwordErrors.currentPassword.message,
+                })}
                 disabled={isLoading}
-                className="pr-10"
+                className='pr-10'
               />
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 disabled={isLoading}
               >
                 {showCurrentPassword ? (
-                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                  <EyeSlashIcon className='h-5 w-5 text-gray-400' />
                 ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
                 )}
               </button>
             </div>
           </div>
 
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor='newPassword'
+              className='block text-sm font-medium text-gray-700 mb-2'
+            >
               New Password
             </label>
-            <div className="relative">
+            <div className='relative'>
               <Input
-                id="newPassword"
+                id='newPassword'
                 type={showNewPassword ? 'text' : 'password'}
-                placeholder="Enter your new password"
+                placeholder='Enter your new password'
                 {...registerPassword('newPassword')}
-                error={passwordErrors.newPassword?.message}
+                {...(passwordErrors.newPassword?.message && {
+                  error: passwordErrors.newPassword.message,
+                })}
                 disabled={isLoading}
-                className="pr-10"
+                className='pr-10'
               />
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
                 onClick={() => setShowNewPassword(!showNewPassword)}
                 disabled={isLoading}
               >
                 {showNewPassword ? (
-                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                  <EyeSlashIcon className='h-5 w-5 text-gray-400' />
                 ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
                 )}
               </button>
             </div>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor='confirmPassword'
+              className='block text-sm font-medium text-gray-700 mb-2'
+            >
               Confirm New Password
             </label>
-            <div className="relative">
+            <div className='relative'>
               <Input
-                id="confirmPassword"
+                id='confirmPassword'
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm your new password"
+                placeholder='Confirm your new password'
                 {...registerPassword('confirmPassword')}
-                error={passwordErrors.confirmPassword?.message}
+                {...(passwordErrors.confirmPassword?.message && {
+                  error: passwordErrors.confirmPassword.message,
+                })}
                 disabled={isLoading}
-                className="pr-10"
+                className='pr-10'
               />
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 disabled={isLoading}
               >
                 {showConfirmPassword ? (
-                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                  <EyeSlashIcon className='h-5 w-5 text-gray-400' />
                 ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
                 )}
               </button>
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              loading={isLoading}
-            >
+          <div className='flex justify-end'>
+            <Button type='submit' disabled={isLoading} loading={isLoading}>
               {isLoading ? 'Updating...' : 'Update Password'}
             </Button>
           </div>

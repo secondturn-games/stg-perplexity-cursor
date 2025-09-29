@@ -12,7 +12,8 @@ const envSchema = z.object({
     .min(1, 'Supabase anon key is required'),
   SUPABASE_SERVICE_ROLE_KEY: z
     .string()
-    .min(1, 'Supabase service role key is required'),
+    .min(1, 'Supabase service role key is required')
+    .optional(),
 
   // Application Configuration
   NODE_ENV: z
@@ -51,21 +52,50 @@ const envSchema = z.object({
  * Validated environment variables
  * Throws an error if any required environment variables are missing or invalid
  */
-export const env = envSchema.parse({
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  NODE_ENV: process.env.NODE_ENV,
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-  BGG_API_URL: process.env.BGG_API_URL,
-  MAKECOMMERCE_API_KEY: process.env.MAKECOMMERCE_API_KEY,
-  MAKECOMMERCE_API_URL: process.env.MAKECOMMERCE_API_URL,
-  NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
-  NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-  RESEND_API_KEY: process.env.RESEND_API_KEY,
-  MAX_FILE_SIZE: process.env.MAX_FILE_SIZE,
-  ALLOWED_FILE_TYPES: process.env.ALLOWED_FILE_TYPES,
-});
+export const env = (() => {
+  try {
+    return envSchema.parse({
+      NEXT_PUBLIC_SUPABASE_URL: process.env['NEXT_PUBLIC_SUPABASE_URL'],
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+      SUPABASE_SERVICE_ROLE_KEY: process.env['SUPABASE_SERVICE_ROLE_KEY'],
+      NODE_ENV: process.env['NODE_ENV'],
+      NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'],
+      BGG_API_URL: process.env['BGG_API_URL'],
+      MAKECOMMERCE_API_KEY: process.env['MAKECOMMERCE_API_KEY'],
+      MAKECOMMERCE_API_URL: process.env['MAKECOMMERCE_API_URL'],
+      NEXT_PUBLIC_POSTHOG_KEY: process.env['NEXT_PUBLIC_POSTHOG_KEY'],
+      NEXT_PUBLIC_POSTHOG_HOST: process.env['NEXT_PUBLIC_POSTHOG_HOST'],
+      RESEND_API_KEY: process.env['RESEND_API_KEY'],
+      MAX_FILE_SIZE: process.env['MAX_FILE_SIZE'],
+      ALLOWED_FILE_TYPES: process.env['ALLOWED_FILE_TYPES'],
+    });
+  } catch (error) {
+    // During build time, environment variables might not be available
+    // Return a fallback configuration for build-time rendering
+    if (
+      process.env['NODE_ENV'] === 'production' &&
+      !process.env['NEXT_PUBLIC_SUPABASE_URL']
+    ) {
+      return {
+        NEXT_PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co',
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: 'placeholder-key',
+        SUPABASE_SERVICE_ROLE_KEY: undefined,
+        NODE_ENV: 'production' as const,
+        NEXT_PUBLIC_APP_URL: 'https://placeholder.com',
+        BGG_API_URL: 'https://www.boardgamegeek.com/xmlapi2',
+        MAKECOMMERCE_API_KEY: undefined,
+        MAKECOMMERCE_API_URL: undefined,
+        NEXT_PUBLIC_POSTHOG_KEY: undefined,
+        NEXT_PUBLIC_POSTHOG_HOST: undefined,
+        RESEND_API_KEY: undefined,
+        MAX_FILE_SIZE: 5242880,
+        ALLOWED_FILE_TYPES: 'image/jpeg,image/png,image/webp',
+      };
+    }
+    throw error;
+  }
+})();
 
 /**
  * Type-safe environment variables for use throughout the application

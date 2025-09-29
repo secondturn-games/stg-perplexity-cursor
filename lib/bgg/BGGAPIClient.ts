@@ -40,44 +40,59 @@ export class BGGAPIClient {
 
           const options = {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             },
           };
 
-          const req = https.get(url, options, (res) => {
+          const req = https.get(url, options, res => {
             let data = '';
-            
+
             // Check for redirects (BGG often returns 302 redirects when rate limited)
             if (res.statusCode === 302 || res.statusCode === 301) {
               const location = res.headers.location;
               if (this.config.debug.enabled) {
-                console.log(`BGG redirect detected: ${res.statusCode} to ${location}`);
+                console.log(
+                  `BGG redirect detected: ${res.statusCode} to ${location}`
+                );
               }
-              reject(new BGGError(
-                'RATE_LIMIT',
-                'BGG API redirected - likely rate limited',
-                { statusCode: res.statusCode, location },
-                30, // retry after 30 seconds
-                'BGG is rate limiting requests. Please wait a moment and try again.'
-              ));
+              reject(
+                new BGGError(
+                  'RATE_LIMIT',
+                  'BGG API redirected - likely rate limited',
+                  { statusCode: res.statusCode, location },
+                  30, // retry after 30 seconds
+                  'BGG is rate limiting requests. Please wait a moment and try again.'
+                )
+              );
               return;
             }
 
             // Check for empty responses (BGG rate limiting)
-            if (res.headers['content-length'] === '0' || res.statusCode !== 200) {
+            if (
+              res.headers['content-length'] === '0' ||
+              res.statusCode !== 200
+            ) {
               if (this.config.debug.enabled) {
-                console.log(`BGG empty response: status ${res.statusCode}, content-length: ${res.headers['content-length']}`);
+                console.log(
+                  `BGG empty response: status ${res.statusCode}, content-length: ${res.headers['content-length']}`
+                );
               }
-              reject(new BGGError(
-                'RATE_LIMIT',
-                'BGG API returned empty response - likely rate limited',
-                { statusCode: res.statusCode, contentLength: res.headers['content-length'] },
-                30, // retry after 30 seconds
-                'BGG is rate limiting requests. Please wait a moment and try again.'
-              ));
+              reject(
+                new BGGError(
+                  'RATE_LIMIT',
+                  'BGG API returned empty response - likely rate limited',
+                  {
+                    statusCode: res.statusCode,
+                    contentLength: res.headers['content-length'],
+                  },
+                  30, // retry after 30 seconds
+                  'BGG is rate limiting requests. Please wait a moment and try again.'
+                )
+              );
               return;
             }
-            
+
             // Handle gzipped content
             if (res.headers['content-encoding'] === 'gzip') {
               const zlib = require('zlib');
@@ -94,29 +109,33 @@ export class BGGAPIClient {
                   console.log('Contains <items>:', data.includes('<items'));
                   console.log('Contains <item>:', data.includes('<item'));
                 }
-                
+
                 // Check if response is empty after decompression
                 if (data.length === 0) {
-                  reject(new BGGError(
-                    'RATE_LIMIT',
-                    'BGG API returned empty response after decompression',
-                    { statusCode: res.statusCode, headers: res.headers },
-                    30,
-                    'BGG is rate limiting requests. Please wait a moment and try again.'
-                  ));
+                  reject(
+                    new BGGError(
+                      'RATE_LIMIT',
+                      'BGG API returned empty response after decompression',
+                      { statusCode: res.statusCode, headers: res.headers },
+                      30,
+                      'BGG is rate limiting requests. Please wait a moment and try again.'
+                    )
+                  );
                   return;
                 }
-                
+
                 resolve(data);
               });
               gunzip.on('error', (error: Error) => {
-                reject(new BGGError(
-                  'PARSE_ERROR',
-                  'Failed to decompress BGG response',
-                  error,
-                  undefined,
-                  'Failed to process BGG response. Please try again.'
-                ));
+                reject(
+                  new BGGError(
+                    'PARSE_ERROR',
+                    'Failed to decompress BGG response',
+                    error,
+                    undefined,
+                    'Failed to process BGG response. Please try again.'
+                  )
+                );
               });
             } else {
               res.on('data', (chunk: Buffer) => {
@@ -130,19 +149,21 @@ export class BGGAPIClient {
                   console.log('Contains <items>:', data.includes('<items'));
                   console.log('Contains <item>:', data.includes('<item'));
                 }
-                
+
                 // Check if response is empty
                 if (data.length === 0) {
-                  reject(new BGGError(
-                    'RATE_LIMIT',
-                    'BGG API returned empty response',
-                    { statusCode: res.statusCode, headers: res.headers },
-                    30,
-                    'BGG is rate limiting requests. Please wait a moment and try again.'
-                  ));
+                  reject(
+                    new BGGError(
+                      'RATE_LIMIT',
+                      'BGG API returned empty response',
+                      { statusCode: res.statusCode, headers: res.headers },
+                      30,
+                      'BGG is rate limiting requests. Please wait a moment and try again.'
+                    )
+                  );
                   return;
                 }
-                
+
                 resolve(data);
               });
             }
@@ -183,7 +204,9 @@ export class BGGAPIClient {
 
     if (timeSinceLastRequest < minInterval) {
       const delay = minInterval - timeSinceLastRequest;
-      console.log(`⏳ Rate limiting: waiting ${Math.round(delay)}ms before next BGG request (${this.config.rateLimit.requestsPerSecond} req/s)`);
+      console.log(
+        `⏳ Rate limiting: waiting ${Math.round(delay)}ms before next BGG request (${this.config.rateLimit.requestsPerSecond} req/s)`
+      );
       await new Promise(resolve => setTimeout(resolve, delay));
     }
 

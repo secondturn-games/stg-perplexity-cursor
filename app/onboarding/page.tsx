@@ -29,17 +29,15 @@ const onboardingSchema = yup.object({
     .required('Full name is required'),
   location: yup
     .string()
-    .oneOf(['EST', 'LVA', 'LTU', 'EU', 'OTHER'], 'Please select a valid location')
+    .oneOf(
+      ['EST', 'LVA', 'LTU', 'EU', 'OTHER'],
+      'Please select a valid location'
+    )
     .required('Location is required'),
-  bio: yup
-    .string()
-    .max(500, 'Bio must be less than 500 characters'),
+  bio: yup.string().max(500, 'Bio must be less than 500 characters'),
   phone: yup
     .string()
-    .matches(
-      /^[\+]?[1-9][\d]{0,15}$/,
-      'Please enter a valid phone number'
-    ),
+    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
   showEmail: yup.boolean(),
   showPhone: yup.boolean(),
   showLocation: yup.boolean(),
@@ -67,7 +65,7 @@ export default function OnboardingPage() {
     resolver: yupResolver(onboardingSchema),
     defaultValues: {
       username: '',
-      fullName: user?.user_metadata?.full_name || '',
+      fullName: user?.user_metadata?.['full_name'] || '',
       location: 'EST',
       bio: '',
       phone: '',
@@ -97,19 +95,21 @@ export default function OnboardingPage() {
       const { error } = await updateProfile({
         username: data.username,
         full_name: data.fullName,
-        bio: data.bio,
+        ...(data.bio !== undefined && { bio: data.bio }),
         location: data.location,
-        phone: data.phone,
+        ...(data.phone !== undefined && { phone: data.phone }),
         privacy_settings: {
-          show_email: data.showEmail,
-          show_phone: data.showPhone,
-          show_location: data.showLocation,
+          ...(data.showEmail !== undefined && { show_email: data.showEmail }),
+          ...(data.showPhone !== undefined && { show_phone: data.showPhone }),
+          ...(data.showLocation !== undefined && {
+            show_location: data.showLocation,
+          }),
         },
         notification_settings: {
-          messages: data.messages,
-          offers: data.offers,
-          listings: data.listings,
-          marketing: data.marketing,
+          ...(data.messages !== undefined && { messages: data.messages }),
+          ...(data.offers !== undefined && { offers: data.offers }),
+          ...(data.listings !== undefined && { listings: data.listings }),
+          ...(data.marketing !== undefined && { marketing: data.marketing }),
         },
       });
 
@@ -145,29 +145,29 @@ export default function OnboardingPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary-600 mb-2">
+    <div className='min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+      <div className='max-w-2xl mx-auto'>
+        <div className='text-center mb-8'>
+          <h1 className='text-4xl font-bold text-primary-600 mb-2'>
             Welcome to Second Turn Games!
           </h1>
-          <p className="text-gray-600">
+          <p className='text-gray-600'>
             Let's set up your profile to get you started
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
+        <div className='mb-8'>
+          <div className='flex items-center'>
+            {[1, 2, 3].map(step => (
+              <div key={step} className='flex items-center'>
                 <div
                   className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
                     step <= currentStep
@@ -187,91 +187,103 @@ export default function OnboardingPage() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-600">
+          <div className='flex justify-between mt-2 text-sm text-gray-600'>
             <span>Basic Info</span>
             <span>Location</span>
             <span>Preferences</span>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
           {error && (
-            <Alert variant="error" className="mb-6">
+            <Alert variant='error' className='mb-6'>
               {error}
             </Alert>
           )}
 
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
-            <div className="space-y-6">
+            <div className='space-y-6'>
               <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
                   Tell us about yourself
                 </h2>
-                <p className="text-gray-600 mb-6">
-                  This information will be visible on your profile and help other users find you.
+                <p className='text-gray-600 mb-6'>
+                  This information will be visible on your profile and help
+                  other users find you.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor='username'
+                    className='block text-sm font-medium text-gray-700 mb-2'
+                  >
                     Username *
                   </label>
                   <Input
-                    id="username"
-                    type="text"
-                    placeholder="Choose a username"
+                    id='username'
+                    type='text'
+                    placeholder='Choose a username'
                     {...register('username')}
-                    error={errors.username?.message}
+                    {...(errors.username?.message && {
+                      error: errors.username.message,
+                    })}
                     disabled={isLoading}
                   />
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className='mt-1 text-sm text-gray-500'>
                     This will be your unique identifier on the platform
                   </p>
                 </div>
 
                 <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor='fullName'
+                    className='block text-sm font-medium text-gray-700 mb-2'
+                  >
                     Full Name *
                   </label>
                   <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Enter your full name"
+                    id='fullName'
+                    type='text'
+                    placeholder='Enter your full name'
                     {...register('fullName')}
-                    error={errors.fullName?.message}
+                    {...(errors.fullName?.message && {
+                      error: errors.fullName.message,
+                    })}
                     disabled={isLoading}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor='bio'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
                   Bio
                 </label>
                 <textarea
-                  id="bio"
+                  id='bio'
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="Tell us about your board game interests..."
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500'
+                  placeholder='Tell us about your board game interests...'
                   {...register('bio')}
                   disabled={isLoading}
                 />
                 {errors.bio && (
-                  <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>
+                  <p className='mt-1 text-sm text-red-600'>
+                    {errors.bio.message}
+                  </p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p className='mt-1 text-sm text-gray-500'>
                   {bio?.length || 0}/500 characters
                 </p>
               </div>
 
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={isLoading}
-                >
+              <div className='flex justify-end'>
+                <Button type='button' onClick={nextStep} disabled={isLoading}>
                   Next
                 </Button>
               </div>
@@ -280,27 +292,32 @@ export default function OnboardingPage() {
 
           {/* Step 2: Location */}
           {currentStep === 2 && (
-            <div className="space-y-6">
+            <div className='space-y-6'>
               <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
                   Where are you located?
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className='text-gray-600 mb-6'>
                   This helps us show you relevant listings and shipping options.
                 </p>
               </div>
 
               <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor='location'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
                   Location *
                 </label>
                 <Select
-                  id="location"
+                  id='location'
                   {...register('location')}
-                  error={errors.location?.message}
+                  {...(errors.location?.message && {
+                    error: errors.location.message,
+                  })}
                   disabled={isLoading}
                 >
-                  {locationOptions.map((option) => (
+                  {locationOptions.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -309,36 +326,37 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor='phone'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
                   Phone Number
                 </label>
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter your phone number (optional)"
+                  id='phone'
+                  type='tel'
+                  placeholder='Enter your phone number (optional)'
                   {...register('phone')}
-                  error={errors.phone?.message}
+                  {...(errors.phone?.message && {
+                    error: errors.phone.message,
+                  })}
                   disabled={isLoading}
                 />
-                <p className="mt-1 text-sm text-gray-500">
+                <p className='mt-1 text-sm text-gray-500'>
                   Optional - helps with local meetups and communication
                 </p>
               </div>
 
-              <div className="flex justify-between">
+              <div className='flex justify-between'>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={prevStep}
                   disabled={isLoading}
                 >
                   Back
                 </Button>
-                <Button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={isLoading}
-                >
+                <Button type='button' onClick={nextStep} disabled={isLoading}>
                   Next
                 </Button>
               </div>
@@ -347,95 +365,104 @@ export default function OnboardingPage() {
 
           {/* Step 3: Preferences */}
           {currentStep === 3 && (
-            <div className="space-y-6">
+            <div className='space-y-6'>
               <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
                   Set your preferences
                 </h2>
-                <p className="text-gray-600 mb-6">
-                  Choose what information you'd like to share and how you'd like to be notified.
+                <p className='text-gray-600 mb-6'>
+                  Choose what information you'd like to share and how you'd like
+                  to be notified.
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className='block text-sm font-medium text-gray-700 mb-3'>
                   Privacy Settings
                 </label>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   <Checkbox
-                    id="showEmail"
+                    id='showEmail'
                     {...register('showEmail')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">Show email address on profile</span>
+                    <span className='text-sm text-gray-700'>
+                      Show email address on profile
+                    </span>
                   </Checkbox>
                   <Checkbox
-                    id="showPhone"
+                    id='showPhone'
                     {...register('showPhone')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">Show phone number on profile</span>
+                    <span className='text-sm text-gray-700'>
+                      Show phone number on profile
+                    </span>
                   </Checkbox>
                   <Checkbox
-                    id="showLocation"
+                    id='showLocation'
                     {...register('showLocation')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">Show location on profile</span>
+                    <span className='text-sm text-gray-700'>
+                      Show location on profile
+                    </span>
                   </Checkbox>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className='block text-sm font-medium text-gray-700 mb-3'>
                   Notification Preferences
                 </label>
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   <Checkbox
-                    id="messages"
+                    id='messages'
                     {...register('messages')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">New messages</span>
+                    <span className='text-sm text-gray-700'>New messages</span>
                   </Checkbox>
                   <Checkbox
-                    id="offers"
+                    id='offers'
                     {...register('offers')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">New offers on my listings</span>
+                    <span className='text-sm text-gray-700'>
+                      New offers on my listings
+                    </span>
                   </Checkbox>
                   <Checkbox
-                    id="listings"
+                    id='listings'
                     {...register('listings')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">Updates about my listings</span>
+                    <span className='text-sm text-gray-700'>
+                      Updates about my listings
+                    </span>
                   </Checkbox>
                   <Checkbox
-                    id="marketing"
+                    id='marketing'
                     {...register('marketing')}
                     disabled={isLoading}
                   >
-                    <span className="text-sm text-gray-700">Marketing emails and special offers</span>
+                    <span className='text-sm text-gray-700'>
+                      Marketing emails and special offers
+                    </span>
                   </Checkbox>
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              <div className='flex justify-between'>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={prevStep}
                   disabled={isLoading}
                 >
                   Back
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  loading={isLoading}
-                >
+                <Button type='submit' disabled={isLoading} loading={isLoading}>
                   {isLoading ? 'Creating Profile...' : 'Complete Setup'}
                 </Button>
               </div>
@@ -446,3 +473,6 @@ export default function OnboardingPage() {
     </div>
   );
 }
+
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
