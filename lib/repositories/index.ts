@@ -18,6 +18,22 @@ export type {
   CacheOptions,
 } from './interfaces/ICacheRepository';
 
+// Import interfaces for use in functions
+import type {
+  IGameRepository,
+  IExtendedGameRepository,
+} from './interfaces/IGameRepository';
+import type {
+  ICacheRepository,
+  IMemoryCacheRepository,
+  CacheOptions,
+  CacheStats,
+} from './interfaces/ICacheRepository';
+
+// Import implementations for use in functions
+import { SupabaseGameRepository } from './SupabaseGameRepository';
+import { MemoryCacheRepository } from './MemoryCacheRepository';
+
 // Repository Implementations
 export { SupabaseGameRepository } from './SupabaseGameRepository';
 export { MemoryCacheRepository } from './MemoryCacheRepository';
@@ -27,6 +43,10 @@ export {
   BGGServiceWithRepositories,
   type BGGServiceConfig,
 } from '../bgg/BGGServiceWithRepositories';
+
+// Import BGGServiceConfig for use in functions
+import type { BGGServiceConfig } from '../bgg/BGGServiceWithRepositories';
+import { BGGServiceWithRepositories } from '../bgg/BGGServiceWithRepositories';
 
 /**
  * Repository Factory Functions

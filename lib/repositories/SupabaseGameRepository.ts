@@ -14,6 +14,7 @@ import type {
   GameInsert,
   GameUpdate,
   GameSearchFilters,
+  Database,
 } from '@/types/database.types';
 
 /**
@@ -240,14 +241,36 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
       let result;
 
       if (existingGame) {
-        // Update existing game - exclude fields that shouldn't be updated
-        const { created_at, ...updateData } = gameData;
-        const { data, error } = await (this.supabase
+        // Update existing game - create update object with only allowed fields
+        const updateData = {
+          title: gameData.title,
+          description: gameData.description ?? null,
+          year_published: gameData.year_published ?? null,
+          min_players: gameData.min_players ?? null,
+          max_players: gameData.max_players ?? null,
+          playing_time: gameData.playing_time ?? null,
+          age_rating: gameData.age_rating ?? null,
+          image_url: gameData.image_url ?? null,
+          thumbnail_url: gameData.thumbnail_url ?? null,
+          categories: gameData.categories ?? [],
+          mechanics: gameData.mechanics ?? [],
+          designers: gameData.designers ?? [],
+          artists: gameData.artists ?? [],
+          publishers: gameData.publishers ?? [],
+          languages: gameData.languages ?? [],
+          bgg_rating: gameData.bgg_rating ?? null,
+          bgg_rank: gameData.bgg_rank ?? null,
+          weight_rating: gameData.weight_rating ?? null,
+          last_bgg_sync: gameData.last_bgg_sync ?? null,
+          updated_at: new Date().toISOString(),
+        };
+
+        // Use a type assertion to work around Supabase type inference issues
+        const query = this.supabase
           .from('games')
-          .update(updateData)
-          .eq('id', existingGame.id)
-          .select()
-          .single() as any);
+          .update(updateData as never)
+          .eq('id', existingGame.id);
+        const { data, error } = await query.select().single();
 
         if (error) {
           throw new Error(`Failed to update game: ${error.message}`);
@@ -258,7 +281,7 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
         // Insert new game
         const { data, error } = await this.supabase
           .from('games')
-          .insert(gameData)
+          .insert(gameData as never)
           .select()
           .single();
 
@@ -339,7 +362,7 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
       // Set last_bgg_sync to null to indicate the game needs syncing
       const { error } = await this.supabase
         .from('games')
-        .update({ last_bgg_sync: null })
+        .update({ last_bgg_sync: null } as never)
         .in('id', gameIds);
 
       if (error) {
@@ -405,7 +428,7 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
     try {
       const { error } = await this.supabase
         .from('games')
-        .update({ last_bgg_sync: new Date().toISOString() })
+        .update({ last_bgg_sync: new Date().toISOString() } as never)
         .eq('id', gameId);
 
       if (error) {
@@ -466,10 +489,10 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
       }
 
       // Get average rating
-      const { data: ratingData, error: ratingError } = await this.supabase
+      const { data: ratingData, error: ratingError } = (await this.supabase
         .from('games')
         .select('bgg_rating')
-        .not('bgg_rating', 'is', null);
+        .not('bgg_rating', 'is', null)) as any;
 
       if (ratingError) {
         throw new Error(`Failed to get rating data: ${ratingError.message}`);
@@ -477,14 +500,16 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
 
       const averageRating =
         ratingData && ratingData.length > 0
-          ? ratingData.reduce((sum, game) => sum + (game.bgg_rating || 0), 0) /
-            ratingData.length
+          ? ratingData.reduce(
+              (sum: number, game: any) => sum + (game.bgg_rating || 0),
+              0
+            ) / ratingData.length
           : 0;
 
       // Get most popular categories
-      const { data: categoryData, error: categoryError } = await this.supabase
+      const { data: categoryData, error: categoryError } = (await this.supabase
         .from('games')
-        .select('categories');
+        .select('categories')) as any;
 
       if (categoryError) {
         throw new Error(
@@ -493,8 +518,8 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
       }
 
       const categoryCounts = new Map<string, number>();
-      categoryData?.forEach(game => {
-        game.categories?.forEach(category => {
+      categoryData?.forEach((game: any) => {
+        game.categories?.forEach((category: string) => {
           categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
         });
       });
