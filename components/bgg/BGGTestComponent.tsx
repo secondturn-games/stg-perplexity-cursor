@@ -626,43 +626,48 @@ export function BGGTestComponent() {
             </div>
 
             {/* Alternate Names */}
-            {gameState.data.alternateNames && gameState.data.alternateNames.length > 0 && (
-              <div className='mt-6 bg-orange-50 p-4 rounded-lg'>
-                {(() => {
-                  const alternateNames = gameState.data.alternateNames.filter((name: any) => name.type === 'alternate');
-                  return (
-                    <>
-                      <h4 className='font-semibold text-gray-900 mb-3'>
-                        Alternate Names ({alternateNames.length})
-                      </h4>
-                      {alternateNames.length > 0 ? (
-                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
-                          {alternateNames.slice(0, 20).map((name: any, index: number) => (
-                            <div
-                              key={index}
-                              className='p-2 bg-white rounded border'
-                            >
-                              <span className='text-sm text-gray-900'>
-                                {name.value}
-                              </span>
-                            </div>
-                          ))}
-                          {alternateNames.length > 20 && (
-                            <div className='col-span-full text-sm text-gray-500 text-center py-2'>
-                              ... and {alternateNames.length - 20} more
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className='text-sm text-gray-500 text-center py-4'>
-                          No alternate names available
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-            )}
+            {gameState.data.alternateNames &&
+              gameState.data.alternateNames.length > 0 && (
+                <div className='mt-6 bg-orange-50 p-4 rounded-lg'>
+                  {(() => {
+                    const alternateNames = gameState.data.alternateNames.filter(
+                      (name: any) => name.type === 'alternate'
+                    );
+                    return (
+                      <>
+                        <h4 className='font-semibold text-gray-900 mb-3'>
+                          Alternate Names ({alternateNames.length})
+                        </h4>
+                        {alternateNames.length > 0 ? (
+                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
+                            {alternateNames
+                              .slice(0, 20)
+                              .map((name: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className='p-2 bg-white rounded border'
+                                >
+                                  <span className='text-sm text-gray-900'>
+                                    {name.value}
+                                  </span>
+                                </div>
+                              ))}
+                            {alternateNames.length > 20 && (
+                              <div className='col-span-full text-sm text-gray-500 text-center py-2'>
+                                ... and {alternateNames.length - 20} more
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className='text-sm text-gray-500 text-center py-4'>
+                            No alternate names available
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
 
             {/* Game Versions */}
             {gameState.data.editions && gameState.data.editions.length > 0 && (
@@ -671,52 +676,69 @@ export function BGGTestComponent() {
                   Game Versions ({gameState.data.editions.length})
                 </h4>
                 <p className='text-sm text-gray-600 mb-3'>
-                  Different editions and versions of this game (regional editions, special editions, anniversary editions, etc.)
+                  Different editions and versions of this game (regional
+                  editions, special editions, anniversary editions, etc.)
                 </p>
                 <div className='space-y-2 max-h-60 overflow-y-auto'>
-                  {gameState.data.editions.slice(0, 10).map((edition: any, index: number) => (
-                    <div key={index} className='flex items-start justify-between p-3 bg-white rounded border'>
-                      <div className='flex-1'>
-                        <div className='font-medium text-gray-900'>{edition.name}</div>
-                        <div className='text-sm text-gray-600 space-y-1'>
-                          <div>Publisher: {edition.publishers?.join(', ') || 'Unknown'}</div>
-                          {edition.languages && edition.languages.length > 0 && (
-                            <div>Language: {edition.languages.join(', ')}</div>
+                  {gameState.data.editions
+                    .slice(0, 10)
+                    .map((edition: any, index: number) => (
+                      <div
+                        key={index}
+                        className='flex items-start justify-between p-3 bg-white rounded border'
+                      >
+                        <div className='flex-1'>
+                          <div className='font-medium text-gray-900'>
+                            {edition.name}
+                          </div>
+                          <div className='text-sm text-gray-600 space-y-1'>
+                            <div>
+                              Publisher:{' '}
+                              {edition.publishers?.join(', ') || 'Unknown'}
+                            </div>
+                            {edition.languages &&
+                              edition.languages.length > 0 && (
+                                <div>
+                                  Language: {edition.languages.join(', ')}
+                                </div>
+                              )}
+                            {edition.yearpublished && (
+                              <div>Year: {edition.yearpublished}</div>
+                            )}
+                            {edition.productCode && (
+                              <div>Product Code: {edition.productCode}</div>
+                            )}
+                            <div className='text-xs text-gray-500'>
+                              ID: {edition.id}
+                            </div>
+                          </div>
+                        </div>
+                        <div className='flex items-center gap-2 ml-4'>
+                          {edition.thumbnail && (
+                            <img
+                              src={edition.thumbnail}
+                              alt={edition.name}
+                              className='w-12 h-12 object-cover rounded border'
+                              onError={e => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
                           )}
-                          {edition.yearpublished && (
-                            <div>Year: {edition.yearpublished}</div>
-                          )}
-                          {edition.productCode && (
-                            <div>Product Code: {edition.productCode}</div>
-                          )}
-                          <div className='text-xs text-gray-500'>ID: {edition.id}</div>
+                          <a
+                            href={edition.bggLink}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-indigo-600 hover:text-indigo-800 text-sm font-medium'
+                          >
+                            View →
+                          </a>
                         </div>
                       </div>
-                      <div className='flex items-center gap-2 ml-4'>
-                        {edition.thumbnail && (
-                          <img
-                            src={edition.thumbnail}
-                            alt={edition.name}
-                            className='w-12 h-12 object-cover rounded border'
-                            onError={e => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        )}
-                        <a
-                          href={edition.bggLink}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-indigo-600 hover:text-indigo-800 text-sm font-medium'
-                        >
-                          View →
-                        </a>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                   {gameState.data.editions.length > 10 && (
                     <div className='text-sm text-gray-500 text-center py-2'>
-                      ... and {gameState.data.editions.length - 10} more versions
+                      ... and {gameState.data.editions.length - 10} more
+                      versions
                     </div>
                   )}
                 </div>

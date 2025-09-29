@@ -296,6 +296,16 @@ export class FallbackStrategies {
       complexityLevel: 'medium' as const,
       playerCountRange: { min: 0, max: 0, optimal: 0 },
       playTimeRange: { min: 0, max: 0, average: 0 },
+      // Enhanced fields
+      alternateNames: [],
+      editions: [],
+      languageDependence: {
+        level: 0,
+        description: 'Unknown',
+        votes: 0,
+        totalVotes: 0,
+        percentage: 0,
+      },
     };
   }
 

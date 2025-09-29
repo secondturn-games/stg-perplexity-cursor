@@ -771,6 +771,16 @@ export class BGGServiceWithRepositories {
       weight_rating: game.weight_rating || 0,
       age_rating: game.age_rating || 0,
       last_bgg_sync: game.last_bgg_sync || new Date().toISOString(),
+      // Enhanced fields
+      alternateNames: [],
+      editions: [],
+      languageDependence: {
+        level: 0,
+        description: 'Unknown',
+        votes: 0,
+        totalVotes: 0,
+        percentage: 0,
+      },
     });
   }
 

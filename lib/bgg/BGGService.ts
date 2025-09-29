@@ -1094,7 +1094,8 @@ export class BGGService {
         item.statistics?.[0]?.ratings?.[0]?.average?.[0]?.$.value || '0'
       ),
       bgg_rank: parseInt(
-        item.statistics?.[0]?.ratings?.[0]?.ranks?.[0]?.rank?.[0]?.$.value || '0'
+        item.statistics?.[0]?.ratings?.[0]?.ranks?.[0]?.rank?.[0]?.$.value ||
+          '0'
       ),
       weight_rating: parseFloat(
         item.statistics?.[0]?.ratings?.[0]?.averageweight?.[0]?.$.value || '0'
@@ -1133,10 +1134,7 @@ export class BGGService {
       return [];
     }
 
-    const versionTypes = [
-      'boardgameimplementation', 
-      'boardgamecompilation'
-    ];
+    const versionTypes = ['boardgameimplementation', 'boardgamecompilation'];
 
     return item.link
       .filter((link: any) => versionTypes.includes(link.$.type))
@@ -1151,11 +1149,15 @@ export class BGGService {
   private extractGameVersions(versions: any[]): BGGEdition[] {
     return versions.map((version: any) => {
       // Extract publisher from links
-      const publisherLink = version.link?.find((link: any) => link.$.type === 'boardgamepublisher');
+      const publisherLink = version.link?.find(
+        (link: any) => link.$.type === 'boardgamepublisher'
+      );
       const publisher = publisherLink?.$.value || 'Unknown';
 
       // Extract language from links
-      const languageLink = version.link?.find((link: any) => link.$.type === 'language');
+      const languageLink = version.link?.find(
+        (link: any) => link.$.type === 'language'
+      );
       const language = languageLink?.$.value || 'Unknown';
 
       return {
@@ -1191,8 +1193,14 @@ export class BGGService {
       };
     }
 
-    const languagePoll = item.poll.find((poll: any) => poll.$.name === 'language_dependence');
-    if (!languagePoll || !languagePoll.results || !Array.isArray(languagePoll.results)) {
+    const languagePoll = item.poll.find(
+      (poll: any) => poll.$.name === 'language_dependence'
+    );
+    if (
+      !languagePoll ||
+      !languagePoll.results ||
+      !Array.isArray(languagePoll.results)
+    ) {
       return {
         level: 0,
         description: 'Unknown',
@@ -1204,11 +1212,11 @@ export class BGGService {
 
     const totalVotes = parseInt(languagePoll.$.totalvotes || '0');
     const results = languagePoll.results[0]?.result || [];
-    
+
     // Find the result with the most votes
     let maxVotes = 0;
-    let selectedResult = null;
-    
+    let selectedResult: any = null;
+
     results.forEach((result: any) => {
       const votes = parseInt(result.$.numvotes || '0');
       if (votes > maxVotes) {
@@ -1232,11 +1240,14 @@ export class BGGService {
       description: selectedResult.$.value || 'Unknown',
       votes: maxVotes,
       totalVotes,
-      percentage: totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0,
+      percentage:
+        totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0,
     };
   }
 
-  private mapEditionType(bggType: string): 'expansion' | 'implementation' | 'compilation' | 'accessory' {
+  private mapEditionType(
+    bggType: string
+  ): 'expansion' | 'implementation' | 'compilation' | 'accessory' {
     switch (bggType) {
       case 'boardgameimplementation':
         return 'implementation';
@@ -1250,7 +1261,7 @@ export class BGGService {
   private convertBGGLevelToUserLevel(bggLevel: number | string): number {
     // Convert BGG internal level codes (76-80) to user-friendly levels (1-5)
     const level = typeof bggLevel === 'string' ? parseInt(bggLevel) : bggLevel;
-    
+
     switch (level) {
       case 76:
         return 1; // "No necessary in-game text"
@@ -1266,7 +1277,6 @@ export class BGGService {
         return 0; // Unknown
     }
   }
-
 
   private transformCollectionResponse(data: any): BGGCollectionResponse {
     const items =
