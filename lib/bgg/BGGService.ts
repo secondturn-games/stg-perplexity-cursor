@@ -15,6 +15,8 @@ import {
   BGGDataUtils,
 } from '@/types/bgg.types';
 import { getBGGConfig } from './config';
+import { eventBus } from '../events/EventBus';
+import { BGGEventFactory } from '../events/BGGEvents';
 
 export class BGGService {
   private apiClient: BGGAPIClient;
@@ -42,13 +44,22 @@ export class BGGService {
 
     // Validate query
     if (!query || query.trim().length < 2) {
-      throw new BGGError(
+      const error = new BGGError(
         'VALIDATION_ERROR',
         'Query must be at least 2 characters long',
         { query },
         undefined,
         'Please enter at least 2 characters to search'
       );
+      
+      // Emit search failed event
+      await eventBus.emit('game.search.failed', BGGEventFactory.createGameSearchFailedEvent(
+        query,
+        filters,
+        error
+      ));
+      
+      throw error;
     }
 
     const normalizedQuery = query.trim();
@@ -65,15 +76,34 @@ export class BGGService {
     const cached = this.cacheManager.get(cacheKey);
     if (cached) {
       cacheHit = true;
+      const queryTime = Date.now() - startTime;
+      
+      // Emit cache hit event
+      await eventBus.emit('cache.hit', BGGEventFactory.createCacheHitEvent(
+        cacheKey,
+        'search',
+        Date.now() - (cached as any).timestamp || 0,
+        undefined,
+        normalizedQuery
+      ));
+      
       return {
         ...cached,
         performance: {
-          queryTime: Date.now() - startTime,
+          queryTime,
           cacheHit: true,
           apiCalls: 0,
         },
       };
     }
+
+    // Emit cache miss event
+    await eventBus.emit('cache.miss', BGGEventFactory.createCacheMissEvent(
+      cacheKey,
+      'search',
+      undefined,
+      normalizedQuery
+    ));
 
     try {
       let results: BGGSearchResponse | null = null;
@@ -171,12 +201,42 @@ export class BGGService {
       // Cache the result
       this.cacheManager.set(cacheKey, results);
 
+      // Emit game cached event
+      await eventBus.emit('game.cached', BGGEventFactory.createGameCachedEvent(
+        cacheKey,
+        'search',
+        this.config.cache.ttl,
+        JSON.stringify(results).length,
+        undefined,
+        normalizedQuery
+      ));
+
+      // Emit game searched event
+      await eventBus.emit('game.searched', BGGEventFactory.createGameSearchedEvent(
+        normalizedQuery,
+        filters,
+        results,
+        {
+          queryTime,
+          cacheHit: false,
+          apiCalls,
+        }
+      ));
+
       console.log(
         `✅ Search completed in ${queryTime}ms, found ${results.items.length} results using ${searchStrategy} strategy`
       );
       return results;
     } catch (error) {
       const bggError = this.handleError('searchGames', error);
+      
+      // Emit search failed event
+      await eventBus.emit('game.search.failed', BGGEventFactory.createGameSearchFailedEvent(
+        normalizedQuery,
+        filters,
+        bggError
+      ));
+      
       throw bggError;
     }
   }
@@ -185,12 +245,29 @@ export class BGGService {
    * Get game details with retry logic
    */
   async getGameDetails(gameId: string): Promise<BGGGameDetails> {
+    const startTime = Date.now();
     const cacheKey = `game:${gameId}`;
     const cached = this.cacheManager.get(cacheKey);
     if (cached) {
       console.log(`✅ Cache hit for game ${gameId}`);
+      
+      // Emit cache hit event
+      await eventBus.emit('cache.hit', BGGEventFactory.createCacheHitEvent(
+        cacheKey,
+        'game-details',
+        Date.now() - (cached as any).timestamp || 0,
+        gameId
+      ));
+      
       return cached;
     }
+
+    // Emit cache miss event
+    await eventBus.emit('cache.miss', BGGEventFactory.createCacheMissEvent(
+      cacheKey,
+      'game-details',
+      gameId
+    ));
 
     let lastError: any;
 
@@ -226,6 +303,34 @@ export class BGGService {
         await this.cacheGameInDatabase(enhancedResult);
 
         this.cacheManager.set(cacheKey, enhancedResult);
+        
+        // Emit game cached event
+        await eventBus.emit('game.cached', BGGEventFactory.createGameCachedEvent(
+          cacheKey,
+          'game-details',
+          this.config.cache.ttl,
+          JSON.stringify(enhancedResult).length,
+          gameId
+        ));
+
+        // Emit game details fetched event
+        await eventBus.emit('game.details.fetched', BGGEventFactory.createGameDetailsFetchedEvent(
+          gameId,
+          enhancedResult.name,
+          enhancedResult.type || 'boardgame',
+          {
+            queryTime: Date.now() - startTime,
+            cacheHit: false,
+            apiCalls: 1,
+          },
+          {
+            yearPublished: enhancedResult.yearpublished,
+            bggRating: enhancedResult.bgg_rating,
+            bggRank: enhancedResult.bgg_rank,
+            weightRating: enhancedResult.weight_rating,
+          }
+        ));
+        
         console.log(`✅ Successfully got game details for ID: ${gameId}`);
         return enhancedResult;
       } catch (error) {
@@ -259,6 +364,26 @@ export class BGGService {
     }
 
     const bggError = this.handleError('getGameDetails', lastError);
+    
+    // Emit game details failed event
+    await eventBus.emit('game.details.failed', {
+      eventType: 'game.details.failed',
+      timestamp: new Date().toISOString(),
+      eventId: `bgg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      source: 'bgg-service',
+      data: {
+        gameId,
+        error: {
+          code: bggError.code,
+          message: bggError.message,
+          userMessage: bggError.userMessage,
+        },
+        retryable: bggError.code === 'RATE_LIMIT' || bggError.code === 'API_UNAVAILABLE',
+        attempt: this.config.retry.maxAttempts,
+        maxAttempts: this.config.retry.maxAttempts,
+      },
+    });
+    
     throw bggError;
   }
 
