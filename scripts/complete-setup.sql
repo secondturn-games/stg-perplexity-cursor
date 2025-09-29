@@ -113,7 +113,7 @@ CREATE TABLE profiles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
     username TEXT UNIQUE,
-    display_name TEXT,
+    full_name TEXT,
     bio TEXT,
     avatar_url TEXT,
     location TEXT,
@@ -306,7 +306,7 @@ CREATE TRIGGER update_conversation_last_message_trigger
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO profiles (user_id, display_name)
+    INSERT INTO profiles (user_id, full_name)
     VALUES (NEW.id, NEW.email);
     
     INSERT INTO user_preferences (user_id)

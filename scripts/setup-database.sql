@@ -11,7 +11,7 @@ CREATE TABLE profiles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
     username TEXT UNIQUE,
-    display_name TEXT,
+    full_name TEXT,
     bio TEXT,
     avatar_url TEXT,
     location TEXT,
