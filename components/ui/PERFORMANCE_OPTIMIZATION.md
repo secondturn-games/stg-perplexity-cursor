@@ -11,6 +11,7 @@
 ### Rendering Performance
 
 **Component Mount Time:**
+
 ```
 First Paint: ~15ms
 Time to Interactive: ~20ms
@@ -19,6 +20,7 @@ Result: ✅ EXCELLENT
 ```
 
 **Animation Frame Rate:**
+
 ```
 Desktop (Chrome): 60 FPS
 Desktop (Firefox): 60 FPS
@@ -31,6 +33,7 @@ Result: ✅ EXCELLENT
 ```
 
 **Re-render Performance:**
+
 ```
 Text change: ~5ms
 Variant change: ~8ms
@@ -50,7 +53,7 @@ Result: ✅ EXCELLENT
 ```css
 /* GPU-accelerated transforms */
 .diceRoll {
-  transform: rotate(0deg) scale(1);  /* ✅ GPU layer */
+  transform: rotate(0deg) scale(1); /* ✅ GPU layer */
   animation: diceRoll 0.9s ease-in-out infinite;
 }
 
@@ -65,15 +68,15 @@ Result: ✅ EXCELLENT
 .diceRoll,
 .diceBounce,
 .diceSpin {
-  will-change: transform;  /* ✅ Browser optimization hint */
+  will-change: transform; /* ✅ Browser optimization hint */
 }
 
 .textPulse {
-  will-change: opacity, transform;  /* ✅ Multiple properties */
+  will-change: opacity, transform; /* ✅ Multiple properties */
 }
 
 .dot {
-  will-change: opacity, transform;  /* ✅ Per element */
+  will-change: opacity, transform; /* ✅ Per element */
 }
 ```
 
@@ -87,7 +90,7 @@ Result: ✅ EXCELLENT
 .diceRoll,
 .diceBounce,
 .diceSpin {
-  backface-visibility: hidden;  /* ✅ Prevents back-face rendering */
+  backface-visibility: hidden; /* ✅ Prevents back-face rendering */
 }
 ```
 
@@ -99,7 +102,7 @@ Result: ✅ EXCELLENT
 .dice,
 .textPulse,
 .dot {
-  transform: translateZ(0);  /* ✅ Force GPU layer creation */
+  transform: translateZ(0); /* ✅ Force GPU layer creation */
 }
 ```
 
@@ -117,13 +120,13 @@ Result: ✅ EXCELLENT
 // Dice cycling effect
 useEffect(() => {
   if (!isVisible) return;
-  
+
   const interval = setInterval(() => {
     setCurrentDiceIndex(prev => (prev + 1) % DICE_FACES.length);
   }, 150);
-  
+
   return () => clearInterval(interval);
-}, [isVisible]);  // ✅ Only re-runs when isVisible changes
+}, [isVisible]); // ✅ Only re-runs when isVisible changes
 ```
 
 **Optimization:** Minimal re-runs, proper cleanup
@@ -141,11 +144,11 @@ useEffect(() => {
     }
     document.body.style.overflow = '';
   }
-  
+
   return () => {
     document.body.style.overflow = '';
   };
-}, [isVisible]);  // ✅ Only runs on visibility change
+}, [isVisible]); // ✅ Only runs on visibility change
 ```
 
 **Optimization:** Single effect for all focus/scroll logic
@@ -154,7 +157,7 @@ useEffect(() => {
 
 ```typescript
 if (!isVisible) {
-  return null;  // ✅ Skip rendering entirely
+  return null; // ✅ Skip rendering entirely
 }
 ```
 
@@ -211,14 +214,14 @@ margin:               ❌ Avoid
 ```css
 /* Static properties (no repaints) */
 .overlay {
-  position: fixed;      /* ✅ Static */
-  inset: 0;            /* ✅ Static */
-  z-index: 50;         /* ✅ Static */
+  position: fixed; /* ✅ Static */
+  inset: 0; /* ✅ Static */
+  z-index: 50; /* ✅ Static */
 }
 
 /* Animated properties (separate layer) */
 .dice {
-  transform: rotate();  /* ✅ Composite layer */
+  transform: rotate(); /* ✅ Composite layer */
 }
 ```
 
@@ -231,6 +234,7 @@ import styles from './DiceLoader.module.css';
 ```
 
 **Optimizations:**
+
 - ✅ Tree-shaking (unused styles removed)
 - ✅ Scoped styles (no global pollution)
 - ✅ Automatic vendor prefixes
@@ -238,6 +242,7 @@ import styles from './DiceLoader.module.css';
 - ✅ Cached by browser
 
 **Bundle Size:**
+
 - Development: ~3KB
 - Production: ~1KB gzipped
 
@@ -334,7 +339,7 @@ will-change: transform;
 
 ```css
 .overlay {
-  contain: layout style paint;  /* Future optimization */
+  contain: layout style paint; /* Future optimization */
 }
 ```
 
@@ -344,7 +349,9 @@ will-change: transform;
 
 ```typescript
 // Minimal dependencies
-useEffect(() => { /* ... */ }, [isVisible]);
+useEffect(() => {
+  /* ... */
+}, [isVisible]);
 
 // Functional updates (no closures)
 setState(prev => prev + 1);
@@ -359,7 +366,7 @@ const ref = useRef<HTMLElement | null>(null);
 
 ```typescript
 if (!isVisible) {
-  return null;  // Don't render anything
+  return null; // Don't render anything
 }
 ```
 
@@ -396,6 +403,7 @@ performance.measure('loading-duration', 'loading-start', 'loading-end');
 ### Chrome DevTools Profile
 
 **Rendering:**
+
 ```
 Scripting: 12ms (15%)
 Rendering: 8ms (10%)
@@ -408,6 +416,7 @@ Result: ✅ EXCELLENT
 ```
 
 **Memory:**
+
 ```
 Initial: 2.1 MB
 After Mount: 2.15 MB
@@ -441,16 +450,18 @@ Result: ✅ NO LEAKS
 ### Runtime Optimizations
 
 **1. Lazy Loading** (if needed)
+
 ```typescript
 const DiceLoader = dynamic(() => import('@/components/ui/DiceLoader'), {
-  ssr: false,  // Client-side only
-  loading: () => null,  // No loading fallback
+  ssr: false, // Client-side only
+  loading: () => null, // No loading fallback
 });
 ```
 
 **Note:** Not recommended - Component is lightweight enough to include in main bundle
 
 **2. Code Splitting**
+
 - Already split via dynamic imports in pages
 - CSS Modules automatically split
 - No additional work needed ✅
@@ -524,11 +535,13 @@ Further Optimization Needed: NO ✅
 ### Recommendations
 
 **Current State:**
+
 - Component is production-ready
 - No critical optimizations needed
 - Performance is excellent
 
 **Future Considerations:**
+
 - Monitor real-world performance metrics
 - Gather user feedback on loading experience
 - A/B test animation variants for UX

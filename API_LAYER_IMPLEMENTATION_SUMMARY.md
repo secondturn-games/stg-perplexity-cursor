@@ -3,6 +3,7 @@
 ## ✅ Step 5: API Layer with Loading States - COMPLETE
 
 ### Overview
+
 Successfully integrated the `useLoading` hook throughout the entire API layer, creating a unified system for managing loading states across all HTTP requests, Supabase operations, BGG API calls, and form submissions.
 
 ---
@@ -10,6 +11,7 @@ Successfully integrated the `useLoading` hook throughout the entire API layer, c
 ## 📦 Files Created
 
 ### Core API Utilities
+
 1. **`lib/api.ts`** (419 lines)
    - Unified API request wrapper with loading state integration
    - 300ms loading delay to prevent flashing
@@ -47,6 +49,7 @@ Successfully integrated the `useLoading` hook throughout the entire API layer, c
    - Integration patterns
 
 ### Updated Exports
+
 6. **`lib/supabase/index.ts`** - Updated with loading function exports
 7. **`lib/bgg/index.ts`** - Created with loading function exports
 
@@ -58,12 +61,17 @@ Successfully integrated the `useLoading` hook throughout the entire API layer, c
 
 ```typescript
 // Prevents flashing for quick requests
-const { data } = await api.get('/api/games', {
-  loadingDelay: 300, // Show loading only if takes > 300ms
-}, { withLoading });
+const { data } = await api.get(
+  '/api/games',
+  {
+    loadingDelay: 300, // Show loading only if takes > 300ms
+  },
+  { withLoading }
+);
 ```
 
 **How it works:**
+
 - Timer starts when request begins
 - If request completes before 300ms, no loading shown
 - If request takes longer, loading appears after delay
@@ -81,6 +89,7 @@ const [games, users, stats] = await Promise.all([
 ```
 
 **How it works:**
+
 - Loading counter tracks active operations
 - Loading indicator remains visible until ALL complete
 - Proper cleanup on errors
@@ -89,13 +98,18 @@ const [games, users, stats] = await Promise.all([
 ### 3. Automatic Timeout Protection ✅
 
 ```typescript
-const { data } = await api.get('/api/slow-endpoint', {
-  timeout: 60000, // 60 seconds
-  onTimeout: () => alert('Request timed out'),
-}, { withLoading });
+const { data } = await api.get(
+  '/api/slow-endpoint',
+  {
+    timeout: 60000, // 60 seconds
+    onTimeout: () => alert('Request timed out'),
+  },
+  { withLoading }
+);
 ```
 
 **Features:**
+
 - Default 30-second timeout for all requests
 - Per-request timeout override
 - Callback on timeout
@@ -104,15 +118,20 @@ const { data } = await api.get('/api/slow-endpoint', {
 ### 4. Error Handling Integration ✅
 
 ```typescript
-const { data, error } = await api.get('/api/data', {
-  onError: (error) => console.error('API Error:', error),
-  retry: true,
-  retryAttempts: 3,
-  retryDelay: 1000,
-}, { withLoading });
+const { data, error } = await api.get(
+  '/api/data',
+  {
+    onError: error => console.error('API Error:', error),
+    retry: true,
+    retryAttempts: 3,
+    retryDelay: 1000,
+  },
+  { withLoading }
+);
 ```
 
 **Layers:**
+
 - Global error handler (useLoading config)
 - Request-level error handler
 - Component-level error handling
@@ -131,6 +150,7 @@ const { data, error } = await searchGamesWithLoading(
 ```
 
 **Integrated functions:**
+
 - `searchGamesWithLoading()`
 - `getGameDetailsWithLoading()`
 - `getUserCollectionWithLoading()`
@@ -144,14 +164,13 @@ const { data, error } = await searchGamesWithLoading(
 ```typescript
 import { signInWithEmailLoading } from '@/lib/supabase/api-with-loading';
 
-const { data, error } = await signInWithEmailLoading(
-  email,
-  password,
-  { withLoading }
-);
+const { data, error } = await signInWithEmailLoading(email, password, {
+  withLoading,
+});
 ```
 
 **Integrated functions:**
+
 - `signInWithEmailLoading()`
 - `signUpWithProfileLoading()`
 - `signInWithGoogleLoading()`
@@ -169,7 +188,7 @@ const { data, error } = await signInWithEmailLoading(
 import { createFormHandler, validators } from '@/lib/form-handlers';
 
 const handleSubmit = createFormHandler(
-  async (formData) => {
+  async formData => {
     const response = await fetch('/api/contact', {
       method: 'POST',
       body: JSON.stringify(formData),
@@ -189,6 +208,7 @@ const handleSubmit = createFormHandler(
 ```
 
 **Features:**
+
 - Automatic loading state management
 - Built-in validation
 - Field-level validation
@@ -200,15 +220,15 @@ const handleSubmit = createFormHandler(
 
 ## 🎯 Requirements Completion
 
-| Requirement | Status | Implementation |
-|-------------|--------|----------------|
-| Modify fetch utilities | ✅ | Created `lib/api.ts` with full REST client |
-| Add loading to Supabase | ✅ | Created `lib/supabase/api-with-loading.ts` |
-| BGG API with loading | ✅ | Created `lib/bgg/api-with-loading.ts` |
-| Form handlers with loading | ✅ | Created `lib/form-handlers.ts` |
-| 300ms delay threshold | ✅ | Implemented in all wrappers |
-| Handle concurrent calls | ✅ | Loading counter system |
-| Maintain error handling | ✅ | Multi-layer error handling |
+| Requirement                | Status | Implementation                             |
+| -------------------------- | ------ | ------------------------------------------ |
+| Modify fetch utilities     | ✅     | Created `lib/api.ts` with full REST client |
+| Add loading to Supabase    | ✅     | Created `lib/supabase/api-with-loading.ts` |
+| BGG API with loading       | ✅     | Created `lib/bgg/api-with-loading.ts`      |
+| Form handlers with loading | ✅     | Created `lib/form-handlers.ts`             |
+| 300ms delay threshold      | ✅     | Implemented in all wrappers                |
+| Handle concurrent calls    | ✅     | Loading counter system                     |
+| Maintain error handling    | ✅     | Multi-layer error handling                 |
 
 ---
 
@@ -226,12 +246,12 @@ function MyComponent() {
 
   const fetchData = async () => {
     const { data, error } = await api.get('/api/games', {}, { withLoading });
-    
+
     if (error) {
       console.error(error);
       return;
     }
-    
+
     setGames(data);
   };
 
@@ -259,7 +279,7 @@ function SearchComponent() {
       { gameType: 'boardgame' },
       { withLoading }
     );
-    
+
     if (data) {
       setResults(data.games);
     }
@@ -360,7 +380,7 @@ User Notification
 const { isLoading, withLoading } = useLoading({
   defaultTimeout: 30000,
   onTimeout: () => console.error('Timeout'),
-  onError: (error) => console.error(error),
+  onError: error => console.error(error),
 });
 
 // All API wrappers accept { withLoading }
@@ -392,6 +412,7 @@ const handleSubmit = createFormHandler(
 ### 1. Loading Delay (300ms)
 
 Prevents loading flash for quick operations:
+
 - ✅ Quick requests (<300ms): No loading shown
 - ✅ Normal requests (>300ms): Loading appears after delay
 - ✅ Smooth UX for all response times
@@ -399,6 +420,7 @@ Prevents loading flash for quick operations:
 ### 2. Concurrent Request Handling
 
 Loading counter system:
+
 - ✅ Tracks multiple active requests
 - ✅ Single loading indicator for all
 - ✅ Hides only when ALL complete
@@ -407,6 +429,7 @@ Loading counter system:
 ### 3. Automatic Cleanup
 
 Memory-safe implementation:
+
 - ✅ Clears timeouts on unmount
 - ✅ Aborts pending requests
 - ✅ Resets loading state
@@ -480,14 +503,14 @@ await api.get('/endpoint', { timeout: 1000 }, { withLoading }); // Too short
 
 ## 🔒 .cursorrules Compliance
 
-| Rule | Status | Implementation |
-|------|--------|----------------|
-| TypeScript strict mode | ✅ | Full compliance |
-| Error handling | ✅ | Multi-layer approach |
-| JSDoc documentation | ✅ | All functions documented |
-| Proper exports | ✅ | Barrel exports updated |
-| No client-only | ✅ | Server-side compatible |
-| Security | ✅ | No exposed secrets |
+| Rule                   | Status | Implementation           |
+| ---------------------- | ------ | ------------------------ |
+| TypeScript strict mode | ✅     | Full compliance          |
+| Error handling         | ✅     | Multi-layer approach     |
+| JSDoc documentation    | ✅     | All functions documented |
+| Proper exports         | ✅     | Barrel exports updated   |
+| No client-only         | ✅     | Server-side compatible   |
+| Security               | ✅     | No exposed secrets       |
 
 ---
 
@@ -498,7 +521,7 @@ await api.get('/endpoint', { timeout: 1000 }, { withLoading }); // Too short
 The API layer is now fully integrated with loading states throughout:
 
 - **Unified API Client** with automatic loading management
-- **300ms Delay** prevents loading flash for quick operations  
+- **300ms Delay** prevents loading flash for quick operations
 - **Concurrent Handling** manages multiple requests properly
 - **BGG Integration** all BGG API calls show loading
 - **Supabase Integration** all auth/database operations show loading

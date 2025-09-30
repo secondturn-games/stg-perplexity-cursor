@@ -217,9 +217,7 @@ export default function MarketplaceIntegrationTest() {
       {/* Selected Game Details */}
       {selectedGame && (
         <div className='card space-y-4'>
-          <h2 className='text-xl font-normal text-primary-500'>
-            Game Details
-          </h2>
+          <h2 className='text-xl font-normal text-primary-500'>Game Details</h2>
           <div className='space-y-2'>
             <h3 className='text-lg font-medium text-gray-900'>
               {selectedGame.name}

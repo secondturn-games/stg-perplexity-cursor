@@ -1,7 +1,8 @@
-/**
- * API Integration with Loading States
- * Complete guide for using loading animations with API calls
- */
+/\*\*
+
+- API Integration with Loading States
+- Complete guide for using loading animations with API calls
+  \*/
 
 import { useLoading } from '@/hooks/useLoading';
 import { DiceLoader } from '@/components/ui';
@@ -15,16 +16,16 @@ import { createFormHandler } from '@/lib/form-handlers';
 // ============================================
 
 function BasicApiExample() {
-  const { isLoading, withLoading } = useLoading();
+const { isLoading, withLoading } = useLoading();
 
-  const fetchGames = async () => {
-    const { data, error } = await api.get(
-      '/api/games',
-      {
-        loadingDelay: 300, // Show loading after 300ms
-      },
-      { withLoading }
-    );
+const fetchGames = async () => {
+const { data, error } = await api.get(
+'/api/games',
+{
+loadingDelay: 300, // Show loading after 300ms
+},
+{ withLoading }
+);
 
     if (error) {
       console.error('Error:', error);
@@ -32,14 +33,15 @@ function BasicApiExample() {
     }
 
     console.log('Games:', data);
-  };
 
-  return (
-    <>
-      <button onClick={fetchGames}>Load Games</button>
-      <DiceLoader isVisible={isLoading} text="Fetching games..." />
-    </>
-  );
+};
+
+return (
+<>
+<button onClick={fetchGames}>Load Games</button>
+<DiceLoader isVisible={isLoading} text="Fetching games..." />
+</>
+);
 }
 
 // ============================================
@@ -47,45 +49,46 @@ function BasicApiExample() {
 // ============================================
 
 function BGGSearchExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [results, setResults] = useState([]);
+const { isLoading, withLoading } = useLoading();
+const [results, setResults] = useState([]);
 
-  const searchGames = async (query: string) => {
-    const { data, error } = await searchGamesWithLoading(
-      query,
-      { gameType: 'boardgame' },
-      { withLoading },
-      {
-        loadingDelay: 300,
-        timeout: 30000,
-        onError: (error) => console.error('Search error:', error),
-      }
-    );
+const searchGames = async (query: string) => {
+const { data, error } = await searchGamesWithLoading(
+query,
+{ gameType: 'boardgame' },
+{ withLoading },
+{
+loadingDelay: 300,
+timeout: 30000,
+onError: (error) => console.error('Search error:', error),
+}
+);
 
     if (data) {
       setResults(data.games);
     }
-  };
 
-  return (
-    <>
-      <input
-        type="text"
-        onChange={(e) => searchGames(e.target.value)}
-        placeholder="Search games..."
-      />
-      <DiceLoader
+};
+
+return (
+<>
+<input
+type="text"
+onChange={(e) => searchGames(e.target.value)}
+placeholder="Search games..."
+/>
+<DiceLoader
         isVisible={isLoading}
         text="Searching BoardGameGeek..."
         variant="roll"
       />
-      <ul>
-        {results.map((game) => (
-          <li key={game.id}>{game.name}</li>
-        ))}
-      </ul>
-    </>
-  );
+<ul>
+{results.map((game) => (
+<li key={game.id}>{game.name}</li>
+))}
+</ul>
+</>
+);
 }
 
 // ============================================
@@ -93,14 +96,14 @@ function BGGSearchExample() {
 // ============================================
 
 function LoginFormExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+const { isLoading, withLoading } = useLoading();
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [error, setError] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+const handleLogin = async (e: React.FormEvent) => {
+e.preventDefault();
+setError('');
 
     const { data, error: authError } = await signInWithEmailLoading(
       email,
@@ -119,31 +122,32 @@ function LoginFormExample() {
 
     // Success - redirect or update UI
     console.log('Logged in:', data);
-  };
 
-  return (
-    <form onSubmit={handleLogin}>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        disabled={isLoading}
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        disabled={isLoading}
-      />
-      <button type="submit" disabled={isLoading}>
-        Login
-      </button>
-      {error && <p className="text-red-600">{error}</p>}
-      <DiceLoader isVisible={isLoading} text="Signing in..." />
-    </form>
-  );
+};
+
+return (
+<form onSubmit={handleLogin}>
+<input
+type="email"
+value={email}
+onChange={(e) => setEmail(e.target.value)}
+placeholder="Email"
+disabled={isLoading}
+/>
+<input
+type="password"
+value={password}
+onChange={(e) => setPassword(e.target.value)}
+placeholder="Password"
+disabled={isLoading}
+/>
+<button type="submit" disabled={isLoading}>
+Login
+</button>
+{error && <p className="text-red-600">{error}</p>}
+<DiceLoader isVisible={isLoading} text="Signing in..." />
+</form>
+);
 }
 
 // ============================================
@@ -151,22 +155,22 @@ function LoginFormExample() {
 // ============================================
 
 function ContactFormExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [success, setSuccess] = useState(false);
+const { isLoading, withLoading } = useLoading();
+const [formData, setFormData] = useState({
+name: '',
+email: '',
+message: '',
+});
+const [errors, setErrors] = useState<Record<string, string>>({});
+const [success, setSuccess] = useState(false);
 
-  const handleSubmit = createFormHandler(
-    async (data) => {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+const handleSubmit = createFormHandler(
+async (data) => {
+const response = await fetch('/api/contact', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(data),
+});
 
       if (!response.ok) {
         throw new Error('Failed to send message');
@@ -197,27 +201,28 @@ function ContactFormExample() {
       },
       resetOnSuccess: true,
     }
-  );
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    setSuccess(false);
-    await handleSubmit(formData, e.currentTarget);
-  };
+);
 
-  return (
-    <form onSubmit={onSubmit}>
-      <div>
-        <label>Name</label>
-        <input
-          type="text"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          disabled={isLoading}
-        />
-        {errors.name && <span className="error">{errors.name}</span>}
-      </div>
+const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+e.preventDefault();
+setErrors({});
+setSuccess(false);
+await handleSubmit(formData, e.currentTarget);
+};
+
+return (
+<form onSubmit={onSubmit}>
+<div>
+<label>Name</label>
+<input
+type="text"
+value={formData.name}
+onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+disabled={isLoading}
+/>
+{errors.name && <span className="error">{errors.name}</span>}
+</div>
 
       <div>
         <label>Email</label>
@@ -251,7 +256,8 @@ function ContactFormExample() {
 
       <DiceLoader isVisible={isLoading} text="Sending message..." />
     </form>
-  );
+
+);
 }
 
 // ============================================
@@ -259,40 +265,41 @@ function ContactFormExample() {
 // ============================================
 
 function DashboardExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [data, setData] = useState({
-    games: [],
-    users: [],
-    stats: {},
-  });
+const { isLoading, withLoading } = useLoading();
+const [data, setData] = useState({
+games: [],
+users: [],
+stats: {},
+});
 
-  const loadDashboard = async () => {
-    // All three calls will show a single loading indicator
-    // Loading persists until ALL complete
-    const [gamesResult, usersResult, statsResult] = await Promise.all([
-      api.get('/api/games', {}, { withLoading }),
-      api.get('/api/users', {}, { withLoading }),
-      api.get('/api/stats', {}, { withLoading }),
-    ]);
+const loadDashboard = async () => {
+// All three calls will show a single loading indicator
+// Loading persists until ALL complete
+const [gamesResult, usersResult, statsResult] = await Promise.all([
+api.get('/api/games', {}, { withLoading }),
+api.get('/api/users', {}, { withLoading }),
+api.get('/api/stats', {}, { withLoading }),
+]);
 
     setData({
       games: gamesResult.data || [],
       users: usersResult.data || [],
       stats: statsResult.data || {},
     });
-  };
 
-  return (
-    <>
-      <button onClick={loadDashboard}>Load Dashboard</button>
-      <DiceLoader
+};
+
+return (
+<>
+<button onClick={loadDashboard}>Load Dashboard</button>
+<DiceLoader
         isVisible={isLoading}
         text="Loading dashboard..."
         variant="spin"
       />
-      {/* Render dashboard data */}
-    </>
-  );
+{/_ Render dashboard data _/}
+</>
+);
 }
 
 // ============================================
@@ -300,13 +307,13 @@ function DashboardExample() {
 // ============================================
 
 function DataMigrationExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [progress, setProgress] = useState('');
+const { isLoading, withLoading } = useLoading();
+const [progress, setProgress] = useState('');
 
-  const runMigration = async () => {
-    await withLoading(async () => {
-      setProgress('Step 1: Backing up data...');
-      await api.post('/api/migrate/backup', {});
+const runMigration = async () => {
+await withLoading(async () => {
+setProgress('Step 1: Backing up data...');
+await api.post('/api/migrate/backup', {});
 
       setProgress('Step 2: Transforming data...');
       await api.post('/api/migrate/transform', {});
@@ -319,17 +326,18 @@ function DataMigrationExample() {
 
       setProgress('Migration complete!');
     });
-  };
 
-  return (
-    <>
-      <button onClick={runMigration} disabled={isLoading}>
-        Run Migration
-      </button>
-      <p>{progress}</p>
-      <DiceLoader isVisible={isLoading} text={progress || 'Processing...'} />
-    </>
-  );
+};
+
+return (
+<>
+<button onClick={runMigration} disabled={isLoading}>
+Run Migration
+</button>
+<p>{progress}</p>
+<DiceLoader isVisible={isLoading} text={progress || 'Processing...'} />
+</>
+);
 }
 
 // ============================================
@@ -337,18 +345,18 @@ function DataMigrationExample() {
 // ============================================
 
 function ErrorHandlingExample() {
-  const { isLoading, withLoading } = useLoading({
-    onError: (error) => {
-      // Global error handler
-      console.error('API Error:', error);
-    },
-    hideOnError: true, // Auto-hide loading on error
-  });
+const { isLoading, withLoading } = useLoading({
+onError: (error) => {
+// Global error handler
+console.error('API Error:', error);
+},
+hideOnError: true, // Auto-hide loading on error
+});
 
-  const [error, setError] = useState('');
+const [error, setError] = useState('');
 
-  const fetchDataWithErrorHandling = async () => {
-    setError('');
+const fetchDataWithErrorHandling = async () => {
+setError('');
 
     try {
       const { data, error: apiError } = await api.get(
@@ -373,15 +381,16 @@ function ErrorHandlingExample() {
     } catch (err) {
       setError('Unexpected error occurred');
     }
-  };
 
-  return (
-    <>
-      <button onClick={fetchDataWithErrorHandling}>Fetch Data</button>
-      {error && <div className="error">{error}</div>}
-      <DiceLoader isVisible={isLoading} text="Loading..." />
-    </>
-  );
+};
+
+return (
+<>
+<button onClick={fetchDataWithErrorHandling}>Fetch Data</button>
+{error && <div className="error">{error}</div>}
+<DiceLoader isVisible={isLoading} text="Loading..." />
+</>
+);
 }
 
 // ============================================
@@ -389,23 +398,23 @@ function ErrorHandlingExample() {
 // ============================================
 
 function TimeoutExample() {
-  const { isLoading, withLoading } = useLoading({
-    defaultTimeout: 10000, // 10 seconds default
-    onTimeout: () => {
-      alert('Request timed out. Please try again.');
-    },
-  });
+const { isLoading, withLoading } = useLoading({
+defaultTimeout: 10000, // 10 seconds default
+onTimeout: () => {
+alert('Request timed out. Please try again.');
+},
+});
 
-  const fetchWithCustomTimeout = async () => {
-    // Override default timeout for this specific call
-    const { data, error } = await api.get(
-      '/api/slow-endpoint',
-      {
-        timeout: 60000, // 60 seconds for slow operations
-        loadingDelay: 500, // Wait 500ms before showing loading
-      },
-      { withLoading }
-    );
+const fetchWithCustomTimeout = async () => {
+// Override default timeout for this specific call
+const { data, error } = await api.get(
+'/api/slow-endpoint',
+{
+timeout: 60000, // 60 seconds for slow operations
+loadingDelay: 500, // Wait 500ms before showing loading
+},
+{ withLoading }
+);
 
     if (error) {
       console.error('Error:', error);
@@ -413,14 +422,15 @@ function TimeoutExample() {
     }
 
     console.log('Data:', data);
-  };
 
-  return (
-    <>
-      <button onClick={fetchWithCustomTimeout}>Fetch with Timeout</button>
-      <DiceLoader isVisible={isLoading} text="This may take a while..." />
-    </>
-  );
+};
+
+return (
+<>
+<button onClick={fetchWithCustomTimeout}>Fetch with Timeout</button>
+<DiceLoader isVisible={isLoading} text="This may take a while..." />
+</>
+);
 }
 
 // ============================================
@@ -428,16 +438,16 @@ function TimeoutExample() {
 // ============================================
 
 function OptimisticUpdateExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [items, setItems] = useState([
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-  ]);
+const { isLoading, withLoading } = useLoading();
+const [items, setItems] = useState([
+{ id: 1, name: 'Item 1' },
+{ id: 2, name: 'Item 2' },
+]);
 
-  const deleteItem = async (id: number) => {
-    // Optimistically remove item from UI
-    const previousItems = [...items];
-    setItems((prev) => prev.filter((item) => item.id !== id));
+const deleteItem = async (id: number) => {
+// Optimistically remove item from UI
+const previousItems = [...items];
+setItems((prev) => prev.filter((item) => item.id !== id));
 
     try {
       const { error } = await api.delete(`/api/items/${id}`, {}, { withLoading });
@@ -451,23 +461,24 @@ function OptimisticUpdateExample() {
       console.error('Delete failed:', err);
       // Items already rolled back
     }
-  };
 
-  return (
-    <>
-      <ul>
-        {items.map((item) => (
-          <li key={item.id}>
-            {item.name}
-            <button onClick={() => deleteItem(item.id)} disabled={isLoading}>
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-      <DiceLoader isVisible={isLoading} text="Deleting..." />
-    </>
-  );
+};
+
+return (
+<>
+<ul>
+{items.map((item) => (
+<li key={item.id}>
+{item.name}
+<button onClick={() => deleteItem(item.id)} disabled={isLoading}>
+Delete
+</button>
+</li>
+))}
+</ul>
+<DiceLoader isVisible={isLoading} text="Deleting..." />
+</>
+);
 }
 
 // ============================================
@@ -475,13 +486,13 @@ function OptimisticUpdateExample() {
 // ============================================
 
 function PollingExample() {
-  const { isLoading, withLoading } = useLoading();
-  const [status, setStatus] = useState('pending');
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+const { isLoading, withLoading } = useLoading();
+const [status, setStatus] = useState('pending');
+const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const startJob = async () => {
-    // Start the job
-    const { data } = await api.post('/api/jobs/start', {}, {}, { withLoading });
+const startJob = async () => {
+// Start the job
+const { data } = await api.post('/api/jobs/start', {}, {}, { withLoading });
 
     if (data?.jobId) {
       // Start polling for status
@@ -499,36 +510,37 @@ function PollingExample() {
         }
       }, 2000); // Poll every 2 seconds
     }
-  };
 
-  useEffect(() => {
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
-    };
-  }, []);
+};
 
-  return (
-    <>
-      <button onClick={startJob} disabled={isLoading || status === 'polling'}>
-        Start Job
-      </button>
-      <p>Status: {status}</p>
-      <DiceLoader isVisible={isLoading} text="Starting job..." />
-    </>
-  );
+useEffect(() => {
+return () => {
+if (pollIntervalRef.current) {
+clearInterval(pollIntervalRef.current);
+}
+};
+}, []);
+
+return (
+<>
+<button onClick={startJob} disabled={isLoading || status === 'polling'}>
+Start Job
+</button>
+<p>Status: {status}</p>
+<DiceLoader isVisible={isLoading} text="Starting job..." />
+</>
+);
 }
 
 export {
-  BasicApiExample,
-  BGGSearchExample,
-  LoginFormExample,
-  ContactFormExample,
-  DashboardExample,
-  DataMigrationExample,
-  ErrorHandlingExample,
-  TimeoutExample,
-  OptimisticUpdateExample,
-  PollingExample,
+BasicApiExample,
+BGGSearchExample,
+LoginFormExample,
+ContactFormExample,
+DashboardExample,
+DataMigrationExample,
+ErrorHandlingExample,
+TimeoutExample,
+OptimisticUpdateExample,
+PollingExample,
 };

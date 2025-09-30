@@ -11,81 +11,119 @@ Complete implementation of page-level loading states using DiceLoader throughout
 ### 1. Loading.tsx Files (Next.js App Router)
 
 **Root Loading** (`app/loading.tsx`)
+
 ```tsx
 export default function Loading() {
-  return <DiceLoader isVisible={true} text="Loading..." variant="roll" />;
+  return <DiceLoader isVisible={true} text='Loading...' variant='roll' />;
 }
 ```
 
 **Auth Loading** (`app/auth/loading.tsx`)
+
 ```tsx
 export default function AuthLoading() {
-  return <DiceLoader isVisible={true} text="Loading authentication..." variant="bounce" />;
+  return (
+    <DiceLoader
+      isVisible={true}
+      text='Loading authentication...'
+      variant='bounce'
+    />
+  );
 }
 ```
 
 **Dashboard Loading** (`app/dashboard/loading.tsx`)
+
 ```tsx
 export default function DashboardLoading() {
-  return <DiceLoader isVisible={true} text="Loading dashboard..." variant="spin" />;
+  return (
+    <DiceLoader isVisible={true} text='Loading dashboard...' variant='spin' />
+  );
 }
 ```
 
 **Profile Loading** (`app/profile/loading.tsx`)
+
 ```tsx
 export default function ProfileLoading() {
-  return <DiceLoader isVisible={true} text="Loading profile..." variant="bounce" />;
+  return (
+    <DiceLoader isVisible={true} text='Loading profile...' variant='bounce' />
+  );
 }
 ```
 
 **Marketplace Loading** (`app/marketplace/loading.tsx`)
+
 ```tsx
 export default function MarketplaceLoading() {
-  return <DiceLoader isVisible={true} text="Loading marketplace..." variant="spin" />;
+  return (
+    <DiceLoader isVisible={true} text='Loading marketplace...' variant='spin' />
+  );
 }
 ```
 
 **Listing Detail Loading** (`app/marketplace/listings/[id]/loading.tsx`)
+
 ```tsx
 export default function ListingDetailLoading() {
-  return <DiceLoader isVisible={true} text="Loading listing details..." variant="bounce" />;
+  return (
+    <DiceLoader
+      isVisible={true}
+      text='Loading listing details...'
+      variant='bounce'
+    />
+  );
 }
 ```
 
 **New Listing Loading** (`app/marketplace/listings/new/loading.tsx`)
+
 ```tsx
 export default function NewListingLoading() {
-  return <DiceLoader isVisible={true} text="Preparing form..." variant="roll" />;
+  return (
+    <DiceLoader isVisible={true} text='Preparing form...' variant='roll' />
+  );
 }
 ```
 
 **My Listings Loading** (`app/marketplace/my-listings/loading.tsx`)
+
 ```tsx
 export default function MyListingsLoading() {
-  return <DiceLoader isVisible={true} text="Loading your listings..." variant="bounce" />;
+  return (
+    <DiceLoader
+      isVisible={true}
+      text='Loading your listings...'
+      variant='bounce'
+    />
+  );
 }
 ```
 
 ### 2. Layout Components
 
 **NavigationLoader** (`components/layout/NavigationLoader.tsx`)
+
 - Monitors route changes
 - Route-aware loading messages
 - Integrated into root layout
 - Handles client-side navigation
 
 **ProtectedRoute** (`components/layout/ProtectedRoute.tsx`)
+
 - Authentication verification with loading
 - Redirects unauthorized users
 - Email verification check
 - Custom loading text support
 
 **SuspenseWrapper** (`components/layout/SuspenseWrapper.tsx`)
+
 - React Suspense with DiceLoader fallback
 - Customizable loading text
 - Animation variant selection
 
 **PageLoader** (`components/layout/PageLoader.tsx`)
+
 - Reusable page-level loader
 - Route-aware loading messages
 - Can override with custom text
@@ -102,6 +140,7 @@ export default function MyListingsLoading() {
 ## 🎨 Loading Text by Route
 
 ### Marketplace Routes
+
 ```
 /marketplace                           → "Loading marketplace..."
 /marketplace/listings/new              → "Preparing listing form..."
@@ -111,6 +150,7 @@ export default function MyListingsLoading() {
 ```
 
 ### Profile Routes
+
 ```
 /profile                               → "Loading profile..."
 /profile/edit                          → "Loading profile editor..."
@@ -118,6 +158,7 @@ export default function MyListingsLoading() {
 ```
 
 ### Auth Routes
+
 ```
 /auth/signin                           → "Loading sign in..."
 /auth/signup                           → "Loading sign up..."
@@ -127,6 +168,7 @@ export default function MyListingsLoading() {
 ```
 
 ### Other Routes
+
 ```
 /dashboard                             → "Loading dashboard..."
 /messages                              → "Loading messages..."
@@ -146,10 +188,10 @@ import DiceLoader from '@/components/ui/DiceLoader';
 
 export default function Loading() {
   return (
-    <DiceLoader 
-      isVisible={true} 
-      text="Loading your content..." 
-      variant="roll"
+    <DiceLoader
+      isVisible={true}
+      text='Loading your content...'
+      variant='roll'
     />
   );
 }
@@ -165,7 +207,7 @@ import { ProtectedRoute } from '@/components/layout';
 
 export default function ProtectedPage() {
   return (
-    <ProtectedRoute loadingText="Verifying access...">
+    <ProtectedRoute loadingText='Verifying access...'>
       <YourProtectedContent />
     </ProtectedRoute>
   );
@@ -180,7 +222,7 @@ import { SuspenseWrapper } from '@/components/layout';
 
 function MyComponent() {
   return (
-    <SuspenseWrapper loadingText="Loading game data..." variant="bounce">
+    <SuspenseWrapper loadingText='Loading game data...' variant='bounce'>
       <AsyncGameComponent />
     </SuspenseWrapper>
   );
@@ -315,7 +357,7 @@ function Loading() {
 <ProtectedRoute>
   <DiceLoader isVisible={true} /> {/* ❌ Redundant */}
   <Content />
-</ProtectedRoute>
+</ProtectedRoute>;
 ```
 
 ---
@@ -383,16 +425,19 @@ Total lines:            ~800
 ### When to Use Each Variant
 
 **Roll (Default)** - General purpose
+
 - Page loading
 - Form submission
 - Data fetching
 
 **Bounce** - Interactive operations
+
 - Authentication
 - Profile updates
 - User actions
 
 **Spin** - Background operations
+
 - Marketplace search
 - Dashboard loading
 - Complex queries
@@ -412,8 +457,8 @@ import { DashboardContent } from '@/components/dashboard';
 
 export default function DashboardPage() {
   return (
-    <ProtectedRoute 
-      loadingText="Loading your dashboard..."
+    <ProtectedRoute
+      loadingText='Loading your dashboard...'
       requireEmailVerification={true}
     >
       <DashboardContent />
@@ -425,7 +470,9 @@ export default function DashboardPage() {
 import DiceLoader from '@/components/ui/DiceLoader';
 
 export default function DashboardLoading() {
-  return <DiceLoader isVisible={true} text="Loading dashboard..." variant="spin" />;
+  return (
+    <DiceLoader isVisible={true} text='Loading dashboard...' variant='spin' />
+  );
 }
 ```
 
@@ -436,7 +483,7 @@ import { SuspenseWrapper } from '@/components/layout';
 
 function GameDetailsPage({ params }: { params: { id: string } }) {
   return (
-    <SuspenseWrapper loadingText="Loading game details..." variant="bounce">
+    <SuspenseWrapper loadingText='Loading game details...' variant='bounce'>
       <AsyncGameDetails gameId={params.id} />
     </SuspenseWrapper>
   );
@@ -449,15 +496,15 @@ function GameDetailsPage({ params }: { params: { id: string } }) {
 function ComplexPage() {
   return (
     <div>
-      <SuspenseWrapper loadingText="Loading games...">
+      <SuspenseWrapper loadingText='Loading games...'>
         <GamesList />
       </SuspenseWrapper>
-      
-      <SuspenseWrapper loadingText="Loading recommendations...">
+
+      <SuspenseWrapper loadingText='Loading recommendations...'>
         <Recommendations />
       </SuspenseWrapper>
-      
-      <SuspenseWrapper loadingText="Loading reviews...">
+
+      <SuspenseWrapper loadingText='Loading reviews...'>
         <ReviewsList />
       </SuspenseWrapper>
     </div>

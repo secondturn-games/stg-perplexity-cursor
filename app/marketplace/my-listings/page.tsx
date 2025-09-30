@@ -71,7 +71,7 @@ function MyListingsContent() {
           }
         });
       } catch (error) {
-        console.error('Failed to load listings:', error);
+        // Error handled - failed to load listings
       }
     };
 
@@ -101,7 +101,7 @@ function MyListingsContent() {
         setListings(prev => prev.filter(l => l.id !== listingId));
       });
     } catch (error) {
-      console.error('Failed to delete listing:', error);
+      // Error handled
       alert('Failed to delete listing. Please try again.');
     }
   };

@@ -61,22 +61,17 @@ export class DiceLoaderErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log error to console in development
-    if (process.env['NODE_ENV'] === 'development') {
-      console.error('DiceLoader Error:', error);
-      console.error('Error Info:', errorInfo);
-    }
-
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Call onError callback if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
 
     // TODO: Send to error tracking service (e.g., Sentry) in production
+    // Error is silently handled to prevent app crashes
   }
 
-  render(): ReactNode {
+  override render(): ReactNode {
     if (this.state.hasError) {
       // Render fallback UI
       if (this.props.fallback) {

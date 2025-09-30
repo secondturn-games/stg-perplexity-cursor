@@ -360,14 +360,12 @@ export default function MarketplaceSearch({
               <Link
                 key={listing.id}
                 href={`/marketplace/listings/${listing.id}`}
-                onClick={
-                  onSelectListing
-                    ? e => {
-                        e.preventDefault();
-                        onSelectListing(listing.id);
-                      }
-                    : undefined
-                }
+                {...(onSelectListing && {
+                  onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+                    e.preventDefault();
+                    onSelectListing(listing.id);
+                  },
+                })}
                 className='card group overflow-hidden transition-shadow hover:shadow-xl'
               >
                 {/* Image */}

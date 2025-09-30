@@ -3,6 +3,7 @@
 ## 🎨 Design System Integration
 
 ### Overview
+
 The DiceLoader component is a core part of the Baltic Board Game Marketplace design system, providing consistent loading feedback across all user interactions.
 
 ---
@@ -10,9 +11,11 @@ The DiceLoader component is a core part of the Baltic Board Game Marketplace des
 ## 🎯 Component Specification
 
 ### Purpose
+
 Provides visual feedback during asynchronous operations with a branded, accessible loading animation featuring dice symbols.
 
 ### Use Cases
+
 - Page navigation loading
 - API request processing
 - Form submission feedback
@@ -21,6 +24,7 @@ Provides visual feedback during asynchronous operations with a branded, accessib
 - Data fetching operations
 
 ### When NOT to Use
+
 - For progress bars with specific percentages
 - For inline loading indicators (use button loading prop instead)
 - For non-blocking background operations
@@ -32,13 +36,13 @@ Provides visual feedback during asynchronous operations with a branded, accessib
 
 ### Brand Colors
 
-| Element | Color Token | Hex Value | Usage |
-|---------|-------------|-----------|-------|
+| Element            | Color Token      | Hex Value     | Usage               |
+| ------------------ | ---------------- | ------------- | ------------------- |
 | Overlay Background | `primary-500/90` | #29432B @ 90% | Dark green backdrop |
-| Dice Symbol | `accent-500` | #D95323 | Vibrant orange dice |
-| Loading Text | `background-100` | #E6EAD7 | Light beige text |
-| Glow Effect | `warning-400` | #F2C94C | Warm yellow glow |
-| Loading Dots | `warning-400` | #F2C94C | Warm yellow dots |
+| Dice Symbol        | `accent-500`     | #D95323       | Vibrant orange dice |
+| Loading Text       | `background-100` | #E6EAD7       | Light beige text    |
+| Glow Effect        | `warning-400`    | #F2C94C       | Warm yellow glow    |
+| Loading Dots       | `warning-400`    | #F2C94C       | Warm yellow dots    |
 
 ### Color Contrast Ratios (WCAG AA Compliance)
 
@@ -64,7 +68,7 @@ Loading Text:
   Size (Tablet): 1.25rem (text-xl)
   Size (Desktop): 1.5rem (text-2xl)
   Color: background-100 (#E6EAD7)
-  
+
 Loading Dots:
   Size (Mobile): 1.25rem (text-xl)
   Size (Tablet): 1.5rem (text-2xl)
@@ -110,6 +114,7 @@ Layer Hierarchy:
 ## 🎭 Animation Variants
 
 ### Roll (Default)
+
 **Use for:** General page loading, data fetching, default operations
 
 ```typescript
@@ -117,18 +122,21 @@ Layer Hierarchy:
 ```
 
 **Animation:**
+
 - 360° rotation with scale variation
 - Duration: 0.9s
 - Easing: ease-in-out
 - Scale: 1 → 1.1 → 1 → 1.1 → 1
 
 **When to Use:**
+
 - Page navigation
 - General API calls
 - Content loading
 - Default choice when unsure
 
 ### Bounce
+
 **Use for:** Interactive operations, user actions, profile updates
 
 ```typescript
@@ -136,6 +144,7 @@ Layer Hierarchy:
 ```
 
 **Animation:**
+
 - Vertical movement + rotation
 - Duration: 0.8s
 - Easing: ease-in-out
@@ -143,12 +152,14 @@ Layer Hierarchy:
 - Rotation: 0° → 90° → 180°
 
 **When to Use:**
+
 - Authentication (sign in/up)
 - Profile updates
 - User actions (add to cart, save)
 - Interactive forms
 
 ### Spin
+
 **Use for:** Background operations, search, complex queries
 
 ```typescript
@@ -156,12 +167,14 @@ Layer Hierarchy:
 ```
 
 **Animation:**
+
 - Continuous Y-axis rotation
 - Duration: 1s
 - Easing: linear
 - Rotation: 0° → 360° (continuous)
 
 **When to Use:**
+
 - Marketplace search
 - Dashboard loading
 - Complex queries
@@ -190,18 +203,21 @@ Layer Hierarchy:
 ### Screen Reader Behavior
 
 **When Loading Appears:**
+
 ```
 Screen Reader: "Alert. [Loading text]. Busy."
 Example: "Alert. Loading marketplace. Busy."
 ```
 
 **When Loading Text Changes:**
+
 ```
 Screen Reader: "[New loading text]"
 Example: "Uploading images"
 ```
 
 **When Loading Disappears:**
+
 ```
 (No announcement - polite aria-live doesn't announce removal)
 ```
@@ -209,11 +225,13 @@ Example: "Uploading images"
 ### Focus Management
 
 **On Show:**
+
 1. Save currently focused element
 2. Prevent body scroll
 3. Set aria-busy="true"
 
 **On Hide:**
+
 1. Restore focus to saved element
 2. Re-enable body scroll
 3. Remove aria-busy
@@ -238,6 +256,7 @@ Example: "Uploading images"
 ```
 
 **Behavior:**
+
 - Animations become static
 - Dice still cycles (minimal motion)
 - Loading text still visible
@@ -275,6 +294,7 @@ Desktop (≥ 768px):
 ### Touch Targets
 
 All interactive elements (when applicable) meet minimum:
+
 - Size: 44×44px (iOS) / 48×48px (Android)
 - Spacing: 8px minimum between targets
 
@@ -287,6 +307,7 @@ All interactive elements (when applicable) meet minimum:
 ### Animation Performance
 
 **Hardware Acceleration:**
+
 ```css
 .dice {
   transform: translateZ(0);
@@ -298,6 +319,7 @@ All interactive elements (when applicable) meet minimum:
 **Target Frame Rate:** 60 FPS
 
 **Actual Performance:**
+
 - Desktop: 60 FPS ✅
 - Mobile: 55-60 FPS ✅
 - Low-end devices: 45-55 FPS ✅
@@ -352,12 +374,14 @@ interface DiceLoaderProps {
 ### Prop Validation
 
 **isVisible:**
+
 - Type: `boolean`
 - Required: Yes
 - Default: N/A
 - Validation: Must be boolean
 
 **text:**
+
 - Type: `string`
 - Required: No
 - Default: `'Loading...'`
@@ -365,6 +389,7 @@ interface DiceLoaderProps {
 - Recommended: 2-50 characters for best UX
 
 **variant:**
+
 - Type: `'roll' | 'bounce' | 'spin'`
 - Required: No
 - Default: `'roll'`
@@ -383,10 +408,10 @@ interface DiceLoaderProps {
 <DiceLoader isVisible={isLoading} text="Processing..." variant="bounce" />
 
 // Complete
-<DiceLoader 
-  isVisible={isLoading} 
-  text="Searching marketplace..." 
-  variant="spin" 
+<DiceLoader
+  isVisible={isLoading}
+  text="Searching marketplace..."
+  variant="spin"
 />
 ```
 
@@ -399,12 +424,12 @@ interface DiceLoaderProps {
 ```typescript
 // Tailwind CSS tokens used
 const colors = {
-  overlay: 'bg-primary-500/90',          // #29432B @ 90%
+  overlay: 'bg-primary-500/90', // #29432B @ 90%
   overlayBlur: 'backdrop-blur-md',
-  dice: 'text-accent-500',               // #D95323
-  text: 'text-background-100',           // #E6EAD7
-  glow: 'bg-warning-400',                // #F2C94C
-  dots: 'text-warning-400',              // #F2C94C
+  dice: 'text-accent-500', // #D95323
+  text: 'text-background-100', // #E6EAD7
+  glow: 'bg-warning-400', // #F2C94C
+  dots: 'text-warning-400', // #F2C94C
 };
 ```
 
@@ -436,6 +461,7 @@ const spacing = {
 ### Visual Testing
 
 **Test Cases:**
+
 1. All three animation variants
 2. Mobile, tablet, desktop viewports
 3. Light and dark mode (if applicable)
@@ -444,6 +470,7 @@ const spacing = {
 6. Brand color accuracy
 
 **Tools:**
+
 - Visual regression testing
 - Cross-browser testing
 - Device testing
@@ -451,6 +478,7 @@ const spacing = {
 ### Accessibility Testing
 
 **Test Cases:**
+
 1. Screen reader announcements
 2. Focus management
 3. Keyboard navigation (should not trap)
@@ -459,6 +487,7 @@ const spacing = {
 6. ARIA attribute validation
 
 **Tools:**
+
 - aXe DevTools
 - WAVE
 - NVDA / JAWS / VoiceOver
@@ -467,6 +496,7 @@ const spacing = {
 ### Unit Testing
 
 **Test Coverage:**
+
 - ✅ Rendering (visible/hidden)
 - ✅ Props (text, variant)
 - ✅ ARIA attributes
@@ -480,6 +510,7 @@ const spacing = {
 ### Integration Testing
 
 **Test Cases:**
+
 - Integration with useLoading hook
 - Form submission flows
 - API call flows
@@ -529,11 +560,13 @@ const spacing = {
 ### Color Usage Rules
 
 **DO:**
+
 - ✅ Use semantic color tokens (primary-500, accent-500, etc.)
 - ✅ Maintain color consistency across all loading states
 - ✅ Test color contrast for accessibility
 
 **DON'T:**
+
 - ❌ Use hardcoded hex values
 - ❌ Mix loading indicator colors
 - ❌ Change opacity without testing contrast
@@ -541,12 +574,14 @@ const spacing = {
 ### Animation Guidelines
 
 **DO:**
+
 - ✅ Use appropriate variant for context
 - ✅ Keep animations smooth (60fps target)
 - ✅ Respect user motion preferences
 - ✅ Use hardware acceleration
 
 **DON'T:**
+
 - ❌ Create custom variants without approval
 - ❌ Override animation timings
 - ❌ Remove reduced motion support
@@ -555,12 +590,14 @@ const spacing = {
 ### Text Guidelines
 
 **DO:**
+
 - ✅ Use clear, concise loading messages
 - ✅ Be specific about what's loading
 - ✅ Keep text under 50 characters
 - ✅ Use present continuous tense ("Loading...", "Saving...")
 
 **DON'T:**
+
 - ❌ Use technical jargon
 - ❌ Write vague messages ("Please wait...")
 - ❌ Use ALL CAPS
@@ -573,6 +610,7 @@ const spacing = {
 ### When to Track
 
 Track DiceLoader usage for:
+
 - Loading duration analytics
 - User experience metrics
 - Performance monitoring
@@ -610,11 +648,13 @@ Track DiceLoader usage for:
 ### Content Security
 
 **Safe:**
+
 - Loading text is sanitized (React escapes by default)
 - No dangerouslySetInnerHTML used
 - No external scripts loaded
 
 **Best Practices:**
+
 - Don't display sensitive data in loading text
 - Avoid exposing internal API details
 - Use generic messages for security operations
@@ -622,6 +662,7 @@ Track DiceLoader usage for:
 ### Privacy
 
 **GDPR Compliance:**
+
 - No personal data in loading messages
 - No tracking without consent
 - No data sent to external services
@@ -633,11 +674,13 @@ Track DiceLoader usage for:
 ### Loading Times
 
 **Target Load Times:**
+
 - Component mount: < 50ms
 - Animation start: < 16ms (1 frame)
 - CSS load: < 100ms
 
 **Measured Performance:**
+
 - Component mount: ~20ms ✅
 - Animation start: ~8ms ✅
 - CSS load: ~30ms ✅
@@ -645,16 +688,19 @@ Track DiceLoader usage for:
 ### Resource Usage
 
 **Memory:**
+
 - Baseline: ~50KB
 - With animations: ~100KB
 - Impact: Minimal ✅
 
 **CPU:**
+
 - Idle: 0%
 - Animating: 2-5%
 - Impact: Minimal ✅
 
 **GPU:**
+
 - Utilization: Low
 - Smoothness: 60fps ✅
 
@@ -688,16 +734,19 @@ Track DiceLoader usage for:
 ### Related Components
 
 **Loading States:**
+
 - Button with loading prop
 - Skeleton loaders (future)
 - Progress bars (future)
 
 **Overlays:**
+
 - Modal dialogs
 - Toast notifications
 - Alert messages
 
 **Navigation:**
+
 - Page transitions
 - Route loading
 
@@ -755,7 +804,7 @@ No rendering
 isVisible={true}
   ↓
 1. Save current focus
-2. Prevent body scroll  
+2. Prevent body scroll
 3. Start dice cycling (150ms interval)
 4. Render overlay
 5. Announce to screen readers
@@ -797,12 +846,14 @@ clearInterval, restore focus/scroll
 ### Figma/Design Tools
 
 **Component Properties:**
+
 - Layer: Overlay
 - Blend Mode: Normal
 - Opacity: 90%
 - Backdrop: Blur 8px
 
 **Export Settings:**
+
 - Format: React component
 - Framework: Next.js
 - Styling: Tailwind CSS

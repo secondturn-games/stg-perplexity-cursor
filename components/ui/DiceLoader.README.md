@@ -9,6 +9,7 @@ The DiceLoader displays an animated dice overlay that cycles through Unicode dic
 ## ✨ Features
 
 ### Design System Integration
+
 - ✅ Uses semantic color tokens from Tailwind config
 - ✅ Leverages `cn()` utility from `@/lib/utils` for className merging
 - ✅ Respects design system z-index layers (z-50)
@@ -16,12 +17,14 @@ The DiceLoader displays an animated dice overlay that cycles through Unicode dic
 - ✅ Backdrop blur effect using Tailwind's `backdrop-blur-md`
 
 ### Brand Colors
+
 - **Background Overlay**: Dark Green (primary-500) at 90% opacity
 - **Dice**: Vibrant Orange (accent-500)
 - **Text**: Light Beige (background-100)
 - **Glow & Dots**: Warm Yellow (warning-400)
 
 ### Accessibility (WCAG 2.1 AA Compliant)
+
 - ✅ ARIA attributes (`role="alert"`, `aria-live="polite"`, `aria-busy="true"`)
 - ✅ Focus management - stores and restores focus when loader shows/hides
 - ✅ Body scroll prevention while loading
@@ -30,12 +33,14 @@ The DiceLoader displays an animated dice overlay that cycles through Unicode dic
 - ✅ Decorative elements marked with `aria-hidden`
 
 ### Performance
+
 - ✅ Hardware-accelerated animations (60fps target)
 - ✅ `will-change` properties for optimal rendering
 - ✅ Transform-based animations (GPU accelerated)
 - ✅ Efficient React hooks with proper cleanup
 
 ### Responsive Design
+
 - ✅ Mobile-first approach
 - ✅ Breakpoints: sm (640px), md (768px)
 - ✅ Scales appropriately on all screen sizes
@@ -66,7 +71,7 @@ export default function MyPage() {
 
   return (
     <>
-      <DiceLoader isVisible={isLoading} text="Loading..." />
+      <DiceLoader isVisible={isLoading} text='Loading...' />
       {/* Your page content */}
     </>
   );
@@ -104,12 +109,12 @@ export default function MarketplacePage() {
 
   return (
     <>
-      <DiceLoader 
-        isVisible={isLoading} 
-        text="Fetching board games..." 
-        variant="roll"
+      <DiceLoader
+        isVisible={isLoading}
+        text='Fetching board games...'
+        variant='roll'
       />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         {games.map(game => (
           <GameCard key={game.id} game={game} />
         ))}
@@ -123,34 +128,34 @@ export default function MarketplacePage() {
 
 ```tsx
 // Roll variant (default) - 360° rotation with scale
-<DiceLoader 
-  isVisible={isLoading} 
-  text="Loading..." 
-  variant="roll" 
+<DiceLoader
+  isVisible={isLoading}
+  text="Loading..."
+  variant="roll"
 />
 
 // Bounce variant - vertical movement with rotation
-<DiceLoader 
-  isVisible={isLoading} 
-  text="Processing..." 
-  variant="bounce" 
+<DiceLoader
+  isVisible={isLoading}
+  text="Processing..."
+  variant="bounce"
 />
 
 // Spin variant - continuous Y-axis rotation
-<DiceLoader 
-  isVisible={isLoading} 
-  text="Please wait..." 
-  variant="spin" 
+<DiceLoader
+  isVisible={isLoading}
+  text="Please wait..."
+  variant="spin"
 />
 ```
 
 ## 📋 Props
 
-| Prop | Type | Default | Required | Description |
-|------|------|---------|----------|-------------|
-| `isVisible` | `boolean` | - | ✅ Yes | Controls loader visibility |
-| `text` | `string` | `"Loading..."` | ❌ No | Custom loading message |
-| `variant` | `'roll' \| 'bounce' \| 'spin'` | `'roll'` | ❌ No | Animation style variant |
+| Prop        | Type                           | Default        | Required | Description                |
+| ----------- | ------------------------------ | -------------- | -------- | -------------------------- |
+| `isVisible` | `boolean`                      | -              | ✅ Yes   | Controls loader visibility |
+| `text`      | `string`                       | `"Loading..."` | ❌ No    | Custom loading message     |
+| `variant`   | `'roll' \| 'bounce' \| 'spin'` | `'roll'`       | ❌ No    | Animation style variant    |
 
 ## 🎨 Design System Integration
 
@@ -218,6 +223,7 @@ font-heading → 'Righteous' (available but not used in loader)
 ## 📱 Responsive Behavior
 
 ### Mobile (< 640px)
+
 - Dice size: 6rem (text-6xl)
 - Container: h-24 w-24
 - Text: text-lg
@@ -225,12 +231,14 @@ font-heading → 'Righteous' (available but not used in loader)
 - Reduced bounce animation amplitude
 
 ### Tablet (≥ 640px, < 768px)
+
 - Dice size: 7rem (text-7xl)
 - Container: h-32 w-32
 - Text: text-xl
 - Dots: text-2xl
 
 ### Desktop (≥ 768px)
+
 - Dice size: 8rem (text-8xl)
 - Container: h-40 w-40
 - Text: text-2xl
@@ -240,6 +248,7 @@ font-heading → 'Righteous' (available but not used in loader)
 ## 🎭 Animation Details
 
 ### Roll Animation (0.9s)
+
 - 0%: 0° rotation, scale 1
 - 25%: 90° rotation, scale 1.1
 - 50%: 180° rotation, scale 1
@@ -247,16 +256,19 @@ font-heading → 'Righteous' (available but not used in loader)
 - 100%: 360° rotation, scale 1
 
 ### Bounce Animation (0.8s)
+
 - Combines vertical translateY with rotation
 - Peak height: -25px
 - Full 180° rotation per cycle
 
 ### Spin Animation (1s)
+
 - Continuous Y-axis rotation
 - Linear timing for smooth spin
 - Scale variation: 1 → 1.1 → 1
 
 ### Dice Face Cycling
+
 - Cycles through ⚀⚁⚂⚃⚄⚅ every 150ms
 - Smooth transitions between faces
 
@@ -274,6 +286,7 @@ components/ui/
 ## 🧪 Testing Recommendations
 
 ### Unit Tests
+
 ```typescript
 describe('DiceLoader', () => {
   it('should render when isVisible is true', () => {});
@@ -286,12 +299,14 @@ describe('DiceLoader', () => {
 ```
 
 ### Accessibility Tests
+
 - Verify ARIA attributes are present
 - Test with screen readers (NVDA, JAWS, VoiceOver)
 - Verify keyboard navigation
 - Test with `prefers-reduced-motion` enabled
 
 ### Visual Regression Tests
+
 - Test all three animation variants
 - Test on mobile, tablet, desktop viewports
 - Verify color accuracy against design system
@@ -299,6 +314,7 @@ describe('DiceLoader', () => {
 ## 📝 Notes
 
 ### Following .cursorrules
+
 - ✅ Client Component (marked with 'use client')
 - ✅ TypeScript strict mode compliant
 - ✅ Under 200 lines (149 lines)
@@ -312,12 +328,14 @@ describe('DiceLoader', () => {
 - ✅ Focus management implemented
 
 ### Browser Support
+
 - Chrome/Edge: Full support
 - Firefox: Full support
 - Safari: Full support (with -webkit- prefixes)
 - Mobile browsers: Optimized with reduced animations
 
 ### Performance Considerations
+
 - Hardware-accelerated transforms
 - Uses `will-change` for animation properties
 - Efficient React hooks with proper dependencies
@@ -333,6 +351,7 @@ describe('DiceLoader', () => {
 ## 📞 Support
 
 For issues or questions:
+
 1. Check the example file: `DiceLoader.example.tsx`
 2. Review design system documentation
 3. Verify Tailwind configuration

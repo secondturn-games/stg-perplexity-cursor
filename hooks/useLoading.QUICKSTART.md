@@ -24,7 +24,7 @@ function MyComponent() {
   return (
     <>
       <button onClick={loadData}>Load</button>
-      <DiceLoader isVisible={isLoading} text="Loading..." />
+      <DiceLoader isVisible={isLoading} text='Loading...' />
     </>
   );
 }
@@ -72,7 +72,7 @@ const { isLoading, withLoading } = useLoading({
 
 ```tsx
 const { isLoading, withLoading } = useLoading({
-  onError: (error) => console.error(error),
+  onError: error => console.error(error),
   hideOnError: true,
 });
 ```
@@ -110,11 +110,11 @@ await Promise.all([
 
 ```tsx
 useLoading({
-  defaultTimeout: 30000,           // Default: 30 seconds
-  onTimeout: () => {},              // Timeout callback
-  onError: (error) => {},           // Error callback
-  hideOnError: true,                // Auto-hide on error (default: true)
-})
+  defaultTimeout: 30000, // Default: 30 seconds
+  onTimeout: () => {}, // Timeout callback
+  onError: error => {}, // Error callback
+  hideOnError: true, // Auto-hide on error (default: true)
+});
 ```
 
 ---
@@ -123,11 +123,11 @@ useLoading({
 
 ```tsx
 const {
-  isLoading,      // boolean - current state
-  showLoading,    // () => void - show loading
-  hideLoading,    // () => void - hide loading
-  withLoading,    // wrapper for async functions
-  reset,          // () => void - force clear
+  isLoading, // boolean - current state
+  showLoading, // () => void - show loading
+  hideLoading, // () => void - hide loading
+  withLoading, // wrapper for async functions
+  reset, // () => void - force clear
 } = useLoading();
 ```
 

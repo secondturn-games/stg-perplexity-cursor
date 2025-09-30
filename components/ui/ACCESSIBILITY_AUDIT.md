@@ -11,10 +11,11 @@
 ### Background Text Contrast
 
 **Loading Text on Overlay**
+
 ```
 Foreground: #E6EAD7 (Light Beige - background-100)
 Background: #29432B (Dark Green - primary-500 @ 90% opacity)
-  
+
 Effective Background (with 90% opacity):
   RGB: rgba(41, 67, 43, 0.9) on typical white page
   Calculated: Approximately #2A4430
@@ -31,6 +32,7 @@ Result: AAA COMPLIANT ✅✅✅
 ```
 
 **Dice Symbol on Overlay**
+
 ```
 Foreground: #D95323 (Vibrant Orange - accent-500)
 Background: #29432B (Dark Green - primary-500)
@@ -47,6 +49,7 @@ Result: AA COMPLIANT ✅✅
 ```
 
 **Loading Dots on Overlay**
+
 ```
 Foreground: #F2C94C (Warm Yellow - warning-400)
 Background: #29432B (Dark Green - primary-500)
@@ -95,12 +98,14 @@ aria-label={text}         // ✅ Present - Provides accessible name
 #### ✅ Live Region Behavior
 
 **aria-live='polite'** ensures:
+
 - Loading announcements don't interrupt user
 - Changes are announced at natural breaks
 - Not overly verbose
 - Appropriate for loading states
 
 **Alternative Considered:**
+
 - `aria-live='assertive'` - Too interruptive ❌
 - `aria-live='off'` - Doesn't announce changes ❌
 - `aria-live='polite'` - Perfect balance ✅
@@ -110,6 +115,7 @@ aria-label={text}         // ✅ Present - Provides accessible name
 #### NVDA (Windows)
 
 **Test:** Show loader
+
 ```
 Expected: "Alert. Loading marketplace. Busy."
 Actual: "Alert. Loading marketplace. Busy."
@@ -117,6 +123,7 @@ Result: ✅ PASS
 ```
 
 **Test:** Change loading text
+
 ```
 Expected: "Uploading images."
 Actual: "Uploading images."
@@ -124,6 +131,7 @@ Result: ✅ PASS
 ```
 
 **Test:** Hide loader
+
 ```
 Expected: (No announcement)
 Actual: (No announcement)
@@ -133,6 +141,7 @@ Result: ✅ PASS
 #### JAWS (Windows)
 
 **Test:** Show loader
+
 ```
 Expected: "Loading marketplace. Alert. Busy."
 Actual: "Loading marketplace. Alert. Busy."
@@ -140,6 +149,7 @@ Result: ✅ PASS
 ```
 
 **Test:** Navigation during loading
+
 ```
 Expected: Tab navigation should work normally
 Actual: Focus remains on previous element, tab works
@@ -149,6 +159,7 @@ Result: ✅ PASS
 #### VoiceOver (macOS/iOS)
 
 **Test:** Show loader
+
 ```
 Expected: "Alert. Loading marketplace. Busy."
 Actual: "Alert. Loading marketplace. Busy."
@@ -156,6 +167,7 @@ Result: ✅ PASS
 ```
 
 **Test:** Touch exploration (iOS)
+
 ```
 Expected: Can explore other elements
 Actual: Loading overlay doesn't trap exploration
@@ -188,7 +200,7 @@ On Show:
   1. Saves currently focused element ✅
   2. Does NOT steal focus ✅
   3. Allows continued keyboard navigation ✅
-  
+
 On Hide:
   1. Restores focus to saved element ✅
   2. Allows normal navigation to resume ✅
@@ -219,6 +231,7 @@ On Hide:
 ```
 
 **Behavior:**
+
 - All animations become near-static
 - Dice still cycles (minimal motion)
 - Loading text remains visible
@@ -228,6 +241,7 @@ On Hide:
 #### Testing Results
 
 **Test:** Enable reduced motion preference
+
 ```
 Expected: Animations significantly reduced
 Actual: Animations play once at 0.01ms (essentially static)
@@ -235,6 +249,7 @@ Result: ✅ PASS
 ```
 
 **Test:** Functionality with reduced motion
+
 ```
 Expected: Component works normally, just without animation
 Actual: All features work, loading still indicated clearly
@@ -244,6 +259,7 @@ Result: ✅ PASS
 ### Animation Safety
 
 **No Seizure Risk:**
+
 - No rapid flashing (< 3 per second)
 - No high-contrast rapid changes
 - Smooth, continuous animations
@@ -264,6 +280,7 @@ Result: ✅ PASS
 #### TalkBack (Android)
 
 **Test:** Show loader
+
 ```
 Expected: "Alert. Loading. Busy."
 Actual: "Alert. Loading. Busy."
@@ -273,6 +290,7 @@ Result: ✅ PASS
 #### VoiceOver (iOS)
 
 **Test:** Show loader on iPhone
+
 ```
 Expected: Component announces, allows exploration
 Actual: Announces correctly, doesn't block exploration
@@ -282,6 +300,7 @@ Result: ✅ PASS
 ### Mobile Performance
 
 **Device Testing:**
+
 - iPhone 12: 60fps ✅
 - iPhone SE: 55fps ✅
 - Pixel 6: 60fps ✅
@@ -301,19 +320,15 @@ Result: ✅ PASS
 - [x] 1.1.1 Non-text Content (Level A)
   - Dice symbols have aria-hidden
   - Text provides all info
-  
 - [x] 1.3.1 Info and Relationships (Level A)
   - Proper ARIA roles
   - Semantic structure
-  
 - [x] 1.3.3 Sensory Characteristics (Level A)
   - Not dependent on shape/color alone
   - Text provides context
-  
 - [x] 1.4.3 Contrast (Minimum) (Level AA)
   - All contrasts exceed 4.5:1
   - Text achieves 8.2:1
-  
 - [x] 1.4.11 Non-text Contrast (Level AA)
   - Visual elements meet requirements
 
@@ -322,19 +337,15 @@ Result: ✅ PASS
 - [x] 2.1.1 Keyboard (Level A)
   - No keyboard trap
   - Focus management works
-  
 - [x] 2.1.2 No Keyboard Trap (Level A)
   - Users can navigate away
   - Focus restoration works
-  
 - [x] 2.2.2 Pause, Stop, Hide (Level A)
   - Controlled by isVisible prop
   - Timeout protection available
-  
 - [x] 2.3.1 Three Flashes (Level A)
   - No rapid flashing
   - Safe animations
-  
 - [x] 2.4.3 Focus Order (Level A)
   - Focus not disrupted
   - Logical tab order maintained
@@ -343,11 +354,9 @@ Result: ✅ PASS
 
 - [x] 3.2.1 On Focus (Level A)
   - No unexpected changes
-  
 - [x] 3.2.2 On Input (Level A)
   - No form controls
   - Not applicable
-  
 - [x] 3.3.1 Error Identification (Level A)
   - Error boundary provided
   - Graceful failure
@@ -358,7 +367,6 @@ Result: ✅ PASS
   - role='alert' defined
   - aria-label provides name
   - aria-busy provides state
-  
 - [x] 4.1.3 Status Messages (Level AA)
   - aria-live='polite' for status
   - Appropriate announcements
@@ -380,6 +388,7 @@ Result: ✅ PASS
 ### Automated Testing
 
 **aXe DevTools:**
+
 ```
 Critical Issues: 0
 Serious Issues: 0
@@ -389,6 +398,7 @@ Result: ✅ PASS
 ```
 
 **WAVE:**
+
 ```
 Errors: 0
 Alerts: 0
@@ -397,6 +407,7 @@ Result: ✅ PASS
 ```
 
 **Lighthouse:**
+
 ```
 Accessibility Score: 100/100
 Best Practices: 100/100
@@ -407,6 +418,7 @@ Result: ✅ PASS
 ### Manual Testing
 
 **Screen Readers:**
+
 - ✅ NVDA (Windows) - PASS
 - ✅ JAWS (Windows) - PASS
 - ✅ VoiceOver (macOS) - PASS
@@ -414,11 +426,13 @@ Result: ✅ PASS
 - ✅ TalkBack (Android) - PASS
 
 **Keyboard Testing:**
+
 - ✅ Tab navigation - PASS
 - ✅ Focus management - PASS
 - ✅ No keyboard traps - PASS
 
 **Motion Testing:**
+
 - ✅ Reduced motion - PASS
 - ✅ Standard motion - PASS
 - ✅ High contrast - PASS
@@ -451,16 +465,19 @@ Compliance Level: WCAG 2.1 AA (with AAA features)
 ### Recommended Testing Schedule
 
 **Every Release:**
+
 - Automated testing (aXe, Lighthouse)
 - Color contrast verification
 - Screen reader spot checks
 
 **Quarterly:**
+
 - Comprehensive screen reader testing
 - User testing with assistive technology users
 - Performance monitoring
 
 **Annually:**
+
 - Full WCAG audit
 - Third-party accessibility review
 - Update for new WCAG versions
@@ -472,6 +489,7 @@ Compliance Level: WCAG 2.1 AA (with AAA features)
 ### Current Status
 
 **Strengths:**
+
 - ✅ Excellent color contrast (AAA level)
 - ✅ Comprehensive ARIA implementation
 - ✅ Proper focus management
@@ -480,6 +498,7 @@ Compliance Level: WCAG 2.1 AA (with AAA features)
 - ✅ Screen reader tested
 
 **Areas for Future Enhancement:**
+
 - Consider adding skip link when shown for extended periods
 - Add configurable timeout for auto-dismiss
 - Consider haptic feedback for mobile devices

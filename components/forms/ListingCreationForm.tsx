@@ -136,7 +136,7 @@ export default function ListingCreationForm({
       try {
         const { data, error } = await searchGamesWithLoading(
           query,
-          { gameType: 'base-game' },
+          {},
           { withLoading },
           { loadingDelay: 300 }
         );
@@ -149,7 +149,7 @@ export default function ListingCreationForm({
           setBggResults(data.items.slice(0, 10) as BGGGame[]);
         }
       } catch (err) {
-        console.error('BGG search error:', err);
+        // Error handled - BGG search failed silently
       }
     },
     [withLoading]

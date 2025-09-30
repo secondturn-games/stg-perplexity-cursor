@@ -47,7 +47,7 @@ function MyComponent() {
   return (
     <>
       <button onClick={handleClick}>Start</button>
-      <DiceLoader isVisible={isLoading} text="Processing..." />
+      <DiceLoader isVisible={isLoading} text='Processing...' />
     </>
   );
 }
@@ -74,7 +74,7 @@ function GamesList() {
   return (
     <>
       <button onClick={fetchGames}>Load Games</button>
-      <DiceLoader isVisible={isLoading} text="Fetching games..." />
+      <DiceLoader isVisible={isLoading} text='Fetching games...' />
       {/* Render games... */}
     </>
   );
@@ -221,7 +221,7 @@ await withLoading(
 
 ```tsx
 const { isLoading, withLoading } = useLoading({
-  onError: (error) => {
+  onError: error => {
     console.error('Global error handler:', error);
     showNotification(error.message);
   },
@@ -267,27 +267,15 @@ function MyPage() {
   return (
     <>
       <button onClick={loadData}>Load</button>
-      
+
       {/* Different animation variants */}
-      <DiceLoader 
-        isVisible={isLoading} 
-        text="Loading..." 
-        variant="roll" 
-      />
-      
+      <DiceLoader isVisible={isLoading} text='Loading...' variant='roll' />
+
       {/* or */}
-      <DiceLoader 
-        isVisible={isLoading} 
-        text="Processing..." 
-        variant="bounce" 
-      />
-      
+      <DiceLoader isVisible={isLoading} text='Processing...' variant='bounce' />
+
       {/* or */}
-      <DiceLoader 
-        isVisible={isLoading} 
-        text="Please wait..." 
-        variant="spin" 
-      />
+      <DiceLoader isVisible={isLoading} text='Please wait...' variant='spin' />
     </>
   );
 }
@@ -304,18 +292,18 @@ function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       await withLoading(async () => {
         const response = await fetch('/api/contact', {
           method: 'POST',
           body: JSON.stringify(formData),
         });
-        
+
         if (!response.ok) {
           throw new Error('Submission failed');
         }
-        
+
         // Success handling...
       });
     } catch (error) {
@@ -326,10 +314,10 @@ function ContactForm() {
   return (
     <form onSubmit={handleSubmit}>
       {/* Form fields */}
-      <button type="submit" disabled={isLoading}>
+      <button type='submit' disabled={isLoading}>
         Submit
       </button>
-      <DiceLoader isVisible={isLoading} text="Submitting..." />
+      <DiceLoader isVisible={isLoading} text='Submitting...' />
     </form>
   );
 }
@@ -347,13 +335,13 @@ function DataMigration() {
     await withLoading(async () => {
       // Step 1
       await backupData();
-      
+
       // Step 2
       await transformData();
-      
+
       // Step 3
       await validateData();
-      
+
       // Step 4
       await commitChanges();
     });
@@ -362,10 +350,10 @@ function DataMigration() {
   return (
     <>
       <button onClick={runMigration}>Start Migration</button>
-      <DiceLoader 
-        isVisible={isLoading} 
-        text="Migrating data..." 
-        variant="spin"
+      <DiceLoader
+        isVisible={isLoading}
+        text='Migrating data...'
+        variant='spin'
       />
     </>
   );
@@ -383,10 +371,10 @@ function Dashboard() {
     await withLoading(async () => {
       setLoadingMessage('Fetching user data...');
       const user = await fetchUser();
-      
+
       setLoadingMessage('Loading analytics...');
       const analytics = await fetchAnalytics();
-      
+
       setLoadingMessage('Preparing dashboard...');
       await prepareDashboard(user, analytics);
     });
@@ -429,10 +417,10 @@ const { isLoading, withLoading } = useLoading({
 
 ```tsx
 const { isLoading, withLoading } = useLoading({
-  onError: (error) => {
+  onError: error => {
     // Log to error tracking service
     trackError(error);
-    
+
     // Show user-friendly message
     showNotification('Something went wrong. Please try again.');
   },
@@ -456,12 +444,12 @@ describe('useLoading', () => {
 
   it('should show and hide loading', () => {
     const { result } = renderHook(() => useLoading());
-    
+
     act(() => {
       result.current.showLoading();
     });
     expect(result.current.isLoading).toBe(true);
-    
+
     act(() => {
       result.current.hideLoading();
     });
@@ -470,13 +458,13 @@ describe('useLoading', () => {
 
   it('should handle withLoading successfully', async () => {
     const { result } = renderHook(() => useLoading());
-    
+
     const mockFn = jest.fn().mockResolvedValue('success');
-    
+
     await act(async () => {
       await result.current.withLoading(mockFn);
     });
-    
+
     expect(mockFn).toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
   });
@@ -484,9 +472,9 @@ describe('useLoading', () => {
   it('should handle errors in withLoading', async () => {
     const { result } = renderHook(() => useLoading());
     const error = new Error('Test error');
-    
+
     const mockFn = jest.fn().mockRejectedValue(error);
-    
+
     await expect(
       act(async () => {
         await result.current.withLoading(mockFn);
@@ -497,22 +485,22 @@ describe('useLoading', () => {
   it('should trigger timeout', async () => {
     jest.useFakeTimers();
     const onTimeout = jest.fn();
-    
+
     const { result } = renderHook(() =>
       useLoading({ defaultTimeout: 1000, onTimeout })
     );
-    
+
     act(() => {
       result.current.showLoading();
     });
-    
+
     act(() => {
       jest.advanceTimersByTime(1000);
     });
-    
+
     expect(onTimeout).toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
-    
+
     jest.useRealTimers();
   });
 });
@@ -523,6 +511,7 @@ describe('useLoading', () => {
 ### ✅ Do's
 
 1. **Use withLoading for async operations**
+
    ```tsx
    await withLoading(async () => {
      await apiCall();
@@ -530,15 +519,17 @@ describe('useLoading', () => {
    ```
 
 2. **Set appropriate timeouts**
+
    ```tsx
    // Quick operations
    useLoading({ defaultTimeout: 5000 });
-   
+
    // Heavy operations
    useLoading({ defaultTimeout: 60000 });
    ```
 
 3. **Handle errors properly**
+
    ```tsx
    try {
      await withLoading(async () => {
@@ -551,15 +542,13 @@ describe('useLoading', () => {
 
 4. **Use specific loading messages**
    ```tsx
-   <DiceLoader 
-     isVisible={isLoading} 
-     text="Fetching your games..." 
-   />
+   <DiceLoader isVisible={isLoading} text='Fetching your games...' />
    ```
 
 ### ❌ Don'ts
 
 1. **Don't forget to handle errors**
+
    ```tsx
    // Bad
    withLoading(async () => {
@@ -568,6 +557,7 @@ describe('useLoading', () => {
    ```
 
 2. **Don't use multiple hooks for the same operation**
+
    ```tsx
    // Bad - creates conflicting states
    const loading1 = useLoading();
@@ -587,6 +577,7 @@ describe('useLoading', () => {
 **Problem**: Loading state remains visible indefinitely
 
 **Solutions**:
+
 1. Check if `hideLoading()` is being called
 2. Ensure timeout is configured: `useLoading({ defaultTimeout: 30000 })`
 3. Check if errors are being thrown without handling
@@ -603,6 +594,7 @@ describe('useLoading', () => {
 **Problem**: Timeout occurs before operation completes
 
 **Solution**: Increase timeout duration or use per-call timeout:
+
 ```tsx
 await withLoading(
   async () => {
@@ -623,10 +615,7 @@ await withLoading(
 The hook is fully typed with comprehensive interfaces:
 
 ```typescript
-import type { 
-  UseLoadingOptions, 
-  UseLoadingReturn 
-} from '@/hooks/useLoading';
+import type { UseLoadingOptions, UseLoadingReturn } from '@/hooks/useLoading';
 ```
 
 ## 📄 License

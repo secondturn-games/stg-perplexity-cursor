@@ -18,12 +18,12 @@ function MyComponent() {
 
   const loadData = async () => {
     const { data, error } = await api.get('/api/games', {}, { withLoading });
-    
+
     if (error) {
       console.error(error);
       return;
     }
-    
+
     setGames(data);
   };
 
@@ -75,11 +75,9 @@ const { data } = await searchGamesWithLoading(
 ```typescript
 import { signInWithEmailLoading } from '@/lib/supabase/api-with-loading';
 
-const { data, error } = await signInWithEmailLoading(
-  email,
-  password,
-  { withLoading }
-);
+const { data, error } = await signInWithEmailLoading(email, password, {
+  withLoading,
+});
 ```
 
 ### Form Submission
@@ -88,7 +86,7 @@ const { data, error } = await signInWithEmailLoading(
 import { createFormHandler } from '@/lib/form-handlers';
 
 const handleSubmit = createFormHandler(
-  async (data) => {
+  async data => {
     const response = await fetch('/api/contact', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -111,28 +109,40 @@ const handleSubmit = createFormHandler(
 
 ```typescript
 // Show loading only if request takes > 300ms
-await api.get('/api/games', {
-  loadingDelay: 300,
-}, { withLoading });
+await api.get(
+  '/api/games',
+  {
+    loadingDelay: 300,
+  },
+  { withLoading }
+);
 ```
 
 ### Timeout
 
 ```typescript
 // Set custom timeout
-await api.get('/api/games', {
-  timeout: 60000, // 60 seconds
-}, { withLoading });
+await api.get(
+  '/api/games',
+  {
+    timeout: 60000, // 60 seconds
+  },
+  { withLoading }
+);
 ```
 
 ### Error Handling
 
 ```typescript
-await api.get('/api/games', {
-  onError: (error) => console.error(error),
-  retry: true,
-  retryAttempts: 3,
-}, { withLoading });
+await api.get(
+  '/api/games',
+  {
+    onError: error => console.error(error),
+    retry: true,
+    retryAttempts: 3,
+  },
+  { withLoading }
+);
 ```
 
 ### Multiple Requests
@@ -161,6 +171,7 @@ await Promise.all([
 ## 📦 Available Functions
 
 ### API Client (`lib/api`)
+
 - `api.get(path, options, loadingHook)`
 - `api.post(path, body, options, loadingHook)`
 - `api.put(path, body, options, loadingHook)`
@@ -168,18 +179,21 @@ await Promise.all([
 - `api.delete(path, options, loadingHook)`
 
 ### BGG API (`lib/bgg/api-with-loading`)
+
 - `searchGamesWithLoading(query, filters, loadingHook, options)`
 - `getGameDetailsWithLoading(gameId, loadingHook, options)`
 - `getUserCollectionWithLoading(username, loadingHook, options)`
 - `batchUpdateGamesWithLoading(gameIds, loadingHook, options)`
 
 ### Supabase (`lib/supabase/api-with-loading`)
+
 - `signInWithEmailLoading(email, password, loadingHook, options)`
 - `signUpWithProfileLoading(data, loadingHook, options)`
 - `signOutLoading(loadingHook, options)`
 - `updateProfileLoading(updates, loadingHook, options)`
 
 ### Forms (`lib/form-handlers`)
+
 - `createFormHandler(submitFn, loadingHook, options)`
 - `createFormEventHandler(submitFn, loadingHook, options)`
 - `createFieldValidator(rules)`

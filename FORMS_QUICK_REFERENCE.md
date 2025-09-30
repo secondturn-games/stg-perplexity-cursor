@@ -23,11 +23,15 @@ function MyForm() {
   const [loadingMessage, setLoadingMessage] = useState('Submitting...');
   const [success, setSuccess] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     await withLoading(async () => {
       await api.post('/api/submit', data);
       setSuccess(true);
@@ -41,9 +45,9 @@ function MyForm() {
         <textarea {...register('message')} />
         <button type='submit'>Submit</button>
       </fieldset>
-      
+
       {success && <p role='status'>✓ Success!</p>}
-      
+
       <DiceLoader isVisible={isLoading} text={loadingMessage} />
     </form>
   );
@@ -58,7 +62,11 @@ function MyForm() {
 
 ```tsx
 import { SignInForm, SignUpForm } from '@/components/auth';
-import { ContactForm, ListingCreationForm, FormWithLoading } from '@/components/forms';
+import {
+  ContactForm,
+  ListingCreationForm,
+  FormWithLoading,
+} from '@/components/forms';
 ```
 
 ### Form Utilities
@@ -79,7 +87,7 @@ function SimpleForm() {
   const { isLoading, withLoading } = useLoading();
   const { register, handleSubmit } = useForm();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     await withLoading(async () => {
       await api.post('/api/submit', data);
     });
@@ -89,9 +97,11 @@ function SimpleForm() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <fieldset disabled={isLoading}>
         <input {...register('name')} />
-        <button type='submit' disabled={isLoading}>Submit</button>
+        <button type='submit' disabled={isLoading}>
+          Submit
+        </button>
       </fieldset>
-      <DiceLoader isVisible={isLoading} text="Submitting..." />
+      <DiceLoader isVisible={isLoading} text='Submitting...' />
     </form>
   );
 }
@@ -107,7 +117,11 @@ const schema = yup.object({
 
 function ValidatedForm() {
   const { isLoading, withLoading } = useLoading();
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
   });
 
@@ -115,8 +129,8 @@ function ValidatedForm() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <input {...register('email')} disabled={isLoading} />
       {errors.email && <p role='alert'>{errors.email.message}</p>}
-      
-      <DiceLoader isVisible={isLoading} text="Validating..." />
+
+      <DiceLoader isVisible={isLoading} text='Validating...' />
     </form>
   );
 }
@@ -129,9 +143,9 @@ function FormWithSuccess() {
   const { isLoading, withLoading } = useLoading();
   const [success, setSuccess] = useState(false);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     setSuccess(false);
-    
+
     await withLoading(async () => {
       await api.post('/api/submit', data);
       setSuccess(true);
@@ -146,12 +160,10 @@ function FormWithSuccess() {
           ✓ Form submitted successfully!
         </div>
       )}
-      
-      <fieldset disabled={isLoading}>
-        {/* inputs */}
-      </fieldset>
-      
-      <DiceLoader isVisible={isLoading} text="Submitting..." />
+
+      <fieldset disabled={isLoading}>{/* inputs */}</fieldset>
+
+      <DiceLoader isVisible={isLoading} text='Submitting...' />
     </form>
   );
 }
@@ -167,7 +179,7 @@ function MyForm() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     await withLoading(async () => {
       await submitData();
@@ -179,12 +191,14 @@ function MyForm() {
     <FormWithLoading
       onSubmit={handleSubmit}
       isLoading={isLoading}
-      loadingText="Processing..."
+      loadingText='Processing...'
       error={error}
       success={success}
     >
       <input disabled={isLoading} />
-      <button type='submit' disabled={isLoading}>Submit</button>
+      <button type='submit' disabled={isLoading}>
+        Submit
+      </button>
     </FormWithLoading>
   );
 }
@@ -228,6 +242,7 @@ function MyForm() {
 ## 🎯 Loading Messages
 
 ### Authentication Forms
+
 ```
 "Signing in..."
 "Creating your account..."
@@ -238,12 +253,14 @@ function MyForm() {
 ```
 
 ### Contact Forms
+
 ```
 "Sending your message..."
 "Message sent successfully!"
 ```
 
 ### Listing Forms
+
 ```
 "Searching BoardGameGeek..."
 "Uploading images..."
@@ -261,7 +278,7 @@ function MyForm() {
 email: yup
   .string()
   .email('Please enter a valid email address')
-  .required('Email is required')
+  .required('Email is required');
 ```
 
 ### Password
@@ -274,7 +291,7 @@ password: yup
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
     'Must contain uppercase, lowercase, and number'
   )
-  .required('Password is required')
+  .required('Password is required');
 ```
 
 ### Price
@@ -284,7 +301,7 @@ price: yup
   .number()
   .positive('Price must be greater than 0')
   .max(10000, 'Price must be less than €10,000')
-  .required('Price is required')
+  .required('Price is required');
 ```
 
 ### Text with Length
@@ -294,7 +311,7 @@ description: yup
   .string()
   .min(20, 'Description must be at least 20 characters')
   .max(2000, 'Description must be less than 2000 characters')
-  .required('Description is required')
+  .required('Description is required');
 ```
 
 ---
@@ -328,20 +345,21 @@ description: yup
 ## 🆘 Common Issues
 
 **Form not disabling?**
+
 ```tsx
 // Use fieldset
-<fieldset disabled={isLoading}>
-  {/* All inputs auto-disabled */}
-</fieldset>
+<fieldset disabled={isLoading}>{/* All inputs auto-disabled */}</fieldset>
 ```
 
 **Multiple submissions?**
+
 ```tsx
 // Disable button
 <button disabled={isLoading} aria-busy={isLoading}>
 ```
 
 **Validation not working?**
+
 ```tsx
 // Check yupResolver
 const { register, handleSubmit } = useForm({
@@ -350,6 +368,7 @@ const { register, handleSubmit } = useForm({
 ```
 
 **Success not showing?**
+
 ```tsx
 // Set success state before redirect
 setSuccess(true);

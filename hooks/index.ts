@@ -4,7 +4,13 @@
  */
 
 export { useAuth } from './useAuth';
-export { useBGG, useBGGSearch, useBGGGameDetails, useBGGCollection, useBGGBatch } from './useBGG';
+export {
+  useBGG,
+  useBGGSearch,
+  useBGGGameDetails,
+  useBGGCollection,
+  useBGGBatch,
+} from './useBGG';
 export {
   useLoading,
   useLoadingWithTimeout,

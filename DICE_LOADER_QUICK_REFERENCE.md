@@ -24,7 +24,7 @@ function MyComponent() {
   return (
     <>
       <button onClick={loadData}>Load</button>
-      <DiceLoader isVisible={isLoading} text="Loading..." />
+      <DiceLoader isVisible={isLoading} text='Loading...' />
     </>
   );
 }
@@ -35,21 +35,38 @@ function MyComponent() {
 ## 📦 What's Available
 
 ### Components
+
 ```tsx
 import { DiceLoader } from '@/components/ui';
-import { ProtectedRoute, SuspenseWrapper, PageLoader } from '@/components/layout';
+import {
+  ProtectedRoute,
+  SuspenseWrapper,
+  PageLoader,
+} from '@/components/layout';
 ```
 
 ### Hooks
+
 ```tsx
-import { useLoading, useLoadingWithTimeout, useLoadingNoTimeout } from '@/hooks/useLoading';
+import {
+  useLoading,
+  useLoadingWithTimeout,
+  useLoadingNoTimeout,
+} from '@/hooks/useLoading';
 ```
 
 ### API Utilities
+
 ```tsx
 import { api } from '@/lib/api';
-import { searchGamesWithLoading, getGameDetailsWithLoading } from '@/lib/bgg/api-with-loading';
-import { signInWithEmailLoading, updateProfileLoading } from '@/lib/supabase/api-with-loading';
+import {
+  searchGamesWithLoading,
+  getGameDetailsWithLoading,
+} from '@/lib/bgg/api-with-loading';
+import {
+  signInWithEmailLoading,
+  updateProfileLoading,
+} from '@/lib/supabase/api-with-loading';
 import { createFormHandler } from '@/lib/form-handlers';
 ```
 
@@ -82,7 +99,7 @@ const loadData = async () => {
   if (data) setGames(data);
 };
 
-<DiceLoader isVisible={isLoading} text="Loading..." />
+<DiceLoader isVisible={isLoading} text='Loading...' />;
 ```
 
 ### 2. BGG Search
@@ -99,7 +116,7 @@ const { data } = await searchGamesWithLoading(
 
 ```tsx
 const handleSubmit = createFormHandler(
-  async (formData) => {
+  async formData => {
     return fetch('/api/contact', {
       method: 'POST',
       body: JSON.stringify(formData),
@@ -113,7 +130,7 @@ const handleSubmit = createFormHandler(
 ### 4. Protected Page
 
 ```tsx
-<ProtectedRoute loadingText="Verifying...">
+<ProtectedRoute loadingText='Verifying...'>
   <YourContent />
 </ProtectedRoute>
 ```
@@ -125,7 +142,7 @@ const handleSubmit = createFormHandler(
 import DiceLoader from '@/components/ui/DiceLoader';
 
 export default function Loading() {
-  return <DiceLoader isVisible={true} text="Loading..." />;
+  return <DiceLoader isVisible={true} text='Loading...' />;
 }
 ```
 
@@ -134,27 +151,32 @@ export default function Loading() {
 ## 🎯 When to Use What
 
 ### DiceLoader Component
+
 - Manual loading control
 - Custom loading scenarios
 - Specific loading messages
 
 ### useLoading Hook
+
 - API calls
 - Form submissions
 - Async operations
 - Multiple concurrent operations
 
 ### Page-level loading.tsx
+
 - Next.js App Router automatic loading
 - Server component loading
 - Route segment loading
 
 ### ProtectedRoute
+
 - Authentication required pages
 - Email verification
 - Access control
 
 ### SuspenseWrapper
+
 - Async component boundaries
 - Streaming components
 - Independent loading sections
@@ -167,9 +189,9 @@ export default function Loading() {
 
 ```tsx
 const { isLoading, withLoading } = useLoading({
-  defaultTimeout: 30000,           // 30 seconds
+  defaultTimeout: 30000, // 30 seconds
   onTimeout: () => alert('Timeout'),
-  onError: (error) => console.error(error),
+  onError: error => console.error(error),
   hideOnError: true,
 });
 ```
@@ -177,24 +199,38 @@ const { isLoading, withLoading } = useLoading({
 ### API Requests
 
 ```tsx
-await api.get('/endpoint', {
-  loadingDelay: 300,               // Show after 300ms
-  timeout: 30000,                  // 30 seconds
-  retry: true,                     // Enable retry
-  retryAttempts: 3,               // 3 attempts
-  onError: (error) => {},         // Error handler
-}, { withLoading });
+await api.get(
+  '/endpoint',
+  {
+    loadingDelay: 300, // Show after 300ms
+    timeout: 30000, // 30 seconds
+    retry: true, // Enable retry
+    retryAttempts: 3, // 3 attempts
+    onError: error => {}, // Error handler
+  },
+  { withLoading }
+);
 ```
 
 ### Form Handlers
 
 ```tsx
-createFormHandler(submitFn, { withLoading }, {
-  validate: (data) => {/* validation */},
-  onSuccess: () => {/* success */},
-  onError: (error) => {/* error */},
-  resetOnSuccess: true,
-});
+createFormHandler(
+  submitFn,
+  { withLoading },
+  {
+    validate: data => {
+      /* validation */
+    },
+    onSuccess: () => {
+      /* success */
+    },
+    onError: error => {
+      /* error */
+    },
+    resetOnSuccess: true,
+  }
+);
 ```
 
 ---
@@ -207,13 +243,13 @@ components/
     DiceLoader.tsx              ← Main component
     DiceLoader.module.css       ← Animations
     DiceLoader.README.md        ← Component docs
-    
+
   layout/
     NavigationLoader.tsx        ← Client nav loading
     ProtectedRoute.tsx          ← Auth protection
     SuspenseWrapper.tsx         ← Suspense integration
     PageLoader.tsx              ← Route-aware loader
-    
+
   marketplace/
     ListingForm.tsx             ← Create/edit listings
     ListingDetail.tsx           ← View listings
@@ -250,6 +286,7 @@ app/
 ## 🎯 Loading Messages Reference
 
 ### Marketplace
+
 - "Loading marketplace..."
 - "Searching marketplace..."
 - "Loading listing details..."
@@ -259,11 +296,13 @@ app/
 - "Updating listing..."
 
 ### BGG Integration
+
 - "Searching BoardGameGeek..."
 - "Loading game information..."
 - "Loading game data..."
 
 ### User Operations
+
 - "Loading profile..."
 - "Loading your profile..."
 - "Updating your profile..."
@@ -271,6 +310,7 @@ app/
 - "Uploading images..."
 
 ### Authentication
+
 - "Loading authentication..."
 - "Loading sign in..."
 - "Loading sign up..."
@@ -278,6 +318,7 @@ app/
 - "Verifying email..."
 
 ### Actions
+
 - "Adding to cart..."
 - "Saving listing..."
 - "Deleting listing..."
@@ -288,16 +329,23 @@ app/
 ## ⚡ Performance Tips
 
 1. **Use 300ms delay** - Prevents flashing
+
 ```tsx
-{ loadingDelay: 300 }
+{
+  loadingDelay: 300;
+}
 ```
 
 2. **Set appropriate timeouts**
+
 ```tsx
-{ timeout: 60000 } // For heavy operations
+{
+  timeout: 60000;
+} // For heavy operations
 ```
 
 3. **Handle concurrent calls**
+
 ```tsx
 await Promise.all([
   api.get('/a', {}, { withLoading }),
@@ -306,6 +354,7 @@ await Promise.all([
 ```
 
 4. **Use route-aware loaders**
+
 ```tsx
 <PageLoader /> // Auto-determines message
 ```
@@ -315,17 +364,20 @@ await Promise.all([
 ## 🆘 Troubleshooting
 
 **Loading doesn't show?**
+
 - Check if request takes > 300ms
 - Verify isLoading is true
 - Check loadingDelay configuration
 
 **Loading doesn't hide?**
+
 - Ensure withLoading wraps async function
 - Check for errors in operation
 - Verify timeout is set
 - Use reset() to force clear
 
 **Multiple loaders showing?**
+
 - Use single useLoading instance per page
 - Loading counter handles multiple operations
 
@@ -350,7 +402,7 @@ Everything is implemented and ready to use:
 ✅ Full marketplace functionality  
 ✅ Page-level loading everywhere  
 ✅ Comprehensive documentation  
-✅ Production-ready code  
+✅ Production-ready code
 
 **Start building with confidence!** 🚀
 

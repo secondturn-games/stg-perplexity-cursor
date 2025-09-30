@@ -148,7 +148,7 @@ export function MultipleOperationsExample() {
  */
 export function CustomTimeoutExample() {
   const [message, setMessage] = useState<string>('');
-  
+
   const { isLoading, withLoading } = useLoading({
     defaultTimeout: 5000,
     onTimeout: () => {
@@ -165,7 +165,9 @@ export function CustomTimeoutExample() {
         setMessage('Operation completed successfully');
       });
     } catch (error) {
-      setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown'}`);
+      setMessage(
+        `Error: ${error instanceof Error ? error.message : 'Unknown'}`
+      );
     }
   };
 
@@ -223,9 +225,7 @@ export function ErrorHandlingExample() {
 
   return (
     <div className='card space-y-4'>
-      <h3 className='text-lg font-normal text-primary-500'>
-        Error Handling
-      </h3>
+      <h3 className='text-lg font-normal text-primary-500'>Error Handling</h3>
       <p className='text-regular text-gray-600'>
         Loading automatically hides on error (hideOnError: true)
       </p>
@@ -283,9 +283,7 @@ export function FormSubmissionExample() {
 
   return (
     <div className='card space-y-4'>
-      <h3 className='text-lg font-normal text-primary-500'>
-        Form Submission
-      </h3>
+      <h3 className='text-lg font-normal text-primary-500'>Form Submission</h3>
       <form onSubmit={handleSubmit} className='space-y-4'>
         <div>
           <label className='form-label'>Name</label>

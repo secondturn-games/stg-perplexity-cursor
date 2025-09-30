@@ -102,7 +102,7 @@ export default function ListingForm({
 
       const { data, error } = await searchGamesWithLoading(
         query,
-        { gameType: 'boardgame' },
+        { gameType: 'base-game' },
         { withLoading },
         {
           loadingDelay: 300,
@@ -112,8 +112,8 @@ export default function ListingForm({
         }
       );
 
-      if (data?.games) {
-        setBggSearchResults(data.games.slice(0, 10));
+      if (data?.items) {
+        setBggSearchResults(data.items.slice(0, 10) as BGGGameData[]);
       }
     },
     [withLoading]
@@ -214,20 +214,20 @@ export default function ListingForm({
         const validationErrors: Record<string, string> = {};
 
         if (!data.gameName) {
-          validationErrors.gameName = 'Game name is required';
+          validationErrors['gameName'] = 'Game name is required';
         }
 
         if (!data.price || data.price <= 0) {
-          validationErrors.price = 'Price must be greater than 0';
+          validationErrors['price'] = 'Price must be greater than 0';
         }
 
         if (!data.description || data.description.length < 20) {
-          validationErrors.description =
+          validationErrors['description'] =
             'Description must be at least 20 characters';
         }
 
         if (uploadedImages.length === 0) {
-          validationErrors.images = 'At least one image is required';
+          validationErrors['images'] = 'At least one image is required';
         }
 
         return Object.keys(validationErrors).length > 0
@@ -339,7 +339,7 @@ export default function ListingForm({
             </div>
           )}
 
-          {errors.bgg && <p className='text-sm text-red-600'>{errors.bgg}</p>}
+          {errors['bgg'] && <p className='text-sm text-red-600'>{errors['bgg']}</p>}
         </div>
 
         {/* Listing Details */}
@@ -391,8 +391,8 @@ export default function ListingForm({
               }
               disabled={isLoading}
             />
-            {errors.price && (
-              <p className='mt-1 text-sm text-red-600'>{errors.price}</p>
+            {errors['price'] && (
+              <p className='mt-1 text-sm text-red-600'>{errors['price']}</p>
             )}
           </div>
 
@@ -412,8 +412,8 @@ export default function ListingForm({
               disabled={isLoading}
               placeholder='Describe the condition, any missing pieces, etc...'
             />
-            {errors.description && (
-              <p className='mt-1 text-sm text-red-600'>{errors.description}</p>
+            {errors['description'] && (
+              <p className='mt-1 text-sm text-red-600'>{errors['description']}</p>
             )}
           </div>
 
@@ -481,8 +481,8 @@ export default function ListingForm({
               disabled={isLoading}
               className='block w-full text-sm text-gray-600 file:mr-4 file:rounded file:border-0 file:bg-accent-500 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-accent-600'
             />
-            {errors.images && (
-              <p className='mt-1 text-sm text-red-600'>{errors.images}</p>
+            {errors['images'] && (
+              <p className='mt-1 text-sm text-red-600'>{errors['images']}</p>
             )}
           </div>
 
@@ -526,9 +526,9 @@ export default function ListingForm({
         </div>
 
         {/* Form Error */}
-        {errors.form && (
+        {errors['form'] && (
           <div className='rounded-lg border border-red-200 bg-red-50 p-4'>
-            <p className='text-regular text-red-800'>{errors.form}</p>
+            <p className='text-regular text-red-800'>{errors['form']}</p>
           </div>
         )}
 

@@ -118,12 +118,12 @@ export default function ProfileUpdateForm({
             location: data['location'] as ProfileFormData['location'],
             phone: data['phone'] || '',
             avatar: data['avatar_url'] || '',
-            privacySettings: data['privacy_settings'] || {
+            privacySettings: (data['privacy_settings'] as ProfileFormData['privacySettings']) || {
               showEmail: false,
               showPhone: false,
               showLocation: true,
             },
-            notificationSettings: data['notification_settings'] || {
+            notificationSettings: (data['notification_settings'] as ProfileFormData['notificationSettings']) || {
               messages: true,
               offers: true,
               listings: true,
@@ -201,8 +201,8 @@ export default function ProfileUpdateForm({
           location: data.location || null,
           phone: data.phone || null,
           avatar_url: data.avatar || null,
-          privacy_settings: data.privacySettings,
-          notification_settings: data.notificationSettings,
+          privacy_settings: (data.privacySettings || {}) as any,
+          notification_settings: (data.notificationSettings || {}) as any,
         },
         { withLoading },
         {
@@ -216,15 +216,15 @@ export default function ProfileUpdateForm({
         const validationErrors: Record<string, string> = {};
 
         if (!data.username || data.username.length < 3) {
-          validationErrors.username = 'Username must be at least 3 characters';
+          validationErrors['username'] = 'Username must be at least 3 characters';
         }
 
         if (!data.fullName || data.fullName.length < 2) {
-          validationErrors.fullName = 'Full name must be at least 2 characters';
+          validationErrors['fullName'] = 'Full name must be at least 2 characters';
         }
 
         if (data.bio && data.bio.length > 500) {
-          validationErrors.bio = 'Bio must be less than 500 characters';
+          validationErrors['bio'] = 'Bio must be less than 500 characters';
         }
 
         return Object.keys(validationErrors).length > 0
@@ -279,7 +279,7 @@ export default function ProfileUpdateForm({
               ) : (
                 <div className='flex h-full w-full items-center justify-center text-3xl text-gray-400'>
                   {formData.fullName && formData.fullName.length > 0
-                    ? formData.fullName[0].toUpperCase()
+                    ? formData.fullName.charAt(0).toUpperCase()
                     : '?'}
                 </div>
               )}
