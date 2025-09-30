@@ -631,7 +631,7 @@ export function BGGTestComponent() {
                 <div className='mt-6 bg-orange-50 p-4 rounded-lg'>
                   {(() => {
                     const alternateNames = gameState.data.alternateNames.filter(
-                      (name: any) => name.type === 'alternate'
+                      (name: any) => name.type !== 'primary'
                     );
                     return (
                       <>
