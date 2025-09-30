@@ -677,8 +677,8 @@ export function BGGTestComponent() {
                 Game Versions ({gameState.data.editions?.length || 0} editions)
               </h4>
               <p className='text-sm text-gray-600 mb-3'>
-                Different editions and versions of this game (regional
-                editions, special editions, anniversary editions, etc.)
+                Different editions and versions of this game (regional editions,
+                special editions, anniversary editions, etc.)
               </p>
               {gameState.data.editions && gameState.data.editions.length > 0 ? (
                 <div className='space-y-2 max-h-60 overflow-y-auto'>
