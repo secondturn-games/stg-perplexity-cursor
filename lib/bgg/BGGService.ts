@@ -335,7 +335,9 @@ export class BGGService {
     try {
       const dbGame = await this.gameRepository.findByBggId(parseInt(gameId));
       if (dbGame) {
-        console.log(`✅ Database cache hit for game ${gameId}`);
+        console.log(
+          `✅ Database cache hit for game ${gameId} (including alternateNames, editions, and languageDependence)`
+        );
 
         // Convert database game to BGGGameDetails format
         const gameDetails = this.convertDbGameToBGGDetails(dbGame);
@@ -380,20 +382,25 @@ export class BGGService {
         );
 
         const response = await this.apiClient.getGameDetails(gameId);
-        console.log(
-          '🔍 Raw game details response:',
-          response.substring(0, 500) + '...'
-        );
+        console.log('🔍 Raw game details response (first 1000 chars):');
+        console.log(response.substring(0, 1000));
+        console.log('...');
+
         const data = await this.parseXML(response, false);
-        console.log(
-          '🔍 Parsed game details data:',
-          JSON.stringify(data, null, 2)
-        );
+        console.log('🔍 Parsed game details data (checking key fields):');
+        console.log('- item exists:', !!data.item);
+        console.log('- item.name count:', data.item?.name?.length || 0);
+        console.log('- item.versions exists:', !!data.item?.versions);
+        console.log('- item.poll count:', data.item?.poll?.length || 0);
+
         const result = this.transformGameDetails(data);
+        console.log('🔍 Transformed game details result:');
         console.log(
-          '🔍 Transformed game details result:',
-          JSON.stringify(result, null, 2)
+          '- alternateNames count:',
+          result.alternateNames?.length || 0
         );
+        console.log('- editions count:', result.editions?.length || 0);
+        console.log('- languageDependence:', result.languageDependence);
 
         // Enhance with inbound link analysis for accurate type classification
         const enhancedResult = await this.enhanceGameDetailsWithInboundAnalysis(
@@ -1041,14 +1048,19 @@ export class BGGService {
         );
       }
 
-      console.log(
-        'Parsed game details item:',
-        JSON.stringify(mainItem, null, 2)
-      );
       console.log('Item structure check:');
       console.log('- item.$.id:', mainItem.$?.id);
-      console.log('- item.name:', mainItem.name);
-      console.log('- item.description:', mainItem.description);
+      console.log('- item.name count:', mainItem.name?.length || 0);
+      console.log('- item.versions exists:', !!mainItem.versions);
+      console.log(
+        '- item.versions structure:',
+        mainItem.versions?.[0] ? 'has data' : 'empty'
+      );
+      console.log(
+        '- item.versions[0].item count:',
+        mainItem.versions?.[0]?.item?.length || 0
+      );
+      console.log('- item.poll count:', mainItem.poll?.length || 0);
 
       // Return in the expected format for game details
       return { item: mainItem };
@@ -1167,10 +1179,6 @@ export class BGGService {
         item.link
           ?.filter((l: any) => l.$.type === 'boardgamepublisher')
           .map((l: any) => this.decodeHtmlEntities(l.$.value)) || [],
-      languages:
-        item.link
-          ?.filter((l: any) => l.$.type === 'language')
-          .map((l: any) => l.$.value) || [],
       bgg_rating: parseFloat(
         item.statistics?.[0]?.ratings?.[0]?.average?.[0]?.$.value || '0'
       ),
@@ -1194,37 +1202,92 @@ export class BGGService {
 
   private extractAlternateNames(item: any): BGGAlternateName[] {
     if (!item.name || !Array.isArray(item.name)) {
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No name data found in item');
+      }
       return [];
     }
 
-    return item.name.map((name: any) => ({
+    if (this.config.debug.enabled) {
+      console.log('🔍 Extracting', item.name.length, 'names from item');
+    }
+
+    const names = item.name.map((name: any) => ({
       type: name.$.type as 'primary' | 'alternate',
       sortindex: parseInt(name.$.sortindex || '1'),
       value: this.decodeHtmlEntities(name.$.value || ''),
     }));
+
+    const alternateCount = names.filter(
+      (n: BGGAlternateName) => n.type === 'alternate'
+    ).length;
+
+    if (this.config.debug.enabled) {
+      console.log(
+        '✅ Extracted',
+        names.length,
+        'names total,',
+        alternateCount,
+        'alternate names'
+      );
+    }
+
+    return names;
   }
 
   private extractEditions(item: any): BGGEdition[] {
     // First try to get real game versions if available
     if (item.versions && item.versions[0] && item.versions[0].item) {
-      return this.extractGameVersions(item.versions[0].item);
+      if (this.config.debug.enabled) {
+        console.log(
+          '🔍 Found versions data with',
+          item.versions[0].item.length,
+          'versions'
+        );
+      }
+      const versions = this.extractGameVersions(item.versions[0].item);
+      if (this.config.debug.enabled) {
+        console.log('✅ Extracted', versions.length, 'game versions');
+      }
+      return versions;
+    }
+
+    if (this.config.debug.enabled) {
+      console.log('⚠️ No versions data found, trying fallback method');
     }
 
     // Fallback to the old method for implementations/compilations
     if (!item.link || !Array.isArray(item.link)) {
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No link data found in item');
+      }
       return [];
     }
 
     const versionTypes = ['boardgameimplementation', 'boardgamecompilation'];
+    const versionLinks = item.link.filter((link: any) =>
+      versionTypes.includes(link.$.type)
+    );
 
-    return item.link
-      .filter((link: any) => versionTypes.includes(link.$.type))
-      .map((link: any) => ({
-        id: link.$.id,
-        name: this.decodeHtmlEntities(link.$.value || ''),
-        type: this.mapEditionType(link.$.type),
-        bggLink: `https://boardgamegeek.com/boardgame/${link.$.id}`,
-      }));
+    if (this.config.debug.enabled) {
+      console.log(
+        '🔍 Found',
+        versionLinks.length,
+        'version links via fallback method'
+      );
+    }
+
+    const editions = versionLinks.map((link: any) => ({
+      id: link.$.id,
+      name: this.decodeHtmlEntities(link.$.value || ''),
+      type: this.mapEditionType(link.$.type),
+      bggLink: `https://boardgamegeek.com/boardgame/${link.$.id}`,
+    }));
+
+    if (this.config.debug.enabled) {
+      console.log('✅ Extracted', editions.length, 'editions via fallback');
+    }
+    return editions;
   }
 
   private extractGameVersions(versions: any[]): BGGEdition[] {
@@ -1265,34 +1328,58 @@ export class BGGService {
 
   private extractLanguageDependence(item: any): BGGLanguageDependence {
     if (!item.poll || !Array.isArray(item.poll)) {
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No poll data found in item');
+      }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       };
+    }
+
+    if (this.config.debug.enabled) {
+      console.log(
+        '🔍 Looking for language_dependence poll in',
+        item.poll.length,
+        'polls'
+      );
+      console.log(
+        '🔍 Available polls:',
+        item.poll.map((p: any) => p.$.name || p.$?.id || 'unnamed')
+      );
     }
 
     const languagePoll = item.poll.find(
       (poll: any) => poll.$.name === 'language_dependence'
     );
-    if (
-      !languagePoll ||
-      !languagePoll.results ||
-      !Array.isArray(languagePoll.results)
-    ) {
+
+    if (!languagePoll) {
+      if (this.config.debug.enabled) {
+        console.log('⚠️ Language dependence poll not found');
+      }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
+        percentage: 0,
+      };
+    }
+
+    if (!languagePoll.results || !Array.isArray(languagePoll.results)) {
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No results array in language poll');
+      }
+      return {
+        description: 'Unknown',
         percentage: 0,
       };
     }
 
     const totalVotes = parseInt(languagePoll.$.totalvotes || '0');
     const results = languagePoll.results[0]?.result || [];
+
+    if (this.config.debug.enabled) {
+      console.log('🔍 Language poll total votes:', totalVotes);
+      console.log('🔍 Language poll results:', results.length);
+    }
 
     // Find the result with the most votes
     let maxVotes = 0;
@@ -1307,23 +1394,25 @@ export class BGGService {
     });
 
     if (!selectedResult) {
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No result with votes found in language poll');
+      }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes,
         percentage: 0,
       };
     }
 
-    return {
-      level: this.convertBGGLevelToUserLevel(selectedResult.$.level || '0'),
+    const languageDependence = {
       description: selectedResult.$.value || 'Unknown',
-      votes: maxVotes,
-      totalVotes,
       percentage:
         totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0,
     };
+
+    if (this.config.debug.enabled) {
+      console.log('✅ Extracted language dependence:', languageDependence);
+    }
+    return languageDependence;
   }
 
   private mapEditionType(
@@ -1506,20 +1595,16 @@ export class BGGService {
       designers: dbGame.designers || [],
       artists: dbGame.artists || [],
       publishers: dbGame.publishers || [],
-      languages: dbGame.languages || [],
       bgg_rating: dbGame.bgg_rating || 0,
       bgg_rank: dbGame.bgg_rank || 0,
       weight_rating: dbGame.weight_rating || 0,
       age_rating: dbGame.age_rating || 0,
       last_bgg_sync: dbGame.last_bgg_sync || new Date().toISOString(),
-      // Enhanced fields
-      alternateNames: [],
-      editions: [],
-      languageDependence: {
-        level: 0,
+      // Enhanced fields - now read from database!
+      alternateNames: dbGame.alternate_names || [],
+      editions: dbGame.editions || [],
+      languageDependence: dbGame.language_dependence || {
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       },
       // Computed fields (readonly)

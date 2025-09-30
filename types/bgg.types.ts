@@ -104,10 +104,7 @@ export interface BGGEdition {
 }
 
 export interface BGGLanguageDependence {
-  level: number;
   description: string;
-  votes: number;
-  totalVotes: number;
   percentage: number;
 }
 
@@ -129,7 +126,6 @@ export interface BGGGameDetails {
   designers: string[];
   artists: string[];
   publishers: string[];
-  languages: string[];
   bgg_rating: number;
   bgg_rank: number;
   weight_rating: number;

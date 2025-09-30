@@ -78,6 +78,7 @@ export interface Database {
       games: {
         Row: {
           age_rating: number | null;
+          alternate_names: Json;
           artists: string[];
           bgg_id: number | null;
           bgg_rank: number | null;
@@ -87,9 +88,10 @@ export interface Database {
           created_at: string;
           description: string | null;
           designers: string[];
+          editions: Json;
           id: string;
           image_url: string | null;
-          languages: string[];
+          language_dependence: Json | null;
           last_bgg_sync: string | null;
           max_players: number | null;
           mechanics: string[];
@@ -104,6 +106,7 @@ export interface Database {
         };
         Insert: {
           age_rating?: number | null;
+          alternate_names?: Json;
           artists?: string[];
           bgg_id?: number | null;
           bgg_rank?: number | null;
@@ -113,9 +116,10 @@ export interface Database {
           created_at?: string;
           description?: string | null;
           designers?: string[];
+          editions?: Json;
           id?: string;
           image_url?: string | null;
-          languages?: string[];
+          language_dependence?: Json | null;
           last_bgg_sync?: string | null;
           max_players?: number | null;
           mechanics?: string[];
@@ -130,6 +134,7 @@ export interface Database {
         };
         Update: {
           age_rating?: number | null;
+          alternate_names?: Json;
           artists?: string[];
           bgg_id?: number | null;
           bgg_rank?: number | null;
@@ -139,9 +144,10 @@ export interface Database {
           created_at?: string;
           description?: string | null;
           designers?: string[];
+          editions?: Json;
           id?: string;
           image_url?: string | null;
-          languages?: string[];
+          language_dependence?: Json | null;
           last_bgg_sync?: string | null;
           max_players?: number | null;
           mechanics?: string[];

@@ -274,7 +274,6 @@ export class FallbackStrategies {
       designers: [],
       artists: [],
       publishers: [],
-      languages: [],
       bgg_rating: 0,
       bgg_rank: 0,
       weight_rating: 0,
@@ -300,10 +299,7 @@ export class FallbackStrategies {
       alternateNames: [],
       editions: [],
       languageDependence: {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       },
     };

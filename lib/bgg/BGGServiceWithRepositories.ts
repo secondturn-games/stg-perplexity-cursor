@@ -765,7 +765,6 @@ export class BGGServiceWithRepositories {
       designers: game.designers || [],
       artists: game.artists || [],
       publishers: game.publishers || [],
-      languages: game.languages || [],
       bgg_rating: game.bgg_rating || 0,
       bgg_rank: game.bgg_rank || 0,
       weight_rating: game.weight_rating || 0,
@@ -775,10 +774,7 @@ export class BGGServiceWithRepositories {
       alternateNames: [],
       editions: [],
       languageDependence: {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       },
     });
