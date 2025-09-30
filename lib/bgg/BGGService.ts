@@ -1194,44 +1194,80 @@ export class BGGService {
 
   private extractAlternateNames(item: any): BGGAlternateName[] {
     if (!item.name || !Array.isArray(item.name)) {
-      console.log('⚠️ No name data found in item');
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No name data found in item');
+      }
       return [];
     }
 
-    console.log('🔍 Extracting', item.name.length, 'names from item');
+    if (this.config.debug.enabled) {
+      console.log('🔍 Extracting', item.name.length, 'names from item');
+    }
+
     const names = item.name.map((name: any) => ({
       type: name.$.type as 'primary' | 'alternate',
       sortindex: parseInt(name.$.sortindex || '1'),
       value: this.decodeHtmlEntities(name.$.value || ''),
     }));
 
-    const alternateCount = names.filter(n => n.type === 'alternate').length;
-    console.log('✅ Extracted', names.length, 'names total,', alternateCount, 'alternate names');
-    
+    const alternateCount = names.filter(
+      (n: BGGAlternateName) => n.type === 'alternate'
+    ).length;
+
+    if (this.config.debug.enabled) {
+      console.log(
+        '✅ Extracted',
+        names.length,
+        'names total,',
+        alternateCount,
+        'alternate names'
+      );
+    }
+
     return names;
   }
 
   private extractEditions(item: any): BGGEdition[] {
     // First try to get real game versions if available
     if (item.versions && item.versions[0] && item.versions[0].item) {
-      console.log('🔍 Found versions data with', item.versions[0].item.length, 'versions');
+      if (this.config.debug.enabled) {
+        console.log(
+          '🔍 Found versions data with',
+          item.versions[0].item.length,
+          'versions'
+        );
+      }
       const versions = this.extractGameVersions(item.versions[0].item);
-      console.log('✅ Extracted', versions.length, 'game versions');
+      if (this.config.debug.enabled) {
+        console.log('✅ Extracted', versions.length, 'game versions');
+      }
       return versions;
     }
 
-    console.log('⚠️ No versions data found, trying fallback method');
+    if (this.config.debug.enabled) {
+      console.log('⚠️ No versions data found, trying fallback method');
+    }
 
     // Fallback to the old method for implementations/compilations
     if (!item.link || !Array.isArray(item.link)) {
-      console.log('⚠️ No link data found in item');
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No link data found in item');
+      }
       return [];
     }
 
     const versionTypes = ['boardgameimplementation', 'boardgamecompilation'];
-    const versionLinks = item.link.filter((link: any) => versionTypes.includes(link.$.type));
-    
-    console.log('🔍 Found', versionLinks.length, 'version links via fallback method');
+    const versionLinks = item.link.filter((link: any) =>
+      versionTypes.includes(link.$.type)
+    );
+
+    if (this.config.debug.enabled) {
+      console.log(
+        '🔍 Found',
+        versionLinks.length,
+        'version links via fallback method'
+      );
+    }
 
     const editions = versionLinks.map((link: any) => ({
       id: link.$.id,
@@ -1240,7 +1276,9 @@ export class BGGService {
       bggLink: `https://boardgamegeek.com/boardgame/${link.$.id}`,
     }));
 
-    console.log('✅ Extracted', editions.length, 'editions via fallback');
+    if (this.config.debug.enabled) {
+      console.log('✅ Extracted', editions.length, 'editions via fallback');
+    }
     return editions;
   }
 
@@ -1282,7 +1320,9 @@ export class BGGService {
 
   private extractLanguageDependence(item: any): BGGLanguageDependence {
     if (!item.poll || !Array.isArray(item.poll)) {
-      console.log('⚠️ No poll data found in item');
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No poll data found in item');
+      }
       return {
         level: 0,
         description: 'Unknown',
@@ -1292,15 +1332,26 @@ export class BGGService {
       };
     }
 
-    console.log('🔍 Looking for language_dependence poll in', item.poll.length, 'polls');
-    console.log('🔍 Available polls:', item.poll.map((p: any) => p.$.name || p.$?.id || 'unnamed'));
+    if (this.config.debug.enabled) {
+      console.log(
+        '🔍 Looking for language_dependence poll in',
+        item.poll.length,
+        'polls'
+      );
+      console.log(
+        '🔍 Available polls:',
+        item.poll.map((p: any) => p.$.name || p.$?.id || 'unnamed')
+      );
+    }
 
     const languagePoll = item.poll.find(
       (poll: any) => poll.$.name === 'language_dependence'
     );
-    
+
     if (!languagePoll) {
-      console.log('⚠️ Language dependence poll not found');
+      if (this.config.debug.enabled) {
+        console.log('⚠️ Language dependence poll not found');
+      }
       return {
         level: 0,
         description: 'Unknown',
@@ -1311,7 +1362,9 @@ export class BGGService {
     }
 
     if (!languagePoll.results || !Array.isArray(languagePoll.results)) {
-      console.log('⚠️ No results array in language poll');
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No results array in language poll');
+      }
       return {
         level: 0,
         description: 'Unknown',
@@ -1324,8 +1377,10 @@ export class BGGService {
     const totalVotes = parseInt(languagePoll.$.totalvotes || '0');
     const results = languagePoll.results[0]?.result || [];
 
-    console.log('🔍 Language poll total votes:', totalVotes);
-    console.log('🔍 Language poll results:', results.length);
+    if (this.config.debug.enabled) {
+      console.log('🔍 Language poll total votes:', totalVotes);
+      console.log('🔍 Language poll results:', results.length);
+    }
 
     // Find the result with the most votes
     let maxVotes = 0;
@@ -1340,7 +1395,9 @@ export class BGGService {
     });
 
     if (!selectedResult) {
-      console.log('⚠️ No result with votes found in language poll');
+      if (this.config.debug.enabled) {
+        console.log('⚠️ No result with votes found in language poll');
+      }
       return {
         level: 0,
         description: 'Unknown',
@@ -1359,7 +1416,9 @@ export class BGGService {
         totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0,
     };
 
-    console.log('✅ Extracted language dependence:', languageDependence);
+    if (this.config.debug.enabled) {
+      console.log('✅ Extracted language dependence:', languageDependence);
+    }
     return languageDependence;
   }
 
