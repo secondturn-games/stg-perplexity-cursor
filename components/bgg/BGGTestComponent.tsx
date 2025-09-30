@@ -633,7 +633,8 @@ export function BGGTestComponent() {
                 return (
                   <>
                     <h4 className='font-semibold text-gray-900 mb-3'>
-                      Alternate Names ({alternateNames.length} of {allNames.length} total names)
+                      Alternate Names ({alternateNames.length} of{' '}
+                      {allNames.length} total names)
                     </h4>
                     {alternateNames.length > 0 ? (
                       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
@@ -673,7 +674,7 @@ export function BGGTestComponent() {
             {/* Game Versions - Always Show */}
             <div className='mt-6 bg-indigo-50 p-4 rounded-lg'>
               <h4 className='font-semibold text-gray-900 mb-3'>
-                Game Versions ({gameState.data.editions?.length || 0})
+                Game Versions ({gameState.data.editions?.length || 0} editions)
               </h4>
               <p className='text-sm text-gray-600 mb-3'>
                 Different editions and versions of this game (regional
