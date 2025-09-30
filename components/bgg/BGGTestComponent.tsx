@@ -368,19 +368,17 @@ export function BGGTestComponent() {
           <div className='mt-4'>
             <h3 className='font-medium mb-2'>Game Details:</h3>
 
-            {/* Debug Information (Development Only) */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className='mb-4 p-3 bg-gray-100 rounded text-xs'>
-                <details>
-                  <summary className='cursor-pointer font-medium'>
-                    Debug: Raw Data Structure
-                  </summary>
-                  <pre className='mt-2 whitespace-pre-wrap overflow-auto max-h-40'>
-                    {JSON.stringify(gameState.data, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            )}
+            {/* Debug Information - Always Show */}
+            <div className='mb-4 p-3 bg-gray-100 rounded text-xs'>
+              <details open>
+                <summary className='cursor-pointer font-medium'>
+                  Debug: Raw Data Structure (Click to collapse)
+                </summary>
+                <pre className='mt-2 whitespace-pre-wrap overflow-auto max-h-96 text-xs'>
+                  {JSON.stringify(gameState.data, null, 2)}
+                </pre>
+              </details>
+            </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {/* Basic Information */}
@@ -625,60 +623,63 @@ export function BGGTestComponent() {
               </div>
             </div>
 
-            {/* Alternate Names */}
-            {gameState.data.alternateNames &&
-              gameState.data.alternateNames.length > 0 && (
-                <div className='mt-6 bg-orange-50 p-4 rounded-lg'>
-                  {(() => {
-                    const alternateNames = gameState.data.alternateNames.filter(
-                      (name: any) => name.type !== 'primary'
-                    );
-                    return (
-                      <>
-                        <h4 className='font-semibold text-gray-900 mb-3'>
-                          Alternate Names ({alternateNames.length})
-                        </h4>
-                        {alternateNames.length > 0 ? (
-                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
-                            {alternateNames
-                              .slice(0, 20)
-                              .map((name: any, index: number) => (
-                                <div
-                                  key={index}
-                                  className='p-2 bg-white rounded border'
-                                >
-                                  <span className='text-sm text-gray-900'>
-                                    {name.value}
-                                  </span>
-                                </div>
-                              ))}
-                            {alternateNames.length > 20 && (
-                              <div className='col-span-full text-sm text-gray-500 text-center py-2'>
-                                ... and {alternateNames.length - 20} more
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className='text-sm text-gray-500 text-center py-4'>
-                            No alternate names available
+            {/* Alternate Names - Always Show */}
+            <div className='mt-6 bg-orange-50 p-4 rounded-lg'>
+              {(() => {
+                const allNames = gameState.data.alternateNames || [];
+                const alternateNames = allNames.filter(
+                  (name: any) => name.type !== 'primary'
+                );
+                return (
+                  <>
+                    <h4 className='font-semibold text-gray-900 mb-3'>
+                      Alternate Names ({alternateNames.length} of {allNames.length} total names)
+                    </h4>
+                    {alternateNames.length > 0 ? (
+                      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
+                        {alternateNames
+                          .slice(0, 20)
+                          .map((name: any, index: number) => (
+                            <div
+                              key={index}
+                              className='p-2 bg-white rounded border'
+                            >
+                              <span className='text-sm text-gray-900'>
+                                {name.value}
+                              </span>
+                              <span className='text-xs text-gray-400 ml-1'>
+                                ({name.type})
+                              </span>
+                            </div>
+                          ))}
+                        {alternateNames.length > 20 && (
+                          <div className='col-span-full text-sm text-gray-500 text-center py-2'>
+                            ... and {alternateNames.length - 20} more
                           </div>
                         )}
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
+                      </div>
+                    ) : (
+                      <div className='text-sm text-gray-500 text-center py-4'>
+                        {allNames.length === 0
+                          ? '⚠️ No name data in response'
+                          : '⚠️ No alternate names (only primary name present)'}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
 
-            {/* Game Versions */}
-            {gameState.data.editions && gameState.data.editions.length > 0 && (
-              <div className='mt-6 bg-indigo-50 p-4 rounded-lg'>
-                <h4 className='font-semibold text-gray-900 mb-3'>
-                  Game Versions ({gameState.data.editions.length})
-                </h4>
-                <p className='text-sm text-gray-600 mb-3'>
-                  Different editions and versions of this game (regional
-                  editions, special editions, anniversary editions, etc.)
-                </p>
+            {/* Game Versions - Always Show */}
+            <div className='mt-6 bg-indigo-50 p-4 rounded-lg'>
+              <h4 className='font-semibold text-gray-900 mb-3'>
+                Game Versions ({gameState.data.editions?.length || 0})
+              </h4>
+              <p className='text-sm text-gray-600 mb-3'>
+                Different editions and versions of this game (regional
+                editions, special editions, anniversary editions, etc.)
+              </p>
+              {gameState.data.editions && gameState.data.editions.length > 0 ? (
                 <div className='space-y-2 max-h-60 overflow-y-auto'>
                   {gameState.data.editions
                     .slice(0, 10)
@@ -709,7 +710,7 @@ export function BGGTestComponent() {
                               <div>Product Code: {edition.productCode}</div>
                             )}
                             <div className='text-xs text-gray-500'>
-                              ID: {edition.id}
+                              ID: {edition.id} | Type: {edition.type}
                             </div>
                           </div>
                         </div>
@@ -742,25 +743,40 @@ export function BGGTestComponent() {
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className='text-sm text-gray-500 text-center py-4'>
+                  ⚠️ No game versions/editions found in response
+                </div>
+              )}
+            </div>
 
-            {/* Language Dependence */}
-            {gameState.data.languageDependence && (
-              <div className='mt-6 bg-teal-50 p-4 rounded-lg'>
-                <h4 className='font-semibold text-gray-900 mb-3'>
-                  Language Dependence
-                </h4>
+            {/* Language Dependence - Always Show */}
+            <div className='mt-6 bg-teal-50 p-4 rounded-lg'>
+              <h4 className='font-semibold text-gray-900 mb-3'>
+                Language Dependence
+              </h4>
+              {gameState.data.languageDependence &&
+              gameState.data.languageDependence.level !== 0 ? (
                 <div className='bg-white p-3 rounded border'>
-                  <p className='text-sm text-gray-900 mb-2'>
-                    {gameState.data.languageDependence.description}
-                  </p>
-                  <div className='text-sm text-gray-500'>
-                    {gameState.data.languageDependence.percentage}% of voters
+                  <div className='text-sm space-y-1'>
+                    <p className='text-gray-900 font-medium'>
+                      Level {gameState.data.languageDependence.level}:{' '}
+                      {gameState.data.languageDependence.description}
+                    </p>
+                    <p className='text-gray-600'>
+                      {gameState.data.languageDependence.votes} of{' '}
+                      {gameState.data.languageDependence.totalVotes} voters (
+                      {gameState.data.languageDependence.percentage}%)
+                    </p>
                   </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className='text-sm text-gray-500 text-center py-4'>
+                  ⚠️ No language dependence data found in response or
+                  insufficient votes
+                </div>
+              )}
+            </div>
 
             {/* Description */}
             {gameState.data.description && (

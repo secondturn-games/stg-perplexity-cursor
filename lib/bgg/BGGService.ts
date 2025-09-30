@@ -380,20 +380,22 @@ export class BGGService {
         );
 
         const response = await this.apiClient.getGameDetails(gameId);
-        console.log(
-          '🔍 Raw game details response:',
-          response.substring(0, 500) + '...'
-        );
+        console.log('🔍 Raw game details response (first 1000 chars):');
+        console.log(response.substring(0, 1000));
+        console.log('...');
+        
         const data = await this.parseXML(response, false);
-        console.log(
-          '🔍 Parsed game details data:',
-          JSON.stringify(data, null, 2)
-        );
+        console.log('🔍 Parsed game details data (checking key fields):');
+        console.log('- item exists:', !!data.item);
+        console.log('- item.name count:', data.item?.name?.length || 0);
+        console.log('- item.versions exists:', !!data.item?.versions);
+        console.log('- item.poll count:', data.item?.poll?.length || 0);
+        
         const result = this.transformGameDetails(data);
-        console.log(
-          '🔍 Transformed game details result:',
-          JSON.stringify(result, null, 2)
-        );
+        console.log('🔍 Transformed game details result:');
+        console.log('- alternateNames count:', result.alternateNames?.length || 0);
+        console.log('- editions count:', result.editions?.length || 0);
+        console.log('- languageDependence:', result.languageDependence);
 
         // Enhance with inbound link analysis for accurate type classification
         const enhancedResult = await this.enhanceGameDetailsWithInboundAnalysis(
