@@ -335,7 +335,9 @@ export class BGGService {
     try {
       const dbGame = await this.gameRepository.findByBggId(parseInt(gameId));
       if (dbGame) {
-        console.log(`✅ Database cache hit for game ${gameId} (including alternateNames, editions, and languageDependence)`);
+        console.log(
+          `✅ Database cache hit for game ${gameId} (including alternateNames, editions, and languageDependence)`
+        );
 
         // Convert database game to BGGGameDetails format
         const gameDetails = this.convertDbGameToBGGDetails(dbGame);
@@ -1050,8 +1052,14 @@ export class BGGService {
       console.log('- item.$.id:', mainItem.$?.id);
       console.log('- item.name count:', mainItem.name?.length || 0);
       console.log('- item.versions exists:', !!mainItem.versions);
-      console.log('- item.versions structure:', mainItem.versions?.[0] ? 'has data' : 'empty');
-      console.log('- item.versions[0].item count:', mainItem.versions?.[0]?.item?.length || 0);
+      console.log(
+        '- item.versions structure:',
+        mainItem.versions?.[0] ? 'has data' : 'empty'
+      );
+      console.log(
+        '- item.versions[0].item count:',
+        mainItem.versions?.[0]?.item?.length || 0
+      );
       console.log('- item.poll count:', mainItem.poll?.length || 0);
 
       // Return in the expected format for game details
