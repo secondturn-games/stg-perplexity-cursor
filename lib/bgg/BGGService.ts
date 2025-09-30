@@ -336,6 +336,8 @@ export class BGGService {
       const dbGame = await this.gameRepository.findByBggId(parseInt(gameId));
       if (dbGame) {
         console.log(`✅ Database cache hit for game ${gameId}`);
+        console.warn(`⚠️ WARNING: alternateNames, editions, and languageDependence are NOT stored in database cache!`);
+        console.warn(`⚠️ These fields will be empty arrays. To get fresh data, clear the cache or delete the game from the database.`);
 
         // Convert database game to BGGGameDetails format
         const gameDetails = this.convertDbGameToBGGDetails(dbGame);
@@ -1046,14 +1048,13 @@ export class BGGService {
         );
       }
 
-      console.log(
-        'Parsed game details item:',
-        JSON.stringify(mainItem, null, 2)
-      );
       console.log('Item structure check:');
       console.log('- item.$.id:', mainItem.$?.id);
-      console.log('- item.name:', mainItem.name);
-      console.log('- item.description:', mainItem.description);
+      console.log('- item.name count:', mainItem.name?.length || 0);
+      console.log('- item.versions exists:', !!mainItem.versions);
+      console.log('- item.versions structure:', mainItem.versions?.[0] ? 'has data' : 'empty');
+      console.log('- item.versions[0].item count:', mainItem.versions?.[0]?.item?.length || 0);
+      console.log('- item.poll count:', mainItem.poll?.length || 0);
 
       // Return in the expected format for game details
       return { item: mainItem };
