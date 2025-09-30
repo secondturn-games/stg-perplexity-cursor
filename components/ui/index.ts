@@ -7,5 +7,9 @@ export { Alert, AlertTitle, AlertDescription } from './Alert';
 export { Button, buttonVariants } from './Button';
 export { Checkbox } from './Checkbox';
 export { default as DiceLoader } from './DiceLoader';
+export {
+  DiceLoaderErrorBoundary,
+  SafeDiceLoader,
+} from './DiceLoaderErrorBoundary';
 export { Input } from './Input';
 export { Select } from './Select';
