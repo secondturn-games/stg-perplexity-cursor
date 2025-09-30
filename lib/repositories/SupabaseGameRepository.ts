@@ -236,6 +236,10 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
         weight_rating: game.weight_rating || null,
         complexity_rating: game.weight_rating || null, // Map weight to complexity
         last_bgg_sync: new Date().toISOString(),
+        // Extended metadata fields
+        alternate_names: (game.alternateNames || []) as never,
+        editions: (game.editions || []) as never,
+        language_dependence: (game.languageDependence || null) as never,
       };
 
       let result;
@@ -262,6 +266,10 @@ export class SupabaseGameRepository implements IExtendedGameRepository<Game> {
           bgg_rank: gameData.bgg_rank ?? null,
           weight_rating: gameData.weight_rating ?? null,
           last_bgg_sync: gameData.last_bgg_sync ?? null,
+          // Extended metadata fields
+          alternate_names: (gameData.alternate_names ?? []) as never,
+          editions: (gameData.editions ?? []) as never,
+          language_dependence: (gameData.language_dependence ?? null) as never,
           updated_at: new Date().toISOString(),
         };
 

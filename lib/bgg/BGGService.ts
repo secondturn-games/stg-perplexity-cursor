@@ -335,9 +335,7 @@ export class BGGService {
     try {
       const dbGame = await this.gameRepository.findByBggId(parseInt(gameId));
       if (dbGame) {
-        console.log(`✅ Database cache hit for game ${gameId}`);
-        console.warn(`⚠️ WARNING: alternateNames, editions, and languageDependence are NOT stored in database cache!`);
-        console.warn(`⚠️ These fields will be empty arrays. To get fresh data, clear the cache or delete the game from the database.`);
+        console.log(`✅ Database cache hit for game ${gameId} (including alternateNames, editions, and languageDependence)`);
 
         // Convert database game to BGGGameDetails format
         const gameDetails = this.convertDbGameToBGGDetails(dbGame);
@@ -1614,10 +1612,10 @@ export class BGGService {
       weight_rating: dbGame.weight_rating || 0,
       age_rating: dbGame.age_rating || 0,
       last_bgg_sync: dbGame.last_bgg_sync || new Date().toISOString(),
-      // Enhanced fields
-      alternateNames: [],
-      editions: [],
-      languageDependence: {
+      // Enhanced fields - now read from database!
+      alternateNames: dbGame.alternate_names || [],
+      editions: dbGame.editions || [],
+      languageDependence: dbGame.language_dependence || {
         level: 0,
         description: 'Unknown',
         votes: 0,
