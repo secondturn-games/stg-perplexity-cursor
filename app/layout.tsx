@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Open_Sans, Righteous } from 'next/font/google';
-import { MainLayout } from '@/components/layout';
+import { MainLayout, NavigationLoader } from '@/components/layout';
 import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css';
 
@@ -77,6 +78,9 @@ export default function RootLayout({
     <html lang='en' className={`${openSans.variable} ${righteous.variable}`}>
       <body className={`${openSans.className}`}>
         <AuthProvider>
+          <Suspense fallback={null}>
+            <NavigationLoader />
+          </Suspense>
           <MainLayout cartCount={0} currentLanguage='EN'>
             {children}
           </MainLayout>

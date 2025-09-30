@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // Skip ESLint during builds (Vercel runs it separately)
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Type-check during builds
+    ignoreBuildErrors: false,
+  },
   typedRoutes: true,
   images: {
     remotePatterns: [

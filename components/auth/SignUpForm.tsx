@@ -11,10 +11,12 @@ import {
   signInWithGoogle,
 } from '@/lib/supabase/auth-client';
 import { useAuth } from '@/hooks/useAuth';
+import { useLoading } from '@/hooks/useLoading';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { DiceLoader } from '@/components/ui';
 
 const signUpSchema = yup.object({
   email: yup
@@ -55,10 +57,17 @@ export function SignUpForm({
   onSuccess,
   redirectTo = '/dashboard',
 }: SignUpFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, withLoading } = useLoading({
+    defaultTimeout: 30000,
+    onError: error => {
+      setError(error.message);
+    },
+  });
+  const [loadingMessage, setLoadingMessage] = useState('Creating account...');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const { signIn } = useAuth();
 
   const {
@@ -70,53 +79,68 @@ export function SignUpForm({
   });
 
   const onSubmit = async (data: SignUpFormData) => {
+    setError(null);
+    setSuccess(false);
+    setLoadingMessage('Creating your account...');
+
     try {
-      setIsLoading(true);
-      setError(null);
+      await withLoading(async () => {
+        const { error } = await signUpWithProfile({
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+          gdprConsent: true,
+        });
 
-      const { error } = await signUpWithProfile({
-        email: data.email,
-        password: data.password,
-        fullName: data.fullName,
-        gdprConsent: true, // Always true since agreement is shown below form
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Success state
+        setSuccess(true);
+        setLoadingMessage('Account created successfully!');
+
+        // Brief delay to show success
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          window.location.href = redirectTo;
+        }
       });
-
-      if (error) {
-        setError(error.message);
-        return;
-      }
-
-      // Show success message and redirect
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        // Redirect to dashboard or specified page
-        window.location.href = redirectTo;
-      }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.'
+      );
     }
   };
 
   const handleGoogleSignUp = async () => {
+    setError(null);
+    setSuccess(false);
+    setLoadingMessage('Connecting to Google...');
+
     try {
-      setIsLoading(true);
-      setError(null);
+      await withLoading(async () => {
+        const { error } = await signInWithGoogle(redirectTo);
 
-      const { error } = await signInWithGoogle(redirectTo);
+        if (error) {
+          throw new Error(error.message);
+        }
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
-
-      // Google sign-in will redirect automatically
+        setSuccess(true);
+        setLoadingMessage('Redirecting to Google...');
+        // Google sign-in will redirect automatically
+      });
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.'
+      );
     }
   };
 
@@ -335,6 +359,26 @@ export function SignUpForm({
           </Link>
         </p>
       </div>
+
+      {/* Success Message */}
+      {success && !isLoading && (
+        <div
+          role='status'
+          aria-live='polite'
+          className='mt-4 rounded-lg border border-green-200 bg-green-50 p-4'
+        >
+          <p className='text-center text-regular text-green-800'>
+            ✓ Account created successfully!
+          </p>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      <DiceLoader
+        isVisible={isLoading}
+        text={loadingMessage}
+        variant='bounce'
+      />
     </form>
   );
 }

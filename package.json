@@ -16,7 +16,9 @@
     "test:coverage": "jest --coverage",
     "check-env": "node scripts/check-env.js",
     "dev:jobs": "node scripts/start-job-worker.js",
-    "test:jobs": "node scripts/test-job-system.js"
+    "test:jobs": "node scripts/test-job-system.js",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

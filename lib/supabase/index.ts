@@ -18,6 +18,21 @@ export {
 } from './auth-client';
 export * from './server-auth';
 
+// Authentication utilities with loading states
+export {
+  signInWithEmailLoading,
+  signUpWithProfileLoading,
+  signInWithGoogleLoading,
+  signOutLoading,
+  resetPasswordLoading,
+  updatePasswordLoading,
+  getProfileLoading,
+  createOrUpdateProfileLoading,
+  updateProfileLoading,
+  withSupabaseLoading,
+  type SupabaseLoadingOptions,
+} from './api-with-loading';
+
 // Storage utilities are already exported from the main supabase file
 
 // Error handling

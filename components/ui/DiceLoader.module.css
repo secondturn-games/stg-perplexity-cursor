@@ -1,0 +1,164 @@
+/* DiceLoader Component - Custom Animations Only */
+/* Base styles are handled by Tailwind CSS for design system integration */
+
+/* ===== DICE ANIMATION VARIANTS ===== */
+
+/* Roll Variant - 360 degree rotation with scale effect */
+.diceRoll {
+  animation: diceRoll 0.9s ease-in-out infinite;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+@keyframes diceRoll {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1);
+  }
+  75% {
+    transform: rotate(270deg) scale(1.1);
+  }
+}
+
+/* Bounce Variant - rotation with vertical movement */
+.diceBounce {
+  animation: diceBounce 0.8s ease-in-out infinite;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+@keyframes diceBounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-15px) rotate(45deg) scale(1.05);
+  }
+  50% {
+    transform: translateY(-25px) rotate(90deg) scale(1.15);
+  }
+  75% {
+    transform: translateY(-15px) rotate(135deg) scale(1.05);
+  }
+}
+
+/* Spin Variant - continuous Y-axis rotation */
+.diceSpin {
+  animation: diceSpin 1s linear infinite;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+@keyframes diceSpin {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotateY(360deg) scale(1);
+  }
+}
+
+/* ===== TEXT PULSE ANIMATION ===== */
+.textPulse {
+  animation: textPulse 2s ease-in-out infinite;
+  transform: translateZ(0);
+  will-change: opacity, transform;
+}
+
+@keyframes textPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+/* ===== LOADING DOTS ANIMATION ===== */
+.dot {
+  display: inline-block;
+  animation: dotBounce 1.4s ease-in-out infinite;
+  transform: translateZ(0);
+  will-change: opacity, transform;
+}
+
+@keyframes dotBounce {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/* Tablets and larger (768px+) */
+@media (min-width: 768px) {
+  @keyframes dotBounce {
+    0%,
+    80%,
+    100% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    40% {
+      opacity: 1;
+      transform: translateY(-10px);
+    }
+  }
+}
+
+/* Mobile - small screens (max 640px) */
+@media (max-width: 640px) {
+  @keyframes diceBounce {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg) scale(1);
+    }
+    25% {
+      transform: translateY(-10px) rotate(45deg) scale(1.05);
+    }
+    50% {
+      transform: translateY(-15px) rotate(90deg) scale(1.1);
+    }
+    75% {
+      transform: translateY(-10px) rotate(135deg) scale(1.05);
+    }
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .diceRoll,
+  .diceBounce,
+  .diceSpin,
+  .textPulse,
+  .dot {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

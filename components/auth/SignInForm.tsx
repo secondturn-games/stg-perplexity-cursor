@@ -8,9 +8,11 @@ import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { signInWithEmail, signInWithGoogle } from '@/lib/supabase/auth-client';
 import { useAuth } from '@/hooks/useAuth';
+import { useLoading } from '@/hooks/useLoading';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import { DiceLoader } from '@/components/ui';
 
 const signInSchema = yup.object({
   email: yup
@@ -34,9 +36,16 @@ export function SignInForm({
   onSuccess,
   redirectTo = '/dashboard',
 }: SignInFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, withLoading } = useLoading({
+    defaultTimeout: 30000,
+    onError: error => {
+      setError(error.message);
+    },
+  });
+  const [loadingMessage, setLoadingMessage] = useState('Signing in...');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const { signIn } = useAuth();
 
   const {
@@ -48,42 +57,64 @@ export function SignInForm({
   });
 
   const onSubmit = async (data: SignInFormData) => {
+    setError(null);
+    setSuccess(false);
+    setLoadingMessage('Signing in...');
+
     try {
-      setIsLoading(true);
-      setError(null);
+      await withLoading(async () => {
+        const { error } = await signIn(data.email, data.password, redirectTo);
 
-      const { error } = await signIn(data.email, data.password, redirectTo);
+        if (error) {
+          throw new Error(error.message);
+        }
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
+        // Success state
+        setSuccess(true);
+        setLoadingMessage('Sign in successful!');
 
-      onSuccess?.();
+        // Brief delay to show success before redirect
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        if (onSuccess) {
+          onSuccess();
+        }
+      });
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.'
+      );
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setError(null);
+    setSuccess(false);
+    setLoadingMessage('Connecting to Google...');
+
     try {
-      setIsLoading(true);
-      setError(null);
+      await withLoading(async () => {
+        const { error } = await signInWithGoogle(redirectTo);
 
-      const { error } = await signInWithGoogle(redirectTo);
+        if (error) {
+          throw new Error(error.message);
+        }
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
+        setSuccess(true);
+        setLoadingMessage('Redirecting to Google...');
 
-      onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        }
+      });
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.'
+      );
     }
   };
 
@@ -244,6 +275,26 @@ export function SignInForm({
           </Link>
         </p>
       </div>
+
+      {/* Success Message */}
+      {success && !isLoading && (
+        <div
+          role='status'
+          aria-live='polite'
+          className='mt-4 rounded-lg border border-green-200 bg-green-50 p-4'
+        >
+          <p className='text-center text-regular text-green-800'>
+            ✓ Sign in successful! Redirecting...
+          </p>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      <DiceLoader
+        isVisible={isLoading}
+        text={loadingMessage}
+        variant='bounce'
+      />
     </div>
   );
 }
