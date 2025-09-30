@@ -52,10 +52,7 @@ This migration adds support for storing extended BoardGameGeek (BGG) metadata in
 #### `language_dependence` Structure
 ```json
 {
-  "level": 1,
   "description": "No necessary in-game text",
-  "votes": 16,
-  "totalVotes": 18,
   "percentage": 89
 }
 ```
@@ -175,17 +172,17 @@ SELECT
   bgg_id,
   jsonb_array_length(alternate_names) as alt_names_count,
   jsonb_array_length(editions) as editions_count,
-  language_dependence->>'level' as lang_level,
-  language_dependence->>'description' as lang_desc
+  language_dependence->>'description' as lang_desc,
+  language_dependence->>'percentage' as lang_pct
 FROM games 
 WHERE bgg_id = 396790;
 ```
 
 Expected output:
 ```
-  title   | bgg_id | alt_names_count | editions_count | lang_level |        lang_desc
-----------+--------+-----------------+----------------+------------+-------------------------
- Nucleum  | 396790 |               7 |              1 | 1          | No necessary in-game text
+  title   | bgg_id | alt_names_count | editions_count |        lang_desc         | lang_pct
+----------+--------+-----------------+----------------+--------------------------+----------
+ Nucleum  | 396790 |               7 |              1 | No necessary in-game text| 89
 ```
 
 ## Rollback (If Needed)
@@ -228,10 +225,12 @@ FROM games
 WHERE jsonb_array_length(editions) > 5
 ORDER BY edition_count DESC;
 
--- Find games with low language dependence
-SELECT title, language_dependence->>'description' as lang_dep
+-- Find games with low language dependence (high percentage for "No necessary text")
+SELECT title, 
+       language_dependence->>'description' as lang_dep,
+       language_dependence->>'percentage' as lang_pct
 FROM games
-WHERE (language_dependence->>'level')::int <= 2
+WHERE language_dependence->>'description' = 'No necessary in-game text'
 ORDER BY bgg_rating DESC;
 ```
 

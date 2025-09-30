@@ -104,10 +104,7 @@ export interface BGGEdition {
 }
 
 export interface BGGLanguageDependence {
-  level: number;
   description: string;
-  votes: number;
-  totalVotes: number;
   percentage: number;
 }
 

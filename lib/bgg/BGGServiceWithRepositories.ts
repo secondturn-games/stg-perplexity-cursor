@@ -775,10 +775,7 @@ export class BGGServiceWithRepositories {
       alternateNames: [],
       editions: [],
       languageDependence: {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       },
     });

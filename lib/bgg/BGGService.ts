@@ -1336,10 +1336,7 @@ export class BGGService {
         console.log('⚠️ No poll data found in item');
       }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       };
     }
@@ -1365,10 +1362,7 @@ export class BGGService {
         console.log('⚠️ Language dependence poll not found');
       }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       };
     }
@@ -1378,10 +1372,7 @@ export class BGGService {
         console.log('⚠️ No results array in language poll');
       }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       };
     }
@@ -1411,19 +1402,13 @@ export class BGGService {
         console.log('⚠️ No result with votes found in language poll');
       }
       return {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes,
         percentage: 0,
       };
     }
 
     const languageDependence = {
-      level: this.convertBGGLevelToUserLevel(selectedResult.$.level || '0'),
       description: selectedResult.$.value || 'Unknown',
-      votes: maxVotes,
-      totalVotes,
       percentage:
         totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0,
     };
@@ -1624,10 +1609,7 @@ export class BGGService {
       alternateNames: dbGame.alternate_names || [],
       editions: dbGame.editions || [],
       languageDependence: dbGame.language_dependence || {
-        level: 0,
         description: 'Unknown',
-        votes: 0,
-        totalVotes: 0,
         percentage: 0,
       },
       // Computed fields (readonly)

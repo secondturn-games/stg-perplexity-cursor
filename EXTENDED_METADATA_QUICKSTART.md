@@ -80,7 +80,7 @@ TRUNCATE TABLE games CASCADE;
 {
   "alternateNames": [],  // ❌ Always empty from DB cache
   "editions": [],        // ❌ Always empty from DB cache
-  "languageDependence": { "level": 0, "description": "Unknown" }  // ❌ Default
+  "languageDependence": { "description": "Unknown", "percentage": 0 }  // ❌ Default
 }
 ```
 
@@ -102,10 +102,7 @@ TRUNCATE TABLE games CASCADE;
     }
   ],
   "languageDependence": { // ✅ Real poll data
-    "level": 1,
     "description": "No necessary in-game text",
-    "votes": 16,
-    "totalVotes": 18,
     "percentage": 89
   }
 }
@@ -121,6 +118,16 @@ SELECT column_name, data_type
 FROM information_schema.columns
 WHERE table_name = 'games'
   AND column_name IN ('alternate_names', 'editions', 'language_dependence');
+
+-- Verify data is stored correctly for game 396790
+SELECT 
+  title,
+  jsonb_array_length(alternate_names) as alt_names,
+  jsonb_array_length(editions) as editions,
+  language_dependence->>'description' as lang_desc,
+  language_dependence->>'percentage' as lang_pct
+FROM games 
+WHERE bgg_id = 396790;
 ```
 
 Expected output:

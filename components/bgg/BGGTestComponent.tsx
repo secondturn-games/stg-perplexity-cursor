@@ -757,17 +757,14 @@ export function BGGTestComponent() {
                 Language Dependence
               </h4>
               {gameState.data.languageDependence &&
-              gameState.data.languageDependence.level !== 0 ? (
+              gameState.data.languageDependence.description !== 'Unknown' ? (
                 <div className='bg-white p-3 rounded border'>
                   <div className='text-sm space-y-1'>
                     <p className='text-gray-900 font-medium'>
-                      Level {gameState.data.languageDependence.level}:{' '}
                       {gameState.data.languageDependence.description}
                     </p>
                     <p className='text-gray-600'>
-                      {gameState.data.languageDependence.votes} of{' '}
-                      {gameState.data.languageDependence.totalVotes} voters (
-                      {gameState.data.languageDependence.percentage}%)
+                      {gameState.data.languageDependence.percentage}% of voters
                     </p>
                   </div>
                 </div>
