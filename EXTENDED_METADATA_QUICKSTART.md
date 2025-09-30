@@ -16,7 +16,7 @@ The issue where `alternateNames`, `editions`, and `languageDependence` were retu
 
 ## 🚀 Quick Start (3 Steps)
 
-### Step 1: Run the Database Migration
+### Step 1: Run the Database Migrations
 
 **Copy and run this SQL in Supabase Dashboard → SQL Editor:**
 
@@ -31,10 +31,14 @@ ADD COLUMN IF NOT EXISTS language_dependence JSONB DEFAULT NULL;
 CREATE INDEX IF NOT EXISTS idx_games_alternate_names ON games USING GIN (alternate_names);
 CREATE INDEX IF NOT EXISTS idx_games_editions ON games USING GIN (editions);
 CREATE INDEX IF NOT EXISTS idx_games_language_dependence ON games USING GIN (language_dependence);
+
+-- Remove languages column (languages are in editions now)
+ALTER TABLE games DROP COLUMN IF EXISTS languages;
 ```
 
-**Or run the full migration file:**
-- File: `supabase/migrations/20250930_add_game_extended_metadata.sql`
+**Or run the full migration files:**
+- `supabase/migrations/20250930_add_game_extended_metadata.sql`
+- `supabase/migrations/20250930_remove_languages_column.sql`
 
 ### Step 2: Clear Cached Games (Optional but Recommended)
 

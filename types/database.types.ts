@@ -92,7 +92,6 @@ export interface Database {
           id: string;
           image_url: string | null;
           language_dependence: Json | null;
-          languages: string[];
           last_bgg_sync: string | null;
           max_players: number | null;
           mechanics: string[];
@@ -121,7 +120,6 @@ export interface Database {
           id?: string;
           image_url?: string | null;
           language_dependence?: Json | null;
-          languages?: string[];
           last_bgg_sync?: string | null;
           max_players?: number | null;
           mechanics?: string[];
@@ -150,7 +148,6 @@ export interface Database {
           id?: string;
           image_url?: string | null;
           language_dependence?: Json | null;
-          languages?: string[];
           last_bgg_sync?: string | null;
           max_players?: number | null;
           mechanics?: string[];

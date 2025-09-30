@@ -458,7 +458,6 @@ export class BGGServiceOptimized extends BGGService {
       designers: details.designers || [],
       artists: details.artists || [],
       publishers: details.publishers || [],
-      languages: details.languages || [],
       age_rating: details.age_rating,
       bgg_rating: details.bgg_rating,
       bgg_rank: details.bgg_rank,

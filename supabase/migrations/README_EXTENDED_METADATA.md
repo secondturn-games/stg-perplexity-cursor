@@ -3,11 +3,14 @@
 ## Overview
 This migration adds support for storing extended BoardGameGeek (BGG) metadata including:
 - **Alternate Names**: Different names for the game in various languages and markets
-- **Editions/Versions**: Different editions, regional versions, and implementations
+- **Editions/Versions**: Different editions, regional versions, and implementations (includes language info)
 - **Language Dependence**: Poll data about how language-dependent the game is
 
-## Migration File
-`20250930_add_game_extended_metadata.sql`
+It also removes the `languages` column since language information is stored in the editions data.
+
+## Migration Files
+1. `20250930_add_game_extended_metadata.sql` - Adds extended metadata columns
+2. `20250930_remove_languages_column.sql` - Removes languages column (languages are in editions)
 
 ## Database Changes
 
@@ -18,6 +21,12 @@ This migration adds support for storing extended BoardGameGeek (BGG) metadata in
 | `alternate_names` | JSONB | `[]` | Array of alternate game names from BGG |
 | `editions` | JSONB | `[]` | Array of game editions/versions |
 | `language_dependence` | JSONB | `NULL` | Language dependence poll results |
+
+### Column Removed from `games` Table
+
+| Column Name | Reason for Removal |
+|------------|-------------------|
+| `languages` | Language information is now stored in the `editions` JSONB field for each version/edition |
 
 ### JSONB Structure Documentation
 

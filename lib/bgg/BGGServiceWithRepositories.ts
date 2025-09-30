@@ -765,7 +765,6 @@ export class BGGServiceWithRepositories {
       designers: game.designers || [],
       artists: game.artists || [],
       publishers: game.publishers || [],
-      languages: game.languages || [],
       bgg_rating: game.bgg_rating || 0,
       bgg_rank: game.bgg_rank || 0,
       weight_rating: game.weight_rating || 0,

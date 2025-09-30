@@ -1179,10 +1179,6 @@ export class BGGService {
         item.link
           ?.filter((l: any) => l.$.type === 'boardgamepublisher')
           .map((l: any) => this.decodeHtmlEntities(l.$.value)) || [],
-      languages:
-        item.link
-          ?.filter((l: any) => l.$.type === 'language')
-          .map((l: any) => l.$.value) || [],
       bgg_rating: parseFloat(
         item.statistics?.[0]?.ratings?.[0]?.average?.[0]?.$.value || '0'
       ),
@@ -1599,7 +1595,6 @@ export class BGGService {
       designers: dbGame.designers || [],
       artists: dbGame.artists || [],
       publishers: dbGame.publishers || [],
-      languages: dbGame.languages || [],
       bgg_rating: dbGame.bgg_rating || 0,
       bgg_rank: dbGame.bgg_rank || 0,
       weight_rating: dbGame.weight_rating || 0,
