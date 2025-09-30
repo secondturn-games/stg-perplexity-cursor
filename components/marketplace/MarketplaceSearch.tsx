@@ -132,9 +132,12 @@ export default function MarketplaceSearch({
    * Debounced search for query input
    */
   const debouncedSearch = useCallback(
-    debounce((searchFilters: SearchFilters) => {
-      executeSearch(searchFilters, 1);
-    }, 500),
+    (searchFilters: SearchFilters) => {
+      const debouncedFn = debounce(() => {
+        executeSearch(searchFilters, 1);
+      }, 500);
+      debouncedFn();
+    },
     [executeSearch]
   );
 

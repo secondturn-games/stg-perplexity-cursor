@@ -51,9 +51,7 @@ export default function DiceLoaderExample() {
 
       {/* Bounce Variant */}
       <section className='card space-y-4'>
-        <h2 className='text-xl font-normal text-primary-500'>
-          Bounce Variant
-        </h2>
+        <h2 className='text-xl font-normal text-primary-500'>Bounce Variant</h2>
         <p className='text-regular text-gray-600'>
           Dice bounces vertically while rotating.
         </p>
@@ -246,8 +244,8 @@ export default function MarketplacePage() {
             assistive technology
           </li>
           <li>
-            <strong>Reduced Motion:</strong> Respects prefers-reduced-motion
-            for users with vestibular disorders
+            <strong>Reduced Motion:</strong> Respects prefers-reduced-motion for
+            users with vestibular disorders
           </li>
           <li>
             <strong>Decorative Elements:</strong> Dice and dots marked with
