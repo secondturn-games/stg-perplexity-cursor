@@ -242,19 +242,35 @@ export async function createOrUpdateProfile(profileData: {
 
   if (existingProfile) {
     console.log('📝 Updating existing profile');
-    // Update existing profile
+    // Update existing profile - only include fields that exist
+    const updateData = {
+      username: profileData.username,
+      full_name: profileData.full_name,
+      bio: profileData.bio || null,
+      location: profileData.location || null,
+      phone: profileData.phone || null,
+    };
+
+    // Only add JSONB fields if they exist in the schema
+    try {
+      const { error: testError } = await supabase
+        .from('profiles')
+        .select('privacy_settings')
+        .limit(0);
+      
+      if (!testError || testError.code !== '42703') {
+        // Column exists, add the JSONB fields
+        updateData.privacy_settings = profileData.privacy_settings || {};
+        updateData.notification_settings = profileData.notification_settings || {};
+        updateData.updated_at = new Date().toISOString();
+      }
+    } catch (e) {
+      console.log('⚠️  JSONB columns not available, using basic profile update');
+    }
+
     const { data, error } = await supabase
       .from('profiles')
-      .update({
-        username: profileData.username,
-        full_name: profileData.full_name,
-        bio: profileData.bio || null,
-        location: profileData.location || null,
-        phone: profileData.phone || null,
-        privacy_settings: profileData.privacy_settings || {},
-        notification_settings: profileData.notification_settings || {},
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', user.id)
       .select()
       .single();
@@ -268,7 +284,7 @@ export async function createOrUpdateProfile(profileData: {
     return { data, error };
   } else {
     console.log('🆕 Creating new profile');
-    // Create new profile
+    // Create new profile - only include fields that exist in the current schema
     const profileInsertData = {
       id: user.id,
       username: profileData.username,
@@ -276,23 +292,38 @@ export async function createOrUpdateProfile(profileData: {
       bio: profileData.bio || null,
       location: profileData.location || null,
       phone: profileData.phone || null,
-      privacy_settings: profileData.privacy_settings || {
-        show_email: false,
-        show_phone: false,
-        show_location: true,
-      },
-      notification_settings: profileData.notification_settings || {
-        messages: true,
-        offers: true,
-        listings: true,
-        marketing: false,
-      },
-      email_verified: user.email_confirmed_at ? true : false,
-      phone_verified: false,
-      is_verified: false,
-      reputation_score: 0,
-      last_active_at: new Date().toISOString(),
     };
+
+    // Only add JSONB fields if they exist in the schema
+    try {
+      // Test if privacy_settings column exists by trying to select it
+      const { error: testError } = await supabase
+        .from('profiles')
+        .select('privacy_settings')
+        .limit(0);
+      
+      if (!testError || testError.code !== '42703') {
+        // Column exists, add the JSONB fields
+        profileInsertData.privacy_settings = profileData.privacy_settings || {
+          show_email: false,
+          show_phone: false,
+          show_location: true,
+        };
+        profileInsertData.notification_settings = profileData.notification_settings || {
+          messages: true,
+          offers: true,
+          listings: true,
+          marketing: false,
+        };
+        profileInsertData.email_verified = user.email_confirmed_at ? true : false;
+        profileInsertData.phone_verified = false;
+        profileInsertData.is_verified = false;
+        profileInsertData.reputation_score = 0;
+        profileInsertData.last_active_at = new Date().toISOString();
+      }
+    } catch (e) {
+      console.log('⚠️  JSONB columns not available, using basic profile creation');
+    }
 
     console.log('📤 Profile data to insert:', profileInsertData);
 
