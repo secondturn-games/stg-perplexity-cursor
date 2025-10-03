@@ -222,17 +222,26 @@ export async function createOrUpdateProfile(profileData: {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    console.error('❌ Profile creation failed: No user logged in');
     return { data: null, error: { message: 'No user logged in' } };
   }
 
+  console.log('🔄 Creating/updating profile for user:', user.id);
+
   // Try to update existing profile first
-  const { data: existingProfile } = await supabase
+  const { data: existingProfile, error: checkError } = await supabase
     .from('profiles')
     .select('id')
     .eq('id', user.id)
     .single();
 
+  if (checkError && checkError.code !== 'PGRST116') {
+    console.error('❌ Error checking existing profile:', checkError);
+    return { data: null, error: checkError };
+  }
+
   if (existingProfile) {
+    console.log('📝 Updating existing profile');
     // Update existing profile
     const { data, error } = await supabase
       .from('profiles')
@@ -250,32 +259,60 @@ export async function createOrUpdateProfile(profileData: {
       .select()
       .single();
 
+    if (error) {
+      console.error('❌ Profile update failed:', error);
+    } else {
+      console.log('✅ Profile updated successfully');
+    }
+
     return { data, error };
   } else {
+    console.log('🆕 Creating new profile');
     // Create new profile
+    const profileInsertData = {
+      id: user.id,
+      username: profileData.username,
+      full_name: profileData.full_name,
+      bio: profileData.bio || null,
+      location: profileData.location || null,
+      phone: profileData.phone || null,
+      privacy_settings: profileData.privacy_settings || {
+        show_email: false,
+        show_phone: false,
+        show_location: true,
+      },
+      notification_settings: profileData.notification_settings || {
+        messages: true,
+        offers: true,
+        listings: true,
+        marketing: false,
+      },
+      email_verified: user.email_confirmed_at ? true : false,
+      phone_verified: false,
+      is_verified: false,
+      reputation_score: 0,
+      last_active_at: new Date().toISOString(),
+    };
+
+    console.log('📤 Profile data to insert:', profileInsertData);
+
     const { data, error } = await supabase
       .from('profiles')
-      .insert({
-        id: user.id,
-        username: profileData.username,
-        full_name: profileData.full_name,
-        bio: profileData.bio || null,
-        location: profileData.location || null,
-        phone: profileData.phone || null,
-        privacy_settings: profileData.privacy_settings || {
-          show_email: false,
-          show_phone: false,
-          show_location: true,
-        },
-        notification_settings: profileData.notification_settings || {
-          messages: true,
-          offers: true,
-          listings: true,
-          marketing: false,
-        },
-      })
+      .insert(profileInsertData)
       .select()
       .single();
+
+    if (error) {
+      console.error('❌ Profile creation failed:', error);
+      console.error('❌ Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+    } else {
+      console.log('✅ Profile created successfully:', data);
+    }
 
     return { data, error };
   }
