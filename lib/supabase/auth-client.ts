@@ -222,60 +222,128 @@ export async function createOrUpdateProfile(profileData: {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    console.error('❌ Profile creation failed: No user logged in');
     return { data: null, error: { message: 'No user logged in' } };
   }
 
+  console.log('🔄 Creating/updating profile for user:', user.id);
+
   // Try to update existing profile first
-  const { data: existingProfile } = await supabase
+  const { data: existingProfile, error: checkError } = await supabase
     .from('profiles')
     .select('id')
     .eq('id', user.id)
     .single();
 
+  if (checkError && checkError.code !== 'PGRST116') {
+    console.error('❌ Error checking existing profile:', checkError);
+    return { data: null, error: checkError };
+  }
+
   if (existingProfile) {
-    // Update existing profile
+    console.log('📝 Updating existing profile');
+    // Update existing profile - only include fields that exist
+    const updateData = {
+      username: profileData.username,
+      full_name: profileData.full_name,
+      bio: profileData.bio || null,
+      location: profileData.location || null,
+      phone: profileData.phone || null,
+    };
+
+    // Only add JSONB fields if they exist in the schema
+    try {
+      const { error: testError } = await supabase
+        .from('profiles')
+        .select('privacy_settings')
+        .limit(0);
+      
+      if (!testError || testError.code !== '42703') {
+        // Column exists, add the JSONB fields
+        updateData.privacy_settings = profileData.privacy_settings || {};
+        updateData.notification_settings = profileData.notification_settings || {};
+        updateData.updated_at = new Date().toISOString();
+      }
+    } catch (e) {
+      console.log('⚠️  JSONB columns not available, using basic profile update');
+    }
+
     const { data, error } = await supabase
       .from('profiles')
-      .update({
-        username: profileData.username,
-        full_name: profileData.full_name,
-        bio: profileData.bio || null,
-        location: profileData.location || null,
-        phone: profileData.phone || null,
-        privacy_settings: profileData.privacy_settings || {},
-        notification_settings: profileData.notification_settings || {},
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', user.id)
       .select()
       .single();
 
+    if (error) {
+      console.error('❌ Profile update failed:', error);
+    } else {
+      console.log('✅ Profile updated successfully');
+    }
+
     return { data, error };
   } else {
-    // Create new profile
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert({
-        id: user.id,
-        username: profileData.username,
-        full_name: profileData.full_name,
-        bio: profileData.bio || null,
-        location: profileData.location || null,
-        phone: profileData.phone || null,
-        privacy_settings: profileData.privacy_settings || {
+    console.log('🆕 Creating new profile');
+    // Create new profile - only include fields that exist in the current schema
+    const profileInsertData = {
+      id: user.id,
+      username: profileData.username,
+      full_name: profileData.full_name,
+      bio: profileData.bio || null,
+      location: profileData.location || null,
+      phone: profileData.phone || null,
+    };
+
+    // Only add JSONB fields if they exist in the schema
+    try {
+      // Test if privacy_settings column exists by trying to select it
+      const { error: testError } = await supabase
+        .from('profiles')
+        .select('privacy_settings')
+        .limit(0);
+      
+      if (!testError || testError.code !== '42703') {
+        // Column exists, add the JSONB fields
+        profileInsertData.privacy_settings = profileData.privacy_settings || {
           show_email: false,
           show_phone: false,
           show_location: true,
-        },
-        notification_settings: profileData.notification_settings || {
+        };
+        profileInsertData.notification_settings = profileData.notification_settings || {
           messages: true,
           offers: true,
           listings: true,
           marketing: false,
-        },
-      })
+        };
+        profileInsertData.email_verified = user.email_confirmed_at ? true : false;
+        profileInsertData.phone_verified = false;
+        profileInsertData.is_verified = false;
+        profileInsertData.reputation_score = 0;
+        profileInsertData.last_active_at = new Date().toISOString();
+      }
+    } catch (e) {
+      console.log('⚠️  JSONB columns not available, using basic profile creation');
+    }
+
+    console.log('📤 Profile data to insert:', profileInsertData);
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert(profileInsertData)
       .select()
       .single();
+
+    if (error) {
+      console.error('❌ Profile creation failed:', error);
+      console.error('❌ Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+    } else {
+      console.log('✅ Profile created successfully:', data);
+    }
 
     return { data, error };
   }

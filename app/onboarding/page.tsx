@@ -102,6 +102,8 @@ export default function OnboardingPage() {
       setIsLoading(true);
       setError(null);
 
+      console.log('🚀 Starting profile creation with data:', data);
+
       const { error } = await updateProfile({
         username: data.username,
         full_name: data.fullName,
@@ -122,14 +124,34 @@ export default function OnboardingPage() {
       });
 
       if (error) {
-        setError(error.message);
+        console.error('❌ Profile creation error:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = 'Failed to create profile. ';
+        
+        if (error.code === '23505') {
+          errorMessage += 'Username already exists. Please choose a different username.';
+        } else if (error.code === '23514') {
+          errorMessage += 'Invalid data provided. Please check your input.';
+        } else if (error.code === '42501') {
+          errorMessage += 'Permission denied. Please try again or contact support.';
+        } else if (error.message) {
+          errorMessage += error.message;
+        } else {
+          errorMessage += 'Please try again or contact support if the problem persists.';
+        }
+        
+        setError(errorMessage);
         return;
       }
 
+      console.log('✅ Profile created successfully, redirecting to dashboard');
+      
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      console.error('❌ Unexpected error during profile creation:', err);
+      setError('An unexpected error occurred. Please try again or contact support.');
     } finally {
       setIsLoading(false);
     }
